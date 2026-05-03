@@ -47,18 +47,13 @@ describe('AI 模型列表', () => {
     expect(AI_MODELS.claude.length).toBeGreaterThan(0)
   })
 
-  it('应该包含豆包模型', () => {
-    expect(AI_MODELS.doubao).toBeDefined()
-    expect(AI_MODELS.doubao.length).toBeGreaterThan(0)
+  it('应该包含豆包视觉模型', () => {
+    expect(AI_MODELS.doubao_vision).toBeDefined()
+    expect(AI_MODELS.doubao_vision.length).toBeGreaterThan(0)
   })
 
-  it('豆包模型应该包含视觉理解模型', () => {
-    const visionModel = AI_MODELS.doubao.find(m => m.value.includes('vision'))
-    expect(visionModel).toBeDefined()
-  })
-
-  it('豆包模型应该包含视频理解模型', () => {
-    const videoModel = AI_MODELS.doubao.find(m => m.value.includes('seed'))
-    expect(videoModel).toBeDefined()
+  it('应该包含豆包文本模型', () => {
+    expect(AI_MODELS.doubao_text).toBeDefined()
+    expect(AI_MODELS.doubao_text.length).toBeGreaterThan(0)
   })
 })

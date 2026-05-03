@@ -11,10 +11,10 @@ export interface UseAIReturn {
 }
 
 const MODEL_CONFIG = {
-  provider: 'doubao',
+  provider: 'doubao_vision',
   baseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
   apiKey: import.meta.env.VITE_DOUBAO_API_KEY || '',
-  model: 'doubao-1.6-thinking',
+  model: 'doubao-2.0-vision-pro',
 }
 
 const PROVIDER_CONFIGS = {

@@ -19,7 +19,7 @@ export class VisionService {
   async recognize(imageBase64: string): Promise<RecognitionResult> {
     const provider = this.config.provider
 
-    if (provider === 'doubao') {
+    if (provider === 'doubao_vision') {
       return this.recognizeWithDoubao(imageBase64)
     }
 

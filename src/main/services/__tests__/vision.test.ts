@@ -12,9 +12,9 @@ describe('VisionService', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     visionService = new VisionService({
-      provider: 'doubao',
+      provider: 'doubao_vision',
       apiKey: 'test-key',
-      model: 'doubao-1.5-thinking-vision-pro',
+      model: 'doubao-2.0-vision-pro',
     })
   })
 
@@ -24,9 +24,9 @@ describe('VisionService', () => {
 
   it('应该能够更新配置', () => {
     visionService.updateConfig({
-      provider: 'doubao',
+      provider: 'doubao_vision',
       apiKey: 'new-key',
-      model: 'doubao-1.6-vision',
+      model: 'doubao-2.0-vision-pro',
     })
     expect(true).toBe(true)
   })

@@ -8,11 +8,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useSettings, type Settings } from "@/hooks/useSettings"
 
 const VISION_MODELS = [
+  { value: "doubao-2.0-vision-pro", label: "豆包 2.0 视觉专业版" },
   { value: "doubao-1.5-thinking-vision-pro", label: "豆包 1.5 视觉思考" },
-  { value: "doubao-1.6-vision", label: "豆包 1.6 视觉" },
 ]
 
 const TEXT_PROVIDERS = [
+  { value: "doubao", label: "豆包" },
   { value: "openai", label: "OpenAI" },
   { value: "glm", label: "GLM" },
   { value: "minimax", label: "MiniMax" },
@@ -22,35 +23,46 @@ const TEXT_PROVIDERS = [
 ] as const
 
 const TEXT_MODELS = {
+  doubao: [
+    { value: "doubao-seed-2.0-pro", label: "Doubao-Seed-2.0-Pro（国内综合第一）" },
+    { value: "doubao-2.0-pro", label: "Doubao-2.0-Pro" },
+    { value: "doubao-2.0-lite", label: "Doubao-2.0-Lite" },
+  ],
   openai: [
-    { value: "gpt-4.1", label: "GPT-4.1" },
-    { value: "gpt-4.1-mini", label: "GPT-4.1 Mini" },
-    { value: "gpt-4.1-nano", label: "GPT-4.1 Nano" },
-    { value: "gpt-4.5", label: "GPT-4.5" },
     { value: "gpt-5", label: "GPT-5" },
+    { value: "gpt-4.5", label: "GPT-4.5" },
+    { value: "gpt-4.1", label: "GPT-4.1" },
+  ],
+  claude: [
+    { value: "claude-opus-4.6", label: "Claude Opus 4.6" },
+    { value: "claude-sonnet-4.6", label: "Claude Sonnet 4.6" },
+    { value: "claude-mythos", label: "Claude Mythos" },
   ],
   glm: [
-    { value: "glm-4.5", label: "GLM-4.5" },
-    { value: "glm-4-plus", label: "GLM-4-Plus" },
-    { value: "glm-z1-32b", label: "GLM-Z1-32B" },
-    { value: "glm-4v-plus", label: "GLM-4V-Plus" },
+    { value: "glm-5.1", label: "GLM-5.1（8小时长程任务）" },
+    { value: "glm-5-turbo", label: "GLM-5-Turbo（7440亿参数）" },
+    { value: "glm-4.6v-flash", label: "GLM-4.6V-Flash（视觉）" },
   ],
   minimax: [
-    { value: "minimax-m2.1", label: "MiniMax-M2.1" },
-    { value: "minimax-text-01", label: "MiniMax-Text-01" },
+    { value: "minimax-m2.7", label: "MiniMax-M2.7（Agent自我进化）" },
+    { value: "minimax-m2.5", label: "MiniMax-M2.5" },
+    { value: "minimax-music-2.5-plus", label: "MiniMax-Music-2.5+（音乐）" },
   ],
   xiaomi: [
-    { value: "mimo-v2-pro", label: "MiMo-V2-Pro" },
-    { value: "mimo-v2-flash", label: "MiMo-V2-Flash" },
+    { value: "mimo-v2.5-pro", label: "MiMo-V2.5-Pro（100万上下文）" },
+    { value: "mimo-v2.5", label: "MiMo-V2.5（全模态）" },
+    { value: "mimo-v2-pro", label: "MiMo-V2-Pro（旗舰）" },
+    { value: "mimo-v2-flash", label: "MiMo-V2-Flash（轻量）" },
   ],
   kimi: [
-    { value: "kimi-k2", label: "Kimi K2" },
-    { value: "kimi-k2-thinking", label: "Kimi K2 Thinking" },
-    { value: "kimi-1.5", label: "Kimi k1.5" },
+    { value: "kimi-k2.6", label: "Kimi-K2.6（代码对标GPT-5.4）" },
+    { value: "kimi-k2.5", label: "Kimi-K2.5（多模态旗舰）" },
+    { value: "kimi-k2.1", label: "Kimi-K2.1" },
   ],
   deepseek: [
-    { value: "deepseek-v3-0324", label: "DeepSeek V3-0324" },
-    { value: "deepseek-r1", label: "DeepSeek R1" },
+    { value: "deepseek-v4-pro", label: "DeepSeek-V4-Pro（1.6T参数）" },
+    { value: "deepseek-r1-0528", label: "DeepSeek-R1-0528（推理升级）" },
+    { value: "deepseek-v3.1", label: "DeepSeek-V3.1（思考模式切换）" },
   ],
 }
 

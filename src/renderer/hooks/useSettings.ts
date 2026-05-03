@@ -1,18 +1,18 @@
 import { useState, useEffect, useCallback } from "react"
 
 export interface Settings {
-  visionProvider: "doubao"
+  visionProvider: "doubao_vision"
   visionApiKey: string
   visionModel: string
-  textProvider: "openai" | "glm" | "minimax" | "xiaomi" | "kimi" | "deepseek"
+  textProvider: "doubao" | "openai" | "glm" | "minimax" | "xiaomi" | "kimi" | "deepseek"
   textApiKey: string
   textModel: string
 }
 
 const DEFAULT_SETTINGS: Settings = {
-  visionProvider: "doubao",
+  visionProvider: "doubao_vision",
   visionApiKey: "",
-  visionModel: "doubao-1.5-thinking-vision-pro",
+  visionModel: "doubao-2.0-vision-pro",
   textProvider: "openai",
   textApiKey: "",
   textModel: "gpt-4.1",
