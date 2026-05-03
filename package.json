@@ -9,12 +9,22 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext .ts,.tsx",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
-  "keywords": ["camera", "ai", "vision", "dialog"],
+  "keywords": [
+    "camera",
+    "ai",
+    "vision",
+    "dialog"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
@@ -22,10 +32,12 @@
     "@vitejs/plugin-react": "^4.0.0",
     "autoprefixer": "^10.4.0",
     "eslint": "^8.0.0",
+    "jsdom": "^29.1.1",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.3.0",
     "typescript": "^5.0.0",
-    "vite": "^5.0.0"
+    "vite": "^5.0.0",
+    "vitest": "^4.1.5"
   },
   "dependencies": {
     "react": "^18.2.0",
