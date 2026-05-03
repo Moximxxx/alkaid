@@ -1,5 +1,5 @@
-import React, { useState } from "react"
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import React, { useState, useEffect } from "react"
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom"
 import { Toolbar } from "@/components/layout/Toolbar"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { WelcomePage } from "@/pages/Welcome"
@@ -21,7 +21,14 @@ export function App() {
 function AppContent() {
   const { theme, toggleTheme } = useTheme()
   const { isConfigured } = useSettings()
+  const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  useEffect(() => {
+    if (isConfigured) {
+      navigate("/", { replace: true })
+    }
+  }, [isConfigured, navigate])
 
   if (!isConfigured) {
     return <WelcomePage />
