@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Routes, Route, Navigate } from "react-router-dom"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { Toolbar } from "@/components/layout/Toolbar"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { WelcomePage } from "@/pages/Welcome"
@@ -16,7 +16,11 @@ function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   if (!isConfigured) {
-    return <WelcomePage />
+    return (
+      <BrowserRouter>
+        <WelcomePage />
+      </BrowserRouter>
+    )
   }
 
   return (
