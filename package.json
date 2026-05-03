@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "type": "module",
   "description": "摇光 - 摄像头AI对话助手",
-  "main": "dist/main/index.js",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
-    "start": "electrobun dev",
+    "dev:electron": "concurrently \"bun run dev\" \"bun run electron:dev\"",
+    "electron:dev": "node scripts/start-electron.cjs",
     "build": "tsc && vite build",
+    "electron:build": "electron-builder",
     "preview": "vite preview",
     "lint": "eslint src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
@@ -34,6 +36,8 @@
     "@vitejs/plugin-react": "^4.0.0",
     "autoprefixer": "^10.4.0",
     "concurrently": "^9.2.1",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8",
     "eslint": "^8.0.0",
     "jsdom": "^29.1.1",
     "postcss": "^8.4.0",
@@ -44,8 +48,26 @@
     "vitest": "^4.1.5"
   },
   "dependencies": {
-    "electrobun": "^1.16.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
+  },
+  "build": {
+    "appId": "dev.alkaid.camera-ai-assistant",
+    "productName": "摇光",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }
