@@ -2,7 +2,7 @@ import { mkdir, cp } from 'fs/promises';
 import { existsSync } from 'fs';
 
 async function setup() {
-  const targetDir = 'node_modules/electrobun/Resources';
+  const targetDir = 'node_modules/electrobun/dist/api/Resources';
   if (!existsSync(targetDir)) {
     await mkdir(targetDir, { recursive: true });
   }
