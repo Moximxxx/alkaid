@@ -7,20 +7,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSettings, type Settings } from "@/hooks/useSettings"
 
-const AI_PROVIDERS = [
-  { value: "doubao", label: "豆包 (Volcengine)" },
+const VISION_MODELS = [
+  { value: "doubao-1.5-thinking-vision-pro", label: "豆包 1.5 视觉思考" },
+  { value: "doubao-1.6-vision", label: "豆包 1.6 视觉" },
+]
+
+const TEXT_PROVIDERS = [
   { value: "openai", label: "OpenAI" },
-  { value: "claude", label: "Claude (Anthropic)" },
+  { value: "glm", label: "GLM" },
+  { value: "minimax", label: "MiniMax" },
+  { value: "xiaomi", label: "Xiaomi MiMo" },
+  { value: "kimi", label: "Kimi" },
+  { value: "deepseek", label: "DeepSeek" },
 ] as const
 
-const MODELS = {
-  doubao: [
-    { value: "doubao-seed-1.6-thinking", label: "豆包 Seed 1.6 深度思考" },
-    { value: "doubao-seed-1.6-flash", label: "豆包 Seed 1.6 极速版" },
-    { value: "doubao-1.6-thinking", label: "豆包 1.6 深度思考" },
-    { value: "doubao-1.6-flash", label: "豆包 1.6 极速版" },
-    { value: "doubao-1.5-thinking-vision-pro", label: "豆包 1.5 视觉思考" },
-  ],
+const TEXT_MODELS = {
   openai: [
     { value: "gpt-4.1", label: "GPT-4.1" },
     { value: "gpt-4.1-mini", label: "GPT-4.1 Mini" },
@@ -28,11 +29,28 @@ const MODELS = {
     { value: "gpt-4.5", label: "GPT-4.5" },
     { value: "gpt-5", label: "GPT-5" },
   ],
-  claude: [
-    { value: "claude-opus-4-20250514", label: "Claude Opus 4" },
-    { value: "claude-sonnet-4-20250514", label: "Claude Sonnet 4" },
-    { value: "claude-3-7-sonnet-20250224", label: "Claude 3.7 Sonnet" },
-    { value: "claude-3-5-sonnet-20241022", label: "Claude 3.5 Sonnet" },
+  glm: [
+    { value: "glm-4.5", label: "GLM-4.5" },
+    { value: "glm-4-plus", label: "GLM-4-Plus" },
+    { value: "glm-z1-32b", label: "GLM-Z1-32B" },
+    { value: "glm-4v-plus", label: "GLM-4V-Plus" },
+  ],
+  minimax: [
+    { value: "minimax-m2.1", label: "MiniMax-M2.1" },
+    { value: "minimax-text-01", label: "MiniMax-Text-01" },
+  ],
+  xiaomi: [
+    { value: "mimo-v2-pro", label: "MiMo-V2-Pro" },
+    { value: "mimo-v2-flash", label: "MiMo-V2-Flash" },
+  ],
+  kimi: [
+    { value: "kimi-k2", label: "Kimi K2" },
+    { value: "kimi-k2-thinking", label: "Kimi K2 Thinking" },
+    { value: "kimi-1.5", label: "Kimi k1.5" },
+  ],
+  deepseek: [
+    { value: "deepseek-v3-0324", label: "DeepSeek V3-0324" },
+    { value: "deepseek-r1", label: "DeepSeek R1" },
   ],
 }
 
@@ -45,11 +63,11 @@ export function SettingsPage() {
     setLocalSettings(settings)
   }, [settings])
 
-  const handleProviderChange = (provider: Settings["apiProvider"]) => {
+  const handleTextProviderChange = (provider: Settings["textProvider"]) => {
     setLocalSettings((prev) => ({
       ...prev,
-      apiProvider: provider,
-      model: MODELS[provider][0].value,
+      textProvider: provider,
+      textModel: TEXT_MODELS[provider][0].value,
     }))
   }
 
@@ -80,20 +98,57 @@ export function SettingsPage() {
         <TabsContent value="ai">
           <Card>
             <CardHeader>
-              <CardTitle>AI 模型配置</CardTitle>
-              <CardDescription>选择AI服务提供商并配置API密钥</CardDescription>
+              <CardTitle>视觉模型配置</CardTitle>
+              <CardDescription>选择视觉模型和API密钥</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Provider */}
+              {/* Vision Model */}
               <div className="space-y-2">
-                <Label>AI 提供商</Label>
+                <Label>视觉模型</Label>
+                <select
+                  id="visionModel"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  value={localSettings.visionModel}
+                  onChange={(e) => setLocalSettings((prev) => ({ ...prev, visionModel: e.target.value }))}
+                >
+                  {VISION_MODELS.map((model) => (
+                    <option key={model.value} value={model.value}>
+                      {model.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Vision API Key */}
+              <div className="space-y-2">
+                <Label htmlFor="visionApiKey">视觉模型 API Key</Label>
+                <Input
+                  id="visionApiKey"
+                  type="password"
+                  placeholder="输入视觉模型 API Key"
+                  value={localSettings.visionApiKey}
+                  onChange={(e) => setLocalSettings((prev) => ({ ...prev, visionApiKey: e.target.value }))}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>文本模型配置</CardTitle>
+              <CardDescription>选择文本模型供应商和API密钥</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Text Provider */}
+              <div className="space-y-2">
+                <Label>文本供应商</Label>
                 <div className="flex flex-wrap gap-2">
-                  {AI_PROVIDERS.map((provider) => (
+                  {TEXT_PROVIDERS.map((provider) => (
                     <Button
                       key={provider.value}
-                      variant={localSettings.apiProvider === provider.value ? "default" : "outline"}
+                      variant={localSettings.textProvider === provider.value ? "default" : "outline"}
                       size="sm"
-                      onClick={() => handleProviderChange(provider.value)}
+                      onClick={() => handleTextProviderChange(provider.value as Settings["textProvider"])}
                     >
                       {provider.label}
                     </Button>
@@ -101,28 +156,28 @@ export function SettingsPage() {
                 </div>
               </div>
 
-              {/* API Key */}
+              {/* Text API Key */}
               <div className="space-y-2">
-                <Label htmlFor="apiKey">API Key</Label>
+                <Label htmlFor="textApiKey">文本模型 API Key</Label>
                 <Input
-                  id="apiKey"
+                  id="textApiKey"
                   type="password"
-                  placeholder="输入您的 API Key"
-                  value={localSettings.apiKey}
-                  onChange={(e) => setLocalSettings((prev) => ({ ...prev, apiKey: e.target.value }))}
+                  placeholder="输入文本模型 API Key"
+                  value={localSettings.textApiKey}
+                  onChange={(e) => setLocalSettings((prev) => ({ ...prev, textApiKey: e.target.value }))}
                 />
               </div>
 
-              {/* Model */}
+              {/* Text Model */}
               <div className="space-y-2">
-                <Label htmlFor="model">模型</Label>
+                <Label htmlFor="textModel">模型</Label>
                 <select
-                  id="model"
+                  id="textModel"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  value={localSettings.model}
-                  onChange={(e) => setLocalSettings((prev) => ({ ...prev, model: e.target.value }))}
+                  value={localSettings.textModel}
+                  onChange={(e) => setLocalSettings((prev) => ({ ...prev, textModel: e.target.value }))}
                 >
-                  {MODELS[localSettings.apiProvider].map((model) => (
+                  {TEXT_MODELS[localSettings.textProvider].map((model) => (
                     <option key={model.value} value={model.value}>
                       {model.label}
                     </option>

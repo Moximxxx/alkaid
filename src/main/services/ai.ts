@@ -3,6 +3,33 @@
 import type { AIModelConfig, ChatMessage } from '@shared/types'
 import { configManager } from '../config'
 
+const PROVIDER_CONFIGS = {
+  doubao: {
+    baseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
+  },
+  openai: {
+    baseUrl: 'https://api.openai.com/v1',
+  },
+  glm: {
+    baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
+  },
+  minimax: {
+    baseUrl: 'https://api.minimax.chat/v1',
+  },
+  xiaomi: {
+    baseUrl: 'https://api.mimo.minimax.io/v1',
+  },
+  kimi: {
+    baseUrl: 'https://api.moonshot.cn/v1',
+  },
+  deepseek: {
+    baseUrl: 'https://api.deepseek.com/v1',
+  },
+  claude: {
+    baseUrl: 'https://api.anthropic.com/v1',
+  },
+}
+
 export class AIService {
   private config: AIModelConfig
   private messages: ChatMessage[] = []
@@ -32,14 +59,10 @@ export class AIService {
 
     // 调用对应的API
     let response: string
-    if (provider === 'openai') {
-      response = await this.callOpenAI(content, image)
-    } else if (provider === 'claude') {
+    if (provider === 'claude') {
       response = await this.callClaude(content, image)
-    } else if (provider === 'doubao') {
-      response = await this.callDoubao(content, image)
     } else {
-      throw new Error(`不支持的AI提供商: ${provider}`)
+      response = await this.callOpenAICompatible(content, image)
     }
 
     // 添加助手消息
@@ -54,12 +77,13 @@ export class AIService {
     return assistantMessage
   }
 
-  // 调用OpenAI API
-  private async callOpenAI(content: string, image?: string): Promise<string> {
+  // 调用OpenAI兼容格式的API
+  private async callOpenAICompatible(content: string, image?: string): Promise<string> {
     const messages = this.buildOpenAIMessages(content, image)
+    const providerConfig = PROVIDER_CONFIGS[this.config.provider]
 
     const response = await fetch(
-      `${this.config.baseUrl || 'https://api.openai.com/v1'}/chat/completions`,
+      `${this.config.baseUrl || providerConfig.baseUrl}/chat/completions`,
       {
         method: 'POST',
         headers: {
@@ -75,7 +99,7 @@ export class AIService {
     )
 
     if (!response.ok) {
-      throw new Error(`OpenAI API 错误: ${response.status}`)
+      throw new Error(`${this.config.provider} API 错误: ${response.status}`)
     }
 
     const data = await response.json()
@@ -87,7 +111,7 @@ export class AIService {
     const messages = this.buildClaudeMessages(content, image)
 
     const response = await fetch(
-      `${this.config.baseUrl || 'https://api.anthropic.com/v1'}/messages`,
+      `${this.config.baseUrl || PROVIDER_CONFIGS.claude.baseUrl}/messages`,
       {
         method: 'POST',
         headers: {
@@ -109,34 +133,6 @@ export class AIService {
 
     const data = await response.json()
     return data.content[0].text
-  }
-
-  // 调用豆包 API（兼容OpenAI格式）
-  private async callDoubao(content: string, image?: string): Promise<string> {
-    const messages = this.buildOpenAIMessages(content, image)
-
-    const response = await fetch(
-      `${this.config.baseUrl || 'https://ark.cn-beijing.volces.com/api/v3'}/chat/completions`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.apiKey}`,
-        },
-        body: JSON.stringify({
-          model: this.config.model,
-          messages,
-          max_tokens: 1024,
-        }),
-      }
-    )
-
-    if (!response.ok) {
-      throw new Error(`豆包 API 错误: ${response.status}`)
-    }
-
-    const data = await response.json()
-    return data.choices[0].message.content
   }
 
   // 构建OpenAI消息格式

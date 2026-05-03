@@ -14,7 +14,7 @@ describe('AIService', () => {
     aiService = new AIService({
       provider: 'openai',
       apiKey: 'test-key',
-      model: 'gpt-4-vision-preview',
+      model: 'gpt-4.1',
     })
   })
 
@@ -26,9 +26,8 @@ describe('AIService', () => {
     aiService.updateConfig({
       provider: 'doubao',
       apiKey: 'new-key',
-      model: 'doubao-vision-pro',
+      model: 'doubao-1.6-thinking',
     })
-    // 验证配置已更新（通过后续调用验证）
     expect(true).toBe(true)
   })
 
@@ -62,7 +61,7 @@ describe('AIService', () => {
     aiService.updateConfig({
       provider: 'doubao',
       apiKey: 'doubao-key',
-      model: 'doubao-vision-pro',
+      model: 'doubao-1.6-thinking',
     })
 
     mockFetch.mockResolvedValueOnce({
@@ -105,7 +104,7 @@ describe('AIService', () => {
       status: 500,
     })
 
-    await expect(aiService.sendMessage('测试')).rejects.toThrow('OpenAI API 错误: 500')
+    await expect(aiService.sendMessage('测试')).rejects.toThrow('openai API 错误: 500')
   })
 
   it('应该维护消息历史', async () => {

@@ -1,21 +1,21 @@
 import { useState, useEffect, useCallback } from "react"
 
 export interface Settings {
-  apiProvider: "openai" | "claude" | "doubao"
-  apiKey: string
-  model: string
-  visionProvider: "azure" | "google"
+  visionProvider: "doubao"
   visionApiKey: string
-  visionEndpoint: string
+  visionModel: string
+  textProvider: "openai" | "glm" | "minimax" | "xiaomi" | "kimi" | "deepseek"
+  textApiKey: string
+  textModel: string
 }
 
 const DEFAULT_SETTINGS: Settings = {
-  apiProvider: "doubao",
-  apiKey: "",
-  model: "doubao-1.6-thinking",
-  visionProvider: "azure",
+  visionProvider: "doubao",
   visionApiKey: "",
-  visionEndpoint: "",
+  visionModel: "doubao-1.5-thinking-vision-pro",
+  textProvider: "openai",
+  textApiKey: "",
+  textModel: "gpt-4.1",
 }
 
 export function useSettings() {
@@ -43,7 +43,7 @@ export function useSettings() {
     setSettings(DEFAULT_SETTINGS)
   }, [])
 
-  const isConfigured = settings.apiKey.trim() !== ""
+  const isConfigured = settings.textApiKey.trim() !== ""
 
   return {
     settings,
