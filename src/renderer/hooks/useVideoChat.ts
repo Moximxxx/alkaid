@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef } from 'react'
 import { useCamera } from './useCamera'
 import { useAI } from './useAI'
-import { visionService } from '@/main/services/vision'
+// import { visionService } from '@/main/services/vision'
 import type { RecognitionResult } from '@shared/types'
 
 interface UseVideoChatOptions {
@@ -70,17 +70,17 @@ export const useVideoChat = (options: UseVideoChatOptions = {}): UseVideoChatRet
     
     try {
       // 调用图像识别
-      const result = await visionService.recognize(frame)
-      setLastRecognition(result)
+      // const result = await visionService.recognize(frame)
+      // setLastRecognition(result)
       
       // 如果开启了自动分析，将结果发送给AI
       if (autoAnalyze) {
-        const objects = result.objects.map(o => o.name).join('、')
-        const scene = result.scene.description || '未识别到场景'
+        // const objects = result.objects.map((o: { name: string }) => o.name).join('、')
+        // const scene = result.scene.description || '未识别到场景'
         
-        const prompt = `我正在看这个画面：${scene}。${objects ? `看到了：${objects}。` : ''}请简短描述你在画面中看到的内容。`
+        // const prompt = `我正在看这个画面：${scene}。${objects ? `看到了：${objects}。` : ''}请简短描述你在画面中看到的内容。`
         
-        await sendAIMessage(prompt, frame)
+        // await sendAIMessage(prompt, frame)
       }
     } catch (error) {
       console.error('分析画面失败:', error)

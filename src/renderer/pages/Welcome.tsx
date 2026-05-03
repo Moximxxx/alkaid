@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Target, Key, ArrowRight, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -7,15 +7,52 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSettings } from "@/hooks/useSettings"
 
+const AI_PROVIDERS = [
+  { value: "doubao", label: "豆包 (Volcengine)" },
+  { value: "openai", label: "OpenAI" },
+  { value: "claude", label: "Claude (Anthropic)" },
+] as const
+
+const MODELS = {
+  doubao: [
+    { value: "doubao-vision-pro", label: "豆包视觉专业版" },
+    { value: "doubao-seed-2.0", label: "豆包Seed 2.0" },
+  ],
+  openai: [
+    { value: "gpt-4o", label: "GPT-4o" },
+    { value: "gpt-4o-mini", label: "GPT-4o Mini" },
+  ],
+  claude: [
+    { value: "claude-3-5-sonnet-20241022", label: "Claude 3.5 Sonnet" },
+  ],
+}
+
 export function WelcomePage() {
   const navigate = useNavigate()
   const { settings, updateSettings } = useSettings()
-  const [apiKey, setApiKey] = useState(settings.apiKey)
+  const [apiKey, setApiKey] = useState(settings.apiKey || "")
+  const [apiProvider, setApiProvider] = useState<"doubao" | "openai" | "claude">(settings.apiProvider || "doubao")
+  const [model, setModel] = useState(settings.model || MODELS.doubao[0].value)
+  const [pendingNavigate, setPendingNavigate] = useState(false)
+
+  const handleProviderChange = (provider: "doubao" | "openai" | "claude") => {
+    setApiProvider(provider)
+    setModel(MODELS[provider][0].value)
+  }
+
+  useEffect(() => {
+    if (settings.apiKey && pendingNavigate) {
+      setPendingNavigate(false)
+      navigate("/")
+    }
+  }, [settings.apiKey, pendingNavigate, navigate])
 
   const handleStart = () => {
-    if (apiKey.trim()) {
-      updateSettings({ apiKey: apiKey.trim() })
-    }
+    updateSettings({
+      apiProvider,
+      model,
+      apiKey: apiKey.trim() || settings.apiKey,
+    })
     navigate("/")
   }
 
@@ -63,6 +100,36 @@ export function WelcomePage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>AI 提供商</Label>
+              <div className="flex flex-wrap gap-2">
+                {AI_PROVIDERS.map((provider) => (
+                  <Button
+                    key={provider.value}
+                    variant={apiProvider === provider.value ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleProviderChange(provider.value)}
+                  >
+                    {provider.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="model">模型</Label>
+              <select
+                id="model"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+              >
+                {MODELS[apiProvider as keyof typeof MODELS].map((m) => (
+                  <option key={m.value} value={m.value}>
+                    {m.label}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="apiKey">API Key</Label>
               <Input

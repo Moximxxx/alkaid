@@ -33,6 +33,7 @@ const MODELS = {
 export function SettingsPage() {
   const { settings, updateSettings, resetSettings } = useSettings()
   const [localSettings, setLocalSettings] = useState<Settings>(settings)
+  const [activeTab, setActiveTab] = useState("ai")
 
   useEffect(() => {
     setLocalSettings(settings)
@@ -62,7 +63,7 @@ export function SettingsPage() {
         <p className="mt-2 text-muted-foreground">配置应用程序</p>
       </div>
 
-      <Tabs defaultValue="ai" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
           <TabsTrigger value="ai">AI 模型</TabsTrigger>
           <TabsTrigger value="camera">摄像头</TabsTrigger>

@@ -1,7 +1,7 @@
 // 视频流组件
 
 import React, { useRef, useEffect } from 'react'
-import { cameraService } from '@/main/services/camera'
+// import { cameraService } from '@/main/services/camera'
 
 interface VideoStreamProps {
   onFrameCapture?: (frame: string) => void
@@ -18,46 +18,46 @@ export const VideoStream: React.FC<VideoStreamProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  useEffect(() => {
-    const initCamera = async () => {
-      const success = await cameraService.initialize()
-      if (success && videoRef.current) {
-        cameraService.bindVideoElement(videoRef.current)
-      }
-    }
+  // useEffect(() => {
+  //   const initCamera = async () => {
+  //     const success = await cameraService.initialize()
+  //     if (success && videoRef.current) {
+  //       cameraService.bindVideoElement(videoRef.current)
+  //     }
+  //   }
 
-    initCamera()
+  //   initCamera()
 
-    return () => {
-      cameraService.stop()
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
-    }
-  }, [])
+  //   return () => {
+  //     cameraService.stop()
+  //     if (intervalRef.current) {
+  //       clearInterval(intervalRef.current)
+  //     }
+  //   }
+  // }, [])
 
-  useEffect(() => {
-    if (autoCapture && onFrameCapture) {
-      intervalRef.current = setInterval(() => {
-        const frame = cameraService.captureFrame()
-        if (frame) {
-          onFrameCapture(frame)
-        }
-      }, captureInterval)
-    }
+  // useEffect(() => {
+  //   if (autoCapture && onFrameCapture) {
+  //     intervalRef.current = setInterval(() => {
+  //       const frame = cameraService.captureFrame()
+  //       if (frame) {
+  //         onFrameCapture(frame)
+  //       }
+  //     }, captureInterval)
+  //   }
 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
-    }
-  }, [autoCapture, captureInterval, onFrameCapture])
+  //   return () => {
+  //     if (intervalRef.current) {
+  //       clearInterval(intervalRef.current)
+  //     }
+  //   }
+  // }, [autoCapture, captureInterval, onFrameCapture])
 
   const handleCapture = () => {
-    const frame = cameraService.captureFrame()
-    if (frame && onFrameCapture) {
-      onFrameCapture(frame)
-    }
+    // const frame = cameraService.captureFrame()
+    // if (frame && onFrameCapture) {
+    //   onFrameCapture(frame)
+    // }
   }
 
   return (

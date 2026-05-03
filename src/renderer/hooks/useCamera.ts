@@ -1,7 +1,7 @@
 // 摄像头Hook
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { cameraService } from '@/main/services/camera'
+// import { cameraService } from '@/main/services/camera'
 
 interface UseCameraOptions {
   autoStart?: boolean
@@ -34,57 +34,59 @@ export const useCamera = (options: UseCameraOptions = {}): UseCameraReturn => {
 
   // 获取设备列表
   const fetchDevices = useCallback(async () => {
-    try {
-      const deviceList = await cameraService.getDevices()
-      setDevices(deviceList)
-    } catch (err) {
-      console.error('获取设备列表失败:', err)
-    }
+    // try {
+    //   const deviceList = await cameraService.getDevices()
+    //   setDevices(deviceList)
+    // } catch (err) {
+    //   console.error('获取设备列表失败:', err)
+    // }
   }, [])
 
   // 启动摄像头
   const start = useCallback(async () => {
-    try {
-      setError(null)
-      const success = await cameraService.initialize(deviceId)
-      if (success) {
-        const newStream = cameraService.getStream()
-        setStream(newStream)
-        setIsReady(true)
-        return true
-      } else {
-        setError('摄像头初始化失败')
-        return false
-      }
-    } catch (err: any) {
-      setError(err.message || '摄像头启动失败')
-      return false
-    }
+    // try {
+    //   setError(null)
+    //   const success = await cameraService.initialize(deviceId)
+    //   if (success) {
+    //     const newStream = cameraService.getStream()
+    //     setStream(newStream)
+    //     setIsReady(true)
+    //     return true
+    //   } else {
+    //     setError('摄像头初始化失败')
+    //     return false
+    //   }
+    // } catch (err: any) {
+    //   setError(err.message || '摄像头启动失败')
+    //   return false
+    // }
+    return false
   }, [deviceId])
 
   // 停止摄像头
   const stop = useCallback(() => {
-    cameraService.stop()
+    // cameraService.stop()
     setStream(null)
     setIsReady(false)
   }, [])
 
   // 切换设备
   const switchDevice = useCallback(async (newDeviceId: string) => {
-    stop()
-    const success = await cameraService.initialize(newDeviceId)
-    if (success) {
-      const newStream = cameraService.getStream()
-      setStream(newStream)
-      setIsReady(true)
-      return true
-    }
+    // stop()
+    // const success = await cameraService.initialize(newDeviceId)
+    // if (success) {
+    //   const newStream = cameraService.getStream()
+    //   setStream(newStream)
+    //   setIsReady(true)
+    //   return true
+    // }
     return false
   }, [stop])
 
   // 捕获帧
   const captureFrame = useCallback(() => {
-    return cameraService.captureFrame()
+    // return cameraService.captureFrame()
+    return null
   }, [])
 
   // 开始自动捕获
@@ -93,12 +95,12 @@ export const useCamera = (options: UseCameraOptions = {}): UseCameraReturn => {
     captureCallbackRef.current = onCapture
     setIsCapturing(true)
     
-    captureTimerRef.current = setInterval(() => {
-      const frame = cameraService.captureFrame()
-      if (frame && captureCallbackRef.current) {
-        captureCallbackRef.current(frame)
-      }
-    }, interval)
+    // captureTimerRef.current = setInterval(() => {
+    //   const frame = cameraService.captureFrame()
+    //   if (frame && captureCallbackRef.current) {
+    //     captureCallbackRef.current(frame)
+    //   }
+    // }, interval)
   }, [])
 
   // 停止自动捕获

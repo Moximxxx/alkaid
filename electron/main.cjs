@@ -1,7 +1,46 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+const http = require('http');
 
 let mainWindow = null;
+
+function waitForViteServer(maxWaitTime = 30000) {
+  const startTime = Date.now();
+
+  return new Promise((resolve, reject) => {
+    console.log('[Electron] Waiting for Vite server...');
+
+    function checkServer() {
+      const req = http.get('http://localhost:5173', (res) => {
+        if (res.statusCode === 200) {
+          console.log('[Electron] Vite server is ready!');
+          resolve();
+        } else {
+          retry();
+        }
+      });
+
+      req.on('error', () => {
+        retry();
+      });
+
+      req.setTimeout(1000, () => {
+        req.destroy();
+        retry();
+      });
+    }
+
+    function retry() {
+      if (Date.now() - startTime > maxWaitTime) {
+        reject(new Error('Vite server timeout'));
+        return;
+      }
+      setTimeout(checkServer, 500);
+    }
+
+    checkServer();
+  });
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -31,8 +70,22 @@ function createWindow() {
   console.log('[Electron] Window created');
 }
 
-app.whenReady().then(() => {
-  console.log('[Electron] App ready, creating window...');
+app.whenReady().then(async () => {
+  console.log('[Electron] App ready, waiting for Vite server...');
+
+  const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+
+  if (isDev) {
+    try {
+      await waitForViteServer();
+    } catch (err) {
+      console.error('[Electron] Failed to wait for Vite server:', err.message);
+      console.error('[Electron] Please make sure Vite dev server is running on http://localhost:5173');
+      app.quit();
+      return;
+    }
+  }
+
   createWindow();
 
   app.on('activate', () => {

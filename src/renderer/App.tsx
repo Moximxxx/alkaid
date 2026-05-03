@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { Routes, Route, Navigate } from "react-router-dom"
 import { Toolbar } from "@/components/layout/Toolbar"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { WelcomePage } from "@/pages/Welcome"
@@ -15,38 +15,29 @@ function AppContent() {
   const { isConfigured } = useSettings()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  // Redirect to welcome if not configured
   if (!isConfigured) {
-    return (
-      <BrowserRouter>
-        <Routes>
-          <Route path="*" element={<WelcomePage />} />
-        </Routes>
-      </BrowserRouter>
-    )
+    return <WelcomePage />
   }
 
   return (
-    <BrowserRouter>
-      <div className="min-h-screen bg-background">
-        <Toolbar
-          theme={theme}
-          onThemeToggle={toggleTheme}
-          onMenuToggle={() => setSidebarOpen(true)}
-        />
-        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+    <div className="min-h-screen bg-background">
+      <Toolbar
+        theme={theme}
+        onThemeToggle={toggleTheme}
+        onMenuToggle={() => setSidebarOpen(true)}
+      />
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        <main>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/video-chat" element={<VideoChatPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-      </div>
-    </BrowserRouter>
+      <main>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/video-chat" element={<VideoChatPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+    </div>
   )
 }
 
