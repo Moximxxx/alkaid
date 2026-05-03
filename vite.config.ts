@@ -2,15 +2,13 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
-const srcPath = path.resolve(__dirname, 'src')
-
 export default defineConfig({
   plugins: [react()],
   root: 'src/renderer',
   resolve: {
     alias: {
-      '@': srcPath,
-      '@shared': path.resolve(srcPath, 'shared'),
+      '@': path.resolve(__dirname, 'src/renderer'),
+      '@shared': path.resolve(__dirname, 'src/shared'),
     },
   },
   build: {
