@@ -6,7 +6,7 @@
   "main": "dist/main/index.js",
   "scripts": {
     "dev": "vite",
-    "dev:electron": "vite & bun src/main/electrobun.ts",
+    "dev:desktop": "concurrently \"vite\" \"node --import tsx src/main/electrobun.ts\"",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext .ts,.tsx",
@@ -33,10 +33,12 @@
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.0.0",
     "autoprefixer": "^10.4.0",
+    "concurrently": "^9.2.1",
     "eslint": "^8.0.0",
     "jsdom": "^29.1.1",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.3.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.0.0",
     "vite": "^5.0.0",
     "vitest": "^4.1.5"
