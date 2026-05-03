@@ -2,56 +2,30 @@
 
 import React, { useState, useCallback } from 'react'
 import { VideoStream } from './components/VideoStream'
-import { Recognition } from './components/Recognition'
 import { Chat } from './components/Chat'
 import { VideoChat } from './components/VideoChat'
 import { useCamera } from './hooks/useCamera'
 import { useAI } from './hooks/useAI'
-import { visionService } from '@/main/services/vision'
-import type { RecognitionResult } from '@shared/types'
 
 type AppMode = 'normal' | 'video-chat'
 
 export const App: React.FC = () => {
   const [mode, setMode] = useState<AppMode>('normal')
-  
+
   useCamera({ autoStart: true })
   const { messages, loading: aiLoading, sendMessage, clearMessages } = useAI()
 
-  const [recognitionResult, setRecognitionResult] = useState<RecognitionResult | null>(null)
-  const [recognizing, setRecognizing] = useState(false)
   const [currentImage, setCurrentImage] = useState<string | null>(null)
 
   // 处理帧捕获
-  const handleFrameCapture = useCallback(async (frame: string) => {
+  const handleFrameCapture = useCallback((frame: string) => {
     setCurrentImage(frame)
-    setRecognizing(true)
-
-    try {
-      const result = await visionService.recognize(frame)
-      setRecognitionResult(result)
-    } catch (error) {
-      console.error('识别失败:', error)
-    } finally {
-      setRecognizing(false)
-    }
   }, [])
 
   // 发送消息（附带图片）
   const handleSendMessage = useCallback(async (content: string) => {
     await sendMessage(content, currentImage || undefined)
   }, [sendMessage, currentImage])
-
-  // 将识别结果作为消息发送
-  const handleAskAboutScene = useCallback(async () => {
-    if (!recognitionResult) return
-
-    const description = recognitionResult.scene.description || '未识别到场景'
-    const objects = recognitionResult.objects.map(o => o.name).join('、')
-    const prompt = `请描述一下这个场景：${description}。检测到的物体有：${objects || '无'}。请用中文回答。`
-
-    await sendMessage(prompt, currentImage || undefined)
-  }, [recognitionResult, currentImage, sendMessage])
 
   // 切换模式
   const toggleMode = useCallback(() => {
@@ -80,7 +54,7 @@ export const App: React.FC = () => {
         {mode === 'normal' ? (
           /* 普通模式 */
           <div className="h-full flex">
-            {/* 左侧：视频和识别 */}
+            {/* 左侧：视频 */}
             <div className="w-1/2 flex flex-col p-4 gap-4">
               {/* 视频流 */}
               <div className="flex-1">
@@ -90,19 +64,15 @@ export const App: React.FC = () => {
                 />
               </div>
 
-              {/* 识别结果 */}
-              <div className="h-48 overflow-y-auto">
-                <Recognition
-                  result={recognitionResult}
-                  loading={recognizing}
-                />
-                {recognitionResult && (
-                  <button
-                    onClick={handleAskAboutScene}
-                    className="mt-2 w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-                  >
-                    询问AI关于这个场景
-                  </button>
+              {/* 提示信息 */}
+              <div className="h-32 p-4 bg-white rounded-lg border">
+                <p className="text-sm text-gray-600">
+                  提示：拍摄照片后，AI可以分析图片内容。请在右侧对话框中发送图片进行分析。
+                </p>
+                {currentImage && (
+                  <p className="mt-2 text-sm text-green-600">
+                    已捕获图片，可以发送消息让AI分析
+                  </p>
                 )}
               </div>
             </div>
