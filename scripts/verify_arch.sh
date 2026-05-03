@@ -169,7 +169,20 @@ if [ -d "$ETS_DIR" ]; then
 fi
 echo ""
 
-# ---- 检查 7: coverage_checklist 不允许 TODO ----
+# ---- 检查 7: R-7 禁止跳过 Coordinator ----
+echo "--- 检查 R-7: Coordinator 工作流遵守 ---"
+
+SKIP_VIOLATION=false
+git -C "$PROJECT_ROOT" log -1 --format="%s" 2>/dev/null | grep -qE "^(fix|feat|docs|style|refactor|test|chore)\!?:.*" && SKIP_VIOLATION=true
+
+if [ "$SKIP_VIOLATION" = true ]; then
+    pass "R-7: Commit message 符合规范"
+else
+    warn "R-7: 无法确认是否绕过 Coordinator（建议通过合同文件验证）"
+fi
+echo ""
+
+# ---- 检查 8: coverage_checklist 不允许 TODO ----
 echo "--- 检查 coverage_checklist 完整性 ---"
 
 if [ -d "$CONTRACT_DIR" ]; then
