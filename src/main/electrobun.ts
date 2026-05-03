@@ -1,7 +1,5 @@
 // Electrobun 主进程入口
-import Electrobun from "electrobun";
-
-const { BrowserWindow } = Electrobun;
+import { BrowserWindow } from "electrobun";
 
 // 创建主窗口
 const mainWindow = new BrowserWindow({
@@ -12,7 +10,7 @@ const mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
   },
-  url: "http://localhost:5173", // 开发时使用 Vite 开发服务器
+  url: "http://localhost:5173",
   html: null,
   preload: null,
   viewsRoot: null,
@@ -25,7 +23,5 @@ const mainWindow = new BrowserWindow({
   sandbox: false,
 });
 
-// 窗口准备好后显示
-mainWindow.show();
-
 console.log("摇光 - Electrobun 主进程已启动");
+console.log("窗口已创建，请确保 Vite 开发服务器运行在 http://localhost:5173");
