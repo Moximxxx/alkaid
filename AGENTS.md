@@ -1,58 +1,246 @@
 # AGENTS.md — 项目规则定义
 
-> 本文件定义了项目的工作流约束、Agent 角色和验证规则。
-> 所有任务必须遵守这些规则。
->
-> **版本**: v2.0.0
+> 本文件定义了项目的多智能体工作流约束、角色职责和验证规则。
+> **所有任务必须严格遵守这些规则，违规操作将被拦截。**
 
-## Agent 角色
+---
 
-| 角色 | 触发条件 | 职责 |
-|------|---------|------|
-| **Coordinator** | 所有任务开始前 | 任务拆分、委派、验证 |
-| **Builder** | 修改源码后需构建 | 构建、部署、冒烟测试 |
-| **Crash-Doctor** | CppCrash/SIGSEGV/ANR | 崩溃分析、根因定位 |
-| **Retro** | 任务完成/验证失败 | 复盘、约束更新、事故记录 |
+## 角色定义与职责边界
+
+### 1. Coordinator（协调者）
+
+**触发条件**：所有任务开始前必须由 Coordinator 分析和拆分。
+
+**核心职责**：
+- 分析用户需求，拆分为可执行的子任务
+- 判断任务涉及的架构层级
+- 生成任务合同（TODOWRITE）
+- 委派给正确的执行智能体
+- 验证执行结果是否符合预期
+- 维护任务进度（TODO 状态更新）
+
+**严格禁止**：
+- ❌ 直接编写代码（除非是极简的配置文件）
+- ❌ 执行构建/部署命令
+- ❌ 修改他人负责的模块
+
+**工作模式**：
+```
+用户任务 → Coordinator 分析 → 生成合同 → 委派执行
+                                         ↓
+                              ┌──────────┴──────────┐
+                              ↓                     ↓
+                        Builder               Task-Executor
+                      (构建验证)              (实际实现)
+```
+
+---
+
+### 2. Builder（构建者）
+
+**触发条件**：源码修改后需要构建/部署时。
+
+**核心职责**：
+- 执行标准构建流程（Vite build, Electron build 等）
+- 执行部署命令
+- 运行冒烟测试验证
+- 检查构建产物完整性
+- 确保 CI/CD 流程正常
+
+**严格禁止**：
+- ❌ 修改任何源码文件
+- ❌ 编写业务逻辑代码
+- ❌ 介入需求分析和任务拆分
+
+**构建命令白名单**：
+```bash
+# 前端构建
+bun run build
+bun run dev
+
+# Electron 构建
+bun run electron:build
+bun run electron:dev
+
+# 测试
+bun run test
+bun run typecheck
+```
+
+---
+
+### 3. Crash-Doctor（崩溃诊断者）
+
+**触发条件**：出现以下情况时必须调用
+- 进程崩溃（exit code != 0）
+- CppCrash / SIGSEGV / SIGABRT
+- ANR（应用无响应）
+- 命令异常退出
+- 运行时 panic
+
+**核心职责**：
+- 分析崩溃日志和堆栈信息
+- 定位根因（Root Cause）
+- 识别问题发生的调用链路
+- 提出修复建议
+- 记录事故到 `incidents/` 目录
+
+**严格禁止**：
+- ❌ 直接修改源码修复问题
+- ❌ 忽略任何崩溃或异常
+- ❌ 猜测原因而不分析日志
+
+**分析输出格式**：
+```
+## 崩溃报告
+
+**问题描述**：xxx
+**根因分析**：xxx
+**影响范围**：xxx
+**修复建议**：xxx
+```
+
+---
+
+### 4. Task-Executor（任务执行者）
+
+**触发条件**：收到 Coordinator 委派的任务合同时。
+
+**核心职责**：
+- 按照合同规范实现代码
+- 遵守约束文档中的规则（tech-stack, operation-boundary 等）
+- 完成后报告给 Coordinator
+- 进行自验，确保实现符合合同
+
+**严格禁止**：
+- ❌ 超出合同范围修改其他模块
+- ❌ 跳过约束检查
+- ❌ 直接与用户沟通技术细节（通过 Coordinator 中转）
+
+---
+
+### 5. Retro（复盘者）
+
+**触发条件**：任务完成或验证失败时。
+
+**核心职责**：
+- 任务完成后复盘执行过程
+- 验证失败时分析原因
+- 更新约束文档
+- 记录事故经验教训
+- 维护 `incidents/` 日志
+
+---
 
 ## 强制规则
 
-### R-Contract: 源码修改必须先有合同
+### R-1: Coordinator-Guard（协调者护栏）
 
-Edit/Write 操作会触发 `coordinator-guard.sh` 检查：
-- 无有效合同 → **拦截**
-- 合同过期（>30分钟）→ **拦截**
+所有 Edit/Write 操作必须先检查：
+- 是否在有效的任务合同范围内
+- 合同是否过期（>30 分钟）
+- 是否通过了决策门
 
-### R-Decision: 写操作必须通过决策门
+**违规**：拦截并要求重新走 Coordinator 流程。
 
-Edit/Write/Delete 操作会触发 `decision-gate.sh` 检查：
-- 高风险操作 → **拦截并提示确认**
-- 中风险操作 → **记录并放行**
+### R-2: Decision-Gate（决策门）
 
-### R-Builder: 构建必须调用 Builder
+高风险操作（删除文件、修改配置等）必须：
+1. 显示操作警告
+2. 等待用户确认
+3. 记录操作日志
 
-修改源码后需要构建/部署时，**必须调用 Builder**。
+### R-3: Builder-Must（构建调用）
 
-**禁止**：主 agent 直接执行 ninja/adb/hdc install。
+源码修改后如需构建/部署：
+- **必须调用 Builder 智能体**
+- **禁止**主 agent 直接执行构建命令
 
-### R-Crash: 崩溃必须调用 Crash-Doctor
+### R-4: Crash-Call（崩溃必诊）
 
-出现进程崩溃、ANR、命令异常退出时，**必须调用 Crash-Doctor**。
+出现任何崩溃/异常：
+- **必须调用 Crash-Doctor**
+- **禁止**忽略错误或猜测修复
 
-### R-Verify: 验证必须双重校验
+### R-5: Dual-Verify（双重校验）
 
-Edit/Write 操作后会触发双重校验：
-1. Agent 自验
-2. 工具独立校验 (`post-edit-verify.sh`)
+代码编写后双重验证：
+1. Agent 自验（自检代码正确性）
+2. 工具校验（调用验证脚本）
 
-不一致时 → **质疑 Agent 结果**
+**不一致**：质疑 Agent 结果，重新分析。
+
+---
+
+## 工作流执行循环
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        用户任务输入                               │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     Coordinator 分析                             │
+│  - 需求分析                                                      │
+│  - 任务拆分                                                      │
+│  - 生成合同                                                      │
+│  - 委派执行                                                      │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   Task-Executor 执行                             │
+│  - 按合同实现                                                    │
+│  - 自验                                                          │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+                    ┌───────────────────────┐
+                    │    决策门检查         │
+                    │  高风险 → 确认        │
+                    │  中风险 → 记录        │
+                    └───────────────────────┘
+                                │
+                                ▼
+                    ┌───────────────────────┐
+                    │     双重校验         │
+                    │  post-edit-verify    │
+                    └───────────────────────┘
+                                │
+                    ┌───────────┴───────────┐
+                    │                       │
+               验证通过                验证失败
+                    │                       │
+                    ▼                       ▼
+┌─────────────────────┐    ┌─────────────────────────────────────┐
+│   Builder 构建      │    │     自迭代闭环                      │
+│   - 冒烟测试        │    │     1. 错误分析                     │
+└─────────────────────┘    │     2. 依赖追踪                     │
+                            │     3. 约束更新                     │
+                            │     4. 验证复验                     │
+                            └─────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                         Retro 复盘                               │
+│  - 任务完成记录                                                  │
+│  - 事故经验归档                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
 
 ## 危险命令处理
 
-| 类别 | 模式 | 处理 |
-|------|------|------|
+| 风险等级 | 命令模式 | 处理方式 |
+|---------|---------|---------|
 | **绝对拦截** | `rm -rf /`, `mkfs`, `shutdown` | 直接拒绝 |
-| **提示确认** | `rm `, `curl.*\|`, `chmod `, `dd` | 显示警告，等待确认 |
-| **条件放行** | `git `, `npm `, `python ` | 检查参数后放行 |
+| **高风险** | `rm `, `curl.*\|`, `chmod 777`, `dd` | 显示警告，等待确认 |
+| **中风险** | `git reset`, `git rebase` | 记录并放行 |
+| **低风险** | `git `, `npm `, `python ` | 检查参数后放行 |
+
+---
 
 ## 资源限制
 
@@ -64,48 +252,32 @@ Edit/Write 操作后会触发双重校验：
 | 任务时长 | 30 分钟 |
 | 内存 | 2 GB |
 
-## 自迭代闭环
+---
 
-验证失败时自动触发四阶段闭环：
+## 约束文档体系
 
-1. **错误分析** (`incident-analyzer.sh`) - 根因定位
-2. **依赖追踪** (`dep-tracker.sh`) - 影响范围
-3. **约束更新** - 添加新约束或修改现有约束
-4. **验证复验** - 确保修复有效
+### 架构约束
+| 文档 | 内容 |
+|------|------|
+| `harness-layers.md` | 六层架构规范 |
+| `operation-boundary.md` | 操作边界定义 |
 
-## 约束引用
+### 执行约束
+| 文档 | 内容 |
+|------|------|
+| `execution-loop.md` | 执行循环规范 |
+| `decision-points.md` | 决策点定义 |
+| `context-management.md` | 上下文管理 |
 
-| 类别 | 约束文档 |
-|------|---------|
-| 六层架构 | `constraints/harness-layers.md` |
-| 上下文管理 | `constraints/context-management.md` |
-| 工具编排 | `constraints/tool-orchestration.md` |
-| 执行循环 | `constraints/execution-loop.md` |
-| 决策点 | `constraints/decision-points.md` |
-| 操作边界 | `constraints/operation-boundary.md` |
-| 资源限制 | `constraints/resource-limits.md` |
-| 安全护栏 | `constraints/guardrails.md` |
-| 错误恢复 | `constraints/error-recovery.md` |
-| 自迭代 | `constraints/self-improvement-loop.md` |
-| 评估观测 | `constraints/evaluation.md` |
-| 可观测性 | `constraints/observability.md` |
-
-## 技术栈约束
-
+### 技术约束
 | 技术栈 | 约束文档 |
 |--------|---------|
-| C++ | `constraints/tech-stack/cpp.md` |
-| Qt | `constraints/tech-stack/qt.md` |
-| HarmonyOS | `constraints/tech-stack/harmonyos.md` |
-| ArkTS | `constraints/tech-stack/arktx.md` |
-| Python | `constraints/tech-stack/python.md` |
-| TypeScript | `constraints/tech-stack/typescript.md` |
-| Go | `constraints/tech-stack/golang.md` |
-| Java | `constraints/tech-stack/java.md` |
-| Rust | `constraints/tech-stack/rust.md` |
-| Node.js | `constraints/tech-stack/nodejs.md` |
-| React | `constraints/tech-stack/react.md` |
-| Vue3 | `constraints/tech-stack/vue3.md` |
+| TypeScript | `tech-stack/typescript.md` |
+| React | `tech-stack/react.md` |
+| Electron | `tech-stack/electron.md` |
+| Tailwind CSS | `tech-stack/tailwindcss.md` |
+
+---
 
 ## 验证脚本
 
@@ -116,44 +288,20 @@ Edit/Write 操作后会触发双重校验：
 | `bash scripts/git-diff-analyzer.sh` | 变更分析 |
 | `bash scripts/verify_arch.sh` | 架构规则验证 |
 
-## 工作流
-
-```
-用户任务 → Coordinator 分析 → 生成合同 → 委派执行
-                                          ↓
-                                    实现者写代码
-                                          ↓
-                              ┌───────────┴───────────┐
-                              ↓                       ↓
-                      decision-gate              pre-bash-guard
-                      (决策拦截)                  (危险检查)
-                              ↓                       ↓
-                        写操作校验               双重校验
-                        (双重校验)                (post-edit-verify)
-                              ↓                       ↓
-                        验证通过                   验证通过
-                              ↓                       ↓
-                              └───────────┬───────────┘
-                                          ↓
-                                    Builder 构建
-                                          ↓
-                                    冒烟测试
-                                          ↓
-                                    自迭代闭环
-                                    (如需修复)
-                                          ↓
-                                    Retro 复盘
-                                          ↓
-                                    交接报告
-```
+---
 
 ## 事故记录
 
-所有事故记录在 `${TOOL_DIR}/retros/incident_log.md`。
+所有事故必须记录到 `incidents/` 目录下的对应文件中。
+
+**文件命名**：`YYYY-MM-DD_${事故类型}.md`
+
+---
 
 ## 版本历史
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
-| v2.0.0 | 2026-04-30 | 全面升级：增加决策门、资源护栏、双重校验、自迭代闭环 |
+| v3.0.0 | 2026-05-03 | 严格角色边界：Coordinator 不写代码，Builder 不改源码，Crash-Doctor 只分析 |
+| v2.0.0 | 2026-04-30 | 全面升级：决策门、资源护栏、双重校验、自迭代闭环 |
 | v1.0.0 | 2026-04-29 | 初始版本 |
