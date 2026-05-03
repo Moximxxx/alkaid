@@ -11,5 +11,5 @@ const mainWindow = new BrowserWindow({
   url: "http://localhost:5173",
 });
 
-console.log("摇光 - Electrobun 主进程已启动");
-console.log("窗口已创建，请确保 Vite 开发服务器运行在 http://localhost:5173");
+console.log("Yaoguang - Electrobun main process started");
+console.log("Window created. Make sure Vite dev server is running at http://localhost:5173");

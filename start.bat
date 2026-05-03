@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 echo [摇光] 安装依赖...
 bun install
 if %errorlevel% neq 0 (
