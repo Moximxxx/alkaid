@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Target, Key, ArrowRight, ArrowLeft, Sparkles, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -88,6 +88,7 @@ function WelcomePage() {
   const [textProvider, setTextProvider] = useState<typeof TEXT_PROVIDERS[number]["value"]>(settings.textProvider || "openai")
   const [textApiKey, setTextApiKey] = useState(settings.textApiKey || "")
   const [textModel, setTextModel] = useState(settings.textModel || TEXT_MODELS.openai[0].value)
+  const [settingsComplete, setSettingsComplete] = useState(false)
 
   const handleNext = () => {
     if (currentStep < 4) {
@@ -114,8 +115,15 @@ function WelcomePage() {
       textApiKey: textApiKey.trim() || settings.textApiKey,
       textModel,
     })
-    navigate("/")
+    setSettingsComplete(true)
   }
+
+  useEffect(() => {
+    if (settingsComplete) {
+      setSettingsComplete(false)
+      navigate("/")
+    }
+  }, [settingsComplete, navigate])
 
   const selectedVisionModel = VISION_MODELS.find(m => m.value === visionModel)
   const selectedTextProvider = TEXT_PROVIDERS.find(p => p.value === textProvider)
