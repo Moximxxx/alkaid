@@ -6,6 +6,7 @@
   "main": "dist/main/index.js",
   "scripts": {
     "dev": "vite",
+    "dev:electron": "vite & bun src/main/electrobun.ts",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext .ts,.tsx",
@@ -27,6 +28,7 @@
     "@testing-library/react": "^16.3.2",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "@types/three": "^0.184.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.0.0",
@@ -40,6 +42,7 @@
     "vitest": "^4.1.5"
   },
   "dependencies": {
+    "electrobun": "^1.16.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }
