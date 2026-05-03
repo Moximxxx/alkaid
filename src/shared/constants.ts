@@ -43,6 +43,11 @@ export const AI_MODELS = {
     { id: 'claude-3-sonnet-20240229', name: 'Claude 3 Sonnet' },
     { id: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku' },
   ],
+  doubao: [
+    { id: 'doubao-1.5-vision-pro-32k', name: '豆包 Vision Pro 32K' },
+    { id: 'doubao-seed-2.0', name: '豆包 Seed 2.0 (视频理解)' },
+    { id: 'doubao-1.5-pro-32k', name: '豆包 Pro 32K (文本)' },
+  ],
 }
 
 // 图像识别服务列表

@@ -55,7 +55,7 @@ export interface ChatMessage {
 
 // AI模型配置
 export interface AIModelConfig {
-  provider: 'openai' | 'claude'
+  provider: 'openai' | 'claude' | 'doubao'
   apiKey: string
   model: string
   baseUrl?: string

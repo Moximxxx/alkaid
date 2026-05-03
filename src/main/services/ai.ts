@@ -36,6 +36,8 @@ export class AIService {
       response = await this.callOpenAI(content, image)
     } else if (provider === 'claude') {
       response = await this.callClaude(content, image)
+    } else if (provider === 'doubao') {
+      response = await this.callDoubao(content, image)
     } else {
       throw new Error(`不支持的AI提供商: ${provider}`)
     }
@@ -107,6 +109,34 @@ export class AIService {
 
     const data = await response.json()
     return data.content[0].text
+  }
+
+  // 调用豆包 API（兼容OpenAI格式）
+  private async callDoubao(content: string, image?: string): Promise<string> {
+    const messages = this.buildOpenAIMessages(content, image)
+
+    const response = await fetch(
+      `${this.config.baseUrl || 'https://ark.cn-beijing.volces.com/api/v3'}/chat/completions`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.config.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: this.config.model,
+          messages,
+          max_tokens: 1024,
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`豆包 API 错误: ${response.status}`)
+    }
+
+    const data = await response.json()
+    return data.choices[0].message.content
   }
 
   // 构建OpenAI消息格式
