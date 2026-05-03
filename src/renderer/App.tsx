@@ -10,17 +10,21 @@ import { AboutPage } from "@/pages/About"
 import { useTheme } from "@/hooks/useTheme"
 import { useSettings } from "@/hooks/useSettings"
 
+export function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  )
+}
+
 function AppContent() {
   const { theme, toggleTheme } = useTheme()
   const { isConfigured } = useSettings()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   if (!isConfigured) {
-    return (
-      <BrowserRouter>
-        <WelcomePage />
-      </BrowserRouter>
-    )
+    return <WelcomePage />
   }
 
   return (
@@ -43,10 +47,6 @@ function AppContent() {
       </main>
     </div>
   )
-}
-
-export function App() {
-  return <AppContent />
 }
 
 export default App
