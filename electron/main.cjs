@@ -3,8 +3,14 @@ const path = require('path');
 const http = require('http');
 
 let mainWindow = null;
+let isReady = false;
+let isWaitingForServer = false;
 
 function waitForViteServer(maxWaitTime = 30000) {
+  if (isWaitingForServer || isReady) {
+    return Promise.resolve();
+  }
+  isWaitingForServer = true;
   const startTime = Date.now();
 
   return new Promise((resolve, reject) => {
@@ -71,6 +77,11 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
+  if (isReady) {
+    return;
+  }
+  isReady = true;
+
   console.log('[Electron] App ready, waiting for Vite server...');
 
   const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;

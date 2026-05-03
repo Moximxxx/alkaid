@@ -114,6 +114,7 @@ function WelcomePage() {
       textProvider,
       textApiKey: textApiKey.trim() || settings.textApiKey,
       textModel,
+      setupCompleted: true,
     })
     setSettingsComplete(true)
   }

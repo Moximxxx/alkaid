@@ -7,6 +7,7 @@ export interface Settings {
   textProvider: "doubao" | "openai" | "glm" | "minimax" | "xiaomi" | "kimi" | "deepseek"
   textApiKey: string
   textModel: string
+  setupCompleted?: boolean
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -43,7 +44,9 @@ export function useSettings() {
     setSettings(DEFAULT_SETTINGS)
   }, [])
 
-  const isConfigured = settings.textApiKey.trim() !== ""
+  const isConfigured = settings.setupCompleted || 
+                         settings.textApiKey.trim() !== "" || 
+                         settings.visionApiKey.trim() !== ""
 
   return {
     settings,
