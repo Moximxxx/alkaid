@@ -211,6 +211,45 @@ except: pass
 fi
 echo ""
 
+# ---- 检查 9: P-01 模型列表一致性 ----
+echo "--- 检查 P-01: AI 模型列表一致性 ---"
+
+WELCOME_MODELS="$PROJECT_ROOT/src/renderer/pages/Welcome.tsx"
+SETTINGS_MODELS="$PROJECT_ROOT/src/renderer/pages/Settings.tsx"
+CONSTANTS_MODELS="$PROJECT_ROOT/src/shared/constants.ts"
+
+if [ -f "$WELCOME_MODELS" ] && [ -f "$CONSTANTS_MODELS" ]; then
+    # 提取 Welcome.tsx 中每个 provider 的模型数量
+    WELCOME_DOUBAO=$(grep -c 'doubao-' "$WELCOME_MODELS" 2>/dev/null || echo 0)
+    WELCOME_OPENAI=$(grep -c 'gpt-' "$WELCOME_MODELS" 2>/dev/null || echo 0)
+    WELCOME_CLAUDE=$(grep -c 'claude-' "$WELCOME_MODELS" 2>/dev/null || echo 0)
+
+    # 提取 constants.ts 中每个 provider 的模型数量
+    CONSTANTS_DOUBAO=$(grep -c 'doubao-' "$CONSTANTS_MODELS" 2>/dev/null || echo 0)
+    CONSTANTS_OPENAI=$(grep -c 'gpt-' "$CONSTANTS_MODELS" 2>/dev/null || echo 0)
+    CONSTANTS_CLAUDE=$(grep -c 'claude-' "$CONSTANTS_MODELS" 2>/dev/null || echo 0)
+
+    INCONSISTENT=""
+    if [ "$WELCOME_DOUBAO" != "$CONSTANTS_DOUBAO" ]; then
+        INCONSISTENT="$INCONSISTENT  doubao (Welcome:$WELCOME_DOUBAO vs constants:$CONSTANTS_DOUBAO)"
+    fi
+    if [ "$WELCOME_OPENAI" != "$CONSTANTS_OPENAI" ]; then
+        INCONSISTENT="$INCONSISTENT  openai (Welcome:$WELCOME_OPENAI vs constants:$CONSTANTS_OPENAI)"
+    fi
+    if [ "$WELCOME_CLAUDE" != "$CONSTANTS_CLAUDE" ]; then
+        INCONSISTENT="$INCONSISTENT  claude (Welcome:$WELCOME_CLAUDE vs constants:$CONSTANTS_CLAUDE)"
+    fi
+
+    if [ -n "$INCONSISTENT" ]; then
+        error "P-01: AI 模型列表不一致:$INCONSISTENT"
+    else
+        pass "P-01: AI 模型列表一致 (doubao:$WELCOME_DOUBAO, openai:$WELCOME_OPENAI, claude:$WELCOME_CLAUDE)"
+    fi
+else
+    warn "P-01: 关键文件不存在，跳过检查"
+fi
+echo ""
+
 # ---- 结果汇总 ----
 echo "=== 验证结果 ==="
 if [ "$ERRORS" -eq 0 ]; then

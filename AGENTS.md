@@ -151,6 +151,27 @@ bun run typecheck
 
 ## 强制规则
 
+### P-01: 模型列表一致性（Model List Consistency）
+
+**触发条件**：当任务涉及 AI 模型列表更新时。
+
+**要求**：AI 模型列表必须在所有相关文件中保持一致：
+- `src/shared/constants.ts` (AI_MODELS - 共享常量)
+- `src/renderer/pages/Welcome.tsx` (MODELS - 欢迎页)
+- `src/renderer/pages/Settings.tsx` (MODELS - 设置页)
+- `src/renderer/services/ai.ts` (MODEL_CONFIG.model - AI 服务)
+
+**一致性检查清单**：
+1. ✅ 所有 provider 的模型数量一致
+2. ✅ 每个模型的 `value`/`id` 字段一致
+3. ✅ 默认模型在各处一致
+
+**违规处理**：回滚并强制同步后再继续
+
+**事故引用**：INC-2026-0503-001
+
+---
+
 ### R-1: Coordinator-Guard（协调者护栏）
 
 所有 Edit/Write 操作必须先检查：

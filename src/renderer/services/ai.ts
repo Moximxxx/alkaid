@@ -14,7 +14,7 @@ const MODEL_CONFIG = {
   provider: 'doubao',
   baseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
   apiKey: import.meta.env.VITE_DOUBAO_API_KEY || '',
-  model: 'doubao-vision-pro',
+  model: 'doubao-1.6-thinking',
 }
 
 export const useAI = (): UseAIReturn => {

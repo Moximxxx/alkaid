@@ -12,7 +12,7 @@ export interface Settings {
 const DEFAULT_SETTINGS: Settings = {
   apiProvider: "doubao",
   apiKey: "",
-  model: "doubao-vision-pro",
+  model: "doubao-1.6-thinking",
   visionProvider: "azure",
   visionApiKey: "",
   visionEndpoint: "",

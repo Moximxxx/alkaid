@@ -15,18 +15,24 @@ const AI_PROVIDERS = [
 
 const MODELS = {
   doubao: [
-    { value: "doubao-vision-pro", label: "豆包视觉专业版" },
-    { value: "doubao-seed-2.0", label: "豆包Seed 2.0" },
+    { value: "doubao-seed-1.6-thinking", label: "豆包 Seed 1.6 深度思考" },
+    { value: "doubao-seed-1.6-flash", label: "豆包 Seed 1.6 极速版" },
+    { value: "doubao-1.6-thinking", label: "豆包 1.6 深度思考" },
+    { value: "doubao-1.6-flash", label: "豆包 1.6 极速版" },
+    { value: "doubao-1.5-thinking-vision-pro", label: "豆包 1.5 视觉思考" },
   ],
   openai: [
-    { value: "gpt-4o", label: "GPT-4o" },
-    { value: "gpt-4o-mini", label: "GPT-4o Mini" },
-    { value: "gpt-4-turbo", label: "GPT-4 Turbo" },
+    { value: "gpt-4.1", label: "GPT-4.1" },
+    { value: "gpt-4.1-mini", label: "GPT-4.1 Mini" },
+    { value: "gpt-4.1-nano", label: "GPT-4.1 Nano" },
+    { value: "gpt-4.5", label: "GPT-4.5" },
+    { value: "gpt-5", label: "GPT-5" },
   ],
   claude: [
+    { value: "claude-opus-4-20250514", label: "Claude Opus 4" },
+    { value: "claude-sonnet-4-20250514", label: "Claude Sonnet 4" },
+    { value: "claude-3-7-sonnet-20250224", label: "Claude 3.7 Sonnet" },
     { value: "claude-3-5-sonnet-20241022", label: "Claude 3.5 Sonnet" },
-    { value: "claude-3-opus-20240229", label: "Claude 3 Opus" },
-    { value: "claude-3-haiku-20240307", label: "Claude 3 Haiku" },
   ],
 }
 

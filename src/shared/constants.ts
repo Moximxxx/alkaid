@@ -33,20 +33,25 @@ export const DEFAULT_APP_CONFIG = {
 
 // AI模型列表
 export const AI_MODELS = {
+  doubao: [
+    { value: "doubao-seed-1.6-thinking", label: "豆包 Seed 1.6 深度思考" },
+    { value: "doubao-seed-1.6-flash", label: "豆包 Seed 1.6 极速版" },
+    { value: "doubao-1.6-thinking", label: "豆包 1.6 深度思考" },
+    { value: "doubao-1.6-flash", label: "豆包 1.6 极速版" },
+    { value: "doubao-1.5-thinking-vision-pro", label: "豆包 1.5 视觉思考" },
+  ],
   openai: [
-    { id: 'gpt-4-vision-preview', name: 'GPT-4 Vision' },
-    { id: 'gpt-4o', name: 'GPT-4o' },
-    { id: 'gpt-4o-mini', name: 'GPT-4o Mini' },
+    { value: "gpt-4.1", label: "GPT-4.1" },
+    { value: "gpt-4.1-mini", label: "GPT-4.1 Mini" },
+    { value: "gpt-4.1-nano", label: "GPT-4.1 Nano" },
+    { value: "gpt-4.5", label: "GPT-4.5" },
+    { value: "gpt-5", label: "GPT-5" },
   ],
   claude: [
-    { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus' },
-    { id: 'claude-3-sonnet-20240229', name: 'Claude 3 Sonnet' },
-    { id: 'claude-3-haiku-20240307', name: 'Claude 3 Haiku' },
-  ],
-  doubao: [
-    { id: 'doubao-1.5-vision-pro-32k', name: '豆包 Vision Pro 32K' },
-    { id: 'doubao-seed-2.0', name: '豆包 Seed 2.0 (视频理解)' },
-    { id: 'doubao-1.5-pro-32k', name: '豆包 Pro 32K (文本)' },
+    { value: "claude-opus-4-20250514", label: "Claude Opus 4" },
+    { value: "claude-sonnet-4-20250514", label: "Claude Sonnet 4" },
+    { value: "claude-3-7-sonnet-20250224", label: "Claude 3.7 Sonnet" },
+    { value: "claude-3-5-sonnet-20241022", label: "Claude 3.5 Sonnet" },
   ],
 }
 

@@ -53,12 +53,12 @@ describe('AI 模型列表', () => {
   })
 
   it('豆包模型应该包含视觉理解模型', () => {
-    const visionModel = AI_MODELS.doubao.find(m => m.id.includes('vision'))
+    const visionModel = AI_MODELS.doubao.find(m => m.value.includes('vision'))
     expect(visionModel).toBeDefined()
   })
 
   it('豆包模型应该包含视频理解模型', () => {
-    const videoModel = AI_MODELS.doubao.find(m => m.id.includes('seed'))
+    const videoModel = AI_MODELS.doubao.find(m => m.value.includes('seed'))
     expect(videoModel).toBeDefined()
   })
 })
