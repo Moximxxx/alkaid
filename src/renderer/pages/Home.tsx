@@ -21,7 +21,6 @@ export function HomePage() {
   ])
   const [input, setInput] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const chatContainerRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -61,13 +60,10 @@ export function HomePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Chat Area */}
-      <div
-        ref={chatContainerRef}
-        className="flex-1 overflow-y-auto px-4 py-6"
-      >
-        <div className="max-w-3xl mx-auto space-y-6">
+    <div className="flex flex-col h-screen fixed inset-0">
+      {/* Chat Area - flex-1 overflow-hidden 占据剩余空间 */}
+      <div className="flex-1 overflow-hidden px-4 py-6">
+        <div className="h-full overflow-y-auto space-y-6">
           {messages.map((message) => (
             <div
               key={message.id}
