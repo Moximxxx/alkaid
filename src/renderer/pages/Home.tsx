@@ -60,8 +60,8 @@ export function HomePage() {
   }
 
   return (
-    <div className="flex flex-col h-full relative">
-      {/* Chat Area - 占满除输入框外的空间 */}
+    <div className="flex flex-col" style={{ height: "calc(100vh - 64px)" }}>
+      {/* Chat Area - 占满剩余空间 */}
       <div className="flex-1 overflow-hidden px-4 py-6">
         <div className="h-full overflow-y-auto space-y-6">
           {messages.map((message) => (
@@ -100,8 +100,8 @@ export function HomePage() {
         </div>
       </div>
 
-      {/* Input Area - 绝对定位固定在底部 */}
-      <div className="absolute bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur">
+      {/* Input Area - 固定高度在底部 */}
+      <div className="flex-shrink-0 border-t bg-background/95 px-4 py-4">
         <div className="max-w-3xl mx-auto px-4 py-4">
           <div className="flex gap-2 items-end">
             <Link to="/video-chat" className="flex-shrink-0">
