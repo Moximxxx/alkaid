@@ -61,24 +61,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="flex flex-col h-screen">
-      {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
-        <h1 className="text-xl font-semibold">摇光</h1>
-        <div className="flex items-center gap-2">
-          <Link to="/video-chat">
-            <Button variant="ghost" size="icon" title="视频通话">
-              <Video className="h-5 w-5" />
-            </Button>
-          </Link>
-          <Link to="/settings">
-            <Button variant="ghost" size="icon" title="设置">
-              <Settings className="h-5 w-5" />
-            </Button>
-          </Link>
-        </div>
-      </header>
-
+    <div className="flex flex-col h-full">
       {/* Chat Area */}
       <div
         ref={chatContainerRef}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom"
 import { Toolbar } from "@/components/layout/Toolbar"
 import { Sidebar } from "@/components/layout/Sidebar"
@@ -20,15 +20,17 @@ export function App() {
 
 function AppContent() {
   const { theme, toggleTheme } = useTheme()
-  const { isConfigured } = useSettings()
+  const { isConfigured, settings } = useSettings()
   const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const prevSetupCompleted = useRef(settings.setupCompleted)
 
   useEffect(() => {
-    if (isConfigured) {
+    if (!prevSetupCompleted.current && settings.setupCompleted) {
+      prevSetupCompleted.current = true
       navigate("/", { replace: true })
     }
-  }, [isConfigured, navigate])
+  }, [settings.setupCompleted, navigate])
 
   if (!isConfigured) {
     return <WelcomePage />
@@ -43,7 +45,7 @@ function AppContent() {
       />
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <main>
+      <main className="pb-16">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/settings" element={<SettingsPage />} />
