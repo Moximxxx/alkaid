@@ -37,7 +37,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Toolbar
         theme={theme}
         onThemeToggle={toggleTheme}
@@ -45,7 +45,7 @@ function AppContent() {
       />
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <main className="pb-16">
+      <main className="flex-1 flex flex-col overflow-hidden">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/settings" element={<SettingsPage />} />
