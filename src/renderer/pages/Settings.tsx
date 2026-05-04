@@ -70,6 +70,7 @@ export function SettingsPage() {
   const { settings, updateSettings, resetSettings } = useSettings()
   const [localSettings, setLocalSettings] = useState<Settings>(settings)
   const [activeTab, setActiveTab] = useState("ai")
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   useEffect(() => {
     setLocalSettings(settings)
@@ -85,6 +86,8 @@ export function SettingsPage() {
 
   const handleSave = () => {
     updateSettings(localSettings)
+    setSaveSuccess(true)
+    setTimeout(() => setSaveSuccess(false), 3000)
   }
 
   const handleReset = () => {
@@ -198,11 +201,14 @@ export function SettingsPage() {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-4">
+              <div className="flex gap-4 items-center">
                 <Button onClick={handleSave}>
                   <Save className="w-4 h-4 mr-2" />
                   保存设置
                 </Button>
+                {saveSuccess && (
+                  <span className="text-green-500 text-sm">保存成功</span>
+                )}
                 <Button variant="outline" onClick={handleReset}>
                   <RotateCcw className="w-4 h-4 mr-2" />
                   重置

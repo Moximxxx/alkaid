@@ -61,7 +61,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-screen">
       {/* Chat Area */}
       <div
         ref={chatContainerRef}
@@ -105,7 +105,7 @@ export function HomePage() {
       </div>
 
       {/* Input Area */}
-      <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex-shrink-0">
         <div className="max-w-3xl mx-auto px-4 py-4">
           <div className="flex gap-2 items-end">
             <Link to="/video-chat" className="flex-shrink-0">
