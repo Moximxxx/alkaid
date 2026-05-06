@@ -99,14 +99,23 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
       console.log('[AI] LangChain stream started')
       const stream = await llm.stream(langchainMessages)
       for await (const chunk of stream) {
+        console.log('[AI] Chunk:', JSON.stringify(chunk))
+        console.log('[AI] Chunk content type:', typeof chunk.content)
+        console.log('[AI] Chunk content:', chunk.content)
+
+        if (chunk.content && typeof chunk.content === 'object') {
+          console.log('[AI] Chunk is object, keys:', Object.keys(chunk.content))
+        }
+
         if (firstChunk) {
           firstChunk = false
-          console.log('[AI] First token received')
+          console.log('[AI] First token callback')
           onFirstToken?.()
         }
         const content = typeof chunk.content === 'string' ? chunk.content : ''
         if (content) {
           assistantMsg.content += content
+          console.log('[AI] Updated content:', assistantMsg.content.substring(0, 50))
           messageUpdateCallback?.([...messages])
         }
       }
