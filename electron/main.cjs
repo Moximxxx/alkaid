@@ -133,7 +133,17 @@ function startProxyServer() {
   isProxyServerRunning = true
 
   const server = http.createServer(async (req, res) => {
+    if (req.method === 'OPTIONS' && req.url === '/api/ai/chat') {
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+      res.end()
+      return
+    }
     if (req.method === 'POST' && req.url === '/api/ai/chat') {
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
       let body = ''
       req.on('data', chunk => { body += chunk })
       req.on('end', async () => {
