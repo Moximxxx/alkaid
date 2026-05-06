@@ -70,16 +70,6 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
         throw new Error(`请设置 ${config.apiKeyEnv} 环境变量`)
       }
 
-      const userMsg: ChatMessage = {
-        id: `${Date.now()}`,
-        role: 'user',
-        content,
-        image,
-        timestamp: Date.now(),
-      }
-      messages.push(userMsg)
-      messageUpdateCallback?.([...messages])
-
       const assistantMsg: ChatMessage = {
         id: streamingId || `${Date.now()}-assistant`,
         role: 'assistant',
