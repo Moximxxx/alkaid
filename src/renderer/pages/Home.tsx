@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, KeyboardEvent } from "react"
 import { Link } from "react-router-dom"
-import { Send, Settings, Video, User, Loader2 } from "lucide-react"
+import { Send, Settings, Video, User, Loader2, Bot } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -15,7 +15,7 @@ interface Message {
 
 export function HomePage() {
   const { settings } = useSettings()
-  const { messages: aiMessages, loading, sendMessage } = useAI({
+  const { messages: aiMessages, loading, sendMessage, setMessageUpdateCallback } = useAI({
     provider: settings.textProvider,
     apiKey: settings.textApiKey,
     model: settings.textModel,
@@ -40,20 +40,18 @@ export function HomePage() {
   }, [messages])
 
   useEffect(() => {
-    if (aiMessages.length > messages.length) {
-      const newMessages = aiMessages.slice(messages.length)
-      const assistantMessages = newMessages
-        .filter((m) => m.role === "assistant")
-        .map((m) => ({
-          id: m.id,
-          role: m.role as "user" | "assistant",
-          content: m.content,
-        }))
-      if (assistantMessages.length > 0) {
-        setMessages((prev) => [...prev, ...assistantMessages])
+    setMessageUpdateCallback((msgs) => {
+      for (const msg of msgs) {
+        setMessages((prev) => {
+          const exists = prev.some((m) => m.id === msg.id)
+          if (exists) {
+            return prev.map((m) => (m.id === msg.id ? { ...m, content: msg.content } : m))
+          }
+          return [...prev, { id: msg.id, role: msg.role as "user" | "assistant", content: msg.content }]
+        })
       }
-    }
-  }, [aiMessages, messages.length])
+    })
+  }, [setMessageUpdateCallback])
 
   const handleSend = async () => {
     if (!input.trim()) return
@@ -101,8 +99,9 @@ export function HomePage() {
             >
               {message.role === "assistant" && (
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="/avatar.png" />
-                  <AvatarFallback>AI</AvatarFallback>
+                  <AvatarFallback>
+                    <Bot className="h-4 w-4" />
+                  </AvatarFallback>
                 </Avatar>
               )}
               <div
@@ -116,7 +115,6 @@ export function HomePage() {
               </div>
               {message.role === "user" && (
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="/user-avatar.png" />
                   <AvatarFallback>
                     <User className="h-4 w-4" />
                   </AvatarFallback>
@@ -141,7 +139,8 @@ export function HomePage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="输入消息..."
+              placeholder={loading ? "等待AI回复..." : "输入消息..."}
+              disabled={loading}
               className="flex-1 min-h-[40px] max-h-[120px] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               rows={1}
             />

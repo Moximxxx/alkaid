@@ -100,6 +100,9 @@ export const VISION_MODELS = [
   { value: "doubao-1.5-thinking-vision-pro", label: "豆包 1.5 视觉思考" },
 ]
 
+// System Prompt
+export const SYSTEM_PROMPT = '你是一个能够理解和分析图像的AI助手。请用中文回复。'
+
 // 图像识别服务列表
 export const VISION_SERVICES = {
   azure: {

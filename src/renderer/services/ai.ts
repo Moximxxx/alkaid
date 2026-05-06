@@ -1,6 +1,7 @@
 // AI对话服务 - 渲染进程版本
 
 import type { ChatMessage } from '@shared/types'
+import { SYSTEM_PROMPT } from '@shared/constants'
 
 export interface UseAIReturn {
   messages: ChatMessage[]
@@ -8,6 +9,7 @@ export interface UseAIReturn {
   error: string | null
   sendMessage: (content: string, image?: string) => Promise<void>
   clearMessages: () => void
+  setMessageUpdateCallback: (callback: (msgs: ChatMessage[]) => void) => void
 }
 
 const PROVIDER_CONFIGS: Record<string, { baseUrl: string; apiKeyEnv: string }> = {
@@ -54,54 +56,95 @@ interface UseAIOptions {
 export const useAI = (options: UseAIOptions): UseAIReturn => {
   const { provider, apiKey: externalApiKey, model } = options
   const messages: ChatMessage[] = []
+    let messageUpdateCallback: ((msgs: ChatMessage[]) => void) | null = null
 
-  const sendMessage = async (content: string, image?: string): Promise<void> => {
-    const config = PROVIDER_CONFIGS[provider]
-    if (!config) {
-      throw new Error(`不支持的 provider: ${provider}`)
+    const sendMessage = async (content: string, image?: string): Promise<void> => {
+      const config = PROVIDER_CONFIGS[provider]
+      if (!config) {
+        throw new Error(`不支持的 provider: ${provider}`)
+      }
+
+      const apiKey = externalApiKey || import.meta.env[config.apiKeyEnv]
+      if (!apiKey) {
+        throw new Error(`请设置 ${config.apiKeyEnv} 环境变量`)
+      }
+
+      const userMsg: ChatMessage = {
+        id: `${Date.now()}`,
+        role: 'user',
+        content,
+        image,
+        timestamp: Date.now(),
+      }
+      messages.push(userMsg)
+      messageUpdateCallback?.([...messages])
+
+      const assistantMsg: ChatMessage = {
+        id: `${Date.now()}-assistant`,
+        role: 'assistant',
+        content: '',
+        timestamp: Date.now(),
+      }
+      messages.push(assistantMsg)
+
+      const msgs = buildMessages(content, image, provider)
+      const response = await fetch(`${config.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+          ...(provider === 'claude' ? { 'anthropic-version': '2023-06-01' } : {}),
+        },
+        body: JSON.stringify({
+          model,
+          messages: msgs,
+          max_tokens: 1024,
+          stream: true,
+          ...(provider === 'claude' ? { max_tokens_to_sample: 1024 } : {}),
+        }),
+      })
+
+      if (!response.ok) {
+        const err = await response.text()
+        throw new Error(`API 错误: ${response.status} - ${err}`)
+      }
+
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error('无法读取响应流')
+      }
+
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6)
+            if (data === '[DONE]') continue
+            try {
+              const parsed = JSON.parse(data)
+              const content = parsed.choices?.[0]?.delta?.content
+              if (content) {
+                assistantMsg.content += content
+                messageUpdateCallback?.([...messages])
+              }
+            } catch {}
+          }
+        }
+      }
     }
 
-    const apiKey = externalApiKey || import.meta.env[config.apiKeyEnv]
-    if (!apiKey) {
-      throw new Error(`请设置 ${config.apiKeyEnv} 环境变量`)
+    const setMessageUpdateCallback = (callback: (msgs: ChatMessage[]) => void) => {
+      messageUpdateCallback = callback
     }
-
-    const msgs = buildMessages(content, image, provider)
-    const response = await fetch(`${config.baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        ...(provider === 'claude' ? { 'anthropic-version': '2023-06-01' } : {}),
-      },
-      body: JSON.stringify({
-        model,
-        messages: msgs,
-        max_tokens: 1024,
-        ...(provider === 'claude' ? { max_tokens_to_sample: 1024 } : {}),
-      }),
-    })
-
-    if (!response.ok) {
-      const err = await response.text()
-      throw new Error(`API 错误: ${response.status} - ${err}`)
-    }
-
-    const data = await response.json()
-    messages.push({
-      id: `${Date.now()}`,
-      role: 'user',
-      content,
-      image,
-      timestamp: Date.now(),
-    })
-    messages.push({
-      id: `${Date.now()}-assistant`,
-      role: 'assistant',
-      content: data.choices[0].message.content,
-      timestamp: Date.now(),
-    })
-  }
 
   const clearMessages = () => {
     messages.length = 0
@@ -113,12 +156,13 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
     error: null,
     sendMessage,
     clearMessages,
+    setMessageUpdateCallback,
   }
 }
 
 function buildMessages(content: string, image?: string, provider?: string) {
   const msgs: any[] = [
-    { role: 'system', content: '你是一个有用的AI助手，请用中文回复。' },
+    { role: 'system', content: SYSTEM_PROMPT },
   ]
 
   if (image) {
