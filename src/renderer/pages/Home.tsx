@@ -79,7 +79,7 @@ export function HomePage() {
     setInput("")
 
     try {
-      await sendMessage(contentToSend)
+      await sendMessage(contentToSend, undefined, tempLoadingId)
     } catch (error) {
       setMessages((prev) => prev.filter((m) => m.id !== tempLoadingId))
       const errorMessage: Message = {

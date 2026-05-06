@@ -7,7 +7,7 @@ export interface UseAIReturn {
   messages: ChatMessage[]
   loading: boolean
   error: string | null
-  sendMessage: (content: string, image?: string) => Promise<void>
+  sendMessage: (content: string, image?: string, streamingId?: string) => Promise<void>
   clearMessages: () => void
   setMessageUpdateCallback: (callback: (msgs: ChatMessage[]) => void) => void
 }
@@ -59,7 +59,7 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
   const messages: ChatMessage[] = []
     let messageUpdateCallback: ((msgs: ChatMessage[]) => void) | null = null
 
-    const sendMessage = async (content: string, image?: string): Promise<void> => {
+    const sendMessage = async (content: string, image?: string, streamingId?: string): Promise<void> => {
       const config = PROVIDER_CONFIGS[provider]
       if (!config) {
         throw new Error(`不支持的 provider: ${provider}`)
@@ -81,7 +81,7 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
       messageUpdateCallback?.([...messages])
 
       const assistantMsg: ChatMessage = {
-        id: `${Date.now()}-assistant`,
+        id: streamingId || `${Date.now()}-assistant`,
         role: 'assistant',
         content: '',
         timestamp: Date.now(),
