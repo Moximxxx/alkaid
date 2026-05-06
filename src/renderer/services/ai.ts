@@ -84,8 +84,6 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
 
     const langchainMessages = buildLangChainMessages(content, image, provider)
 
-    let firstChunk = true
-
     const llm = new ChatOpenAI({
       model,
       apiKey,
@@ -96,12 +94,22 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
     })
 
     try {
-      console.log('[AI] LangChain stream started')
+      console.log('[AI] LangChain stream starting...')
       const stream = await llm.stream(langchainMessages)
+      console.log('[AI] Stream object type:', typeof stream, stream?.constructor?.name)
+      
+      if (!stream) {
+        console.error('[AI] Stream is null/undefined!')
+        throw new Error('Stream is null')
+      }
+      
+      let firstChunk = true
       for await (const chunk of stream) {
-        console.log('[AI] Chunk:', JSON.stringify(chunk))
-        console.log('[AI] Chunk content type:', typeof chunk.content)
+        console.log('[AI] ===== CHUNK RECEIVED =====')
+        console.log('[AI] Chunk type:', typeof chunk)
+        console.log('[AI] Chunk:', chunk)
         console.log('[AI] Chunk content:', chunk.content)
+        console.log('[AI] Chunk content type:', typeof chunk.content)
 
         if (chunk.content && typeof chunk.content === 'object') {
           console.log('[AI] Chunk is object, keys:', Object.keys(chunk.content))
@@ -121,8 +129,9 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
       }
       console.log('[AI] Stream completed')
       onComplete?.()
-    } catch (error) {
-      console.error('[AI] LangChain error:', error)
+    } catch (error: unknown) {
+      console.error('[AI] Error:', error)
+      console.error('[AI] Error stack:', error instanceof Error ? error.stack : 'N/A')
       throw error
     }
   }
