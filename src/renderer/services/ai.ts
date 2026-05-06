@@ -96,7 +96,13 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
           ...(provider === 'claude' ? { max_tokens_to_sample: 1024 } : {}),
         }),
       })
-      console.log('[AI] API request body:', { messages: msgs })
+      console.log('[AI] API request body:', JSON.stringify({
+        model,
+        messages: msgs,
+        max_tokens: 1024,
+        stream: true,
+        ...(provider === 'claude' ? { max_tokens_to_sample: 1024 } : {}),
+      }))
 
       if (!response.ok) {
         const err = await response.text()
@@ -128,7 +134,11 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
             if (data === '[DONE]') continue
             try {
               const parsed = JSON.parse(data)
-              const content = parsed.choices?.[0]?.delta?.content || parsed.choices?.[0]?.text
+              const deltaContent = parsed.choices?.[0]?.delta?.content
+              const textContent = parsed.choices?.[0]?.text
+              const messageContent = parsed.choices?.[0]?.message?.content
+              const content = deltaContent || textContent || messageContent
+              console.log('[AI] Parsed content:', { deltaContent, textContent, messageContent, content, finish_reason: parsed.choices?.[0]?.finish_reason })
               if (content) {
                 if (!firstTokenCalled) {
                   firstTokenCalled = true

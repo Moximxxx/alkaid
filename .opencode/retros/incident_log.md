@@ -45,8 +45,8 @@
 - **日期**：2026-05-06
 - **类型**：调试耗时
 - **现象**：请求已正确设置 `stream: true`，但API返回完整JSON响应而非SSE流式格式
-- **根因**：待分析（可能是minimax API兼容性问题或请求体格式不匹配）
-- **修复**：待跟进验证
+- **根因**：minimax API 响应格式与标准 OpenAI 兼容格式存在差异，使用 `choices[0].text` 而非 `choices[0].delta.content`
+- **修复**：同时支持 `delta.content`、`text`、`message.content` 三个字段，取第一个有值的字段
 - **约束引用**：无
-- **复盘结论**：NO_ACTION（调试观察，待深入分析后再评估）
+- **复盘结论**：NO_ACTION（问题已正确修复，记录经验教训即可）
 
