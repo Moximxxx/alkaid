@@ -97,11 +97,17 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const data = line.slice(6)
+            console.log('[AI] Raw line:', line)
             if (data === '[DONE]') continue
 
             try {
               const parsed = JSON.parse(data)
-              const content = parsed.choices?.[0]?.delta?.content || parsed.choices?.[0]?.text || ''
+              console.log('[AI] Parsed:', JSON.stringify(parsed).substring(0, 200))
+              const content = parsed.choices?.[0]?.delta?.content
+                           || parsed.choices?.[0]?.text
+                           || parsed.choices?.[0]?.message?.content
+                           || ''
+              console.log('[AI] Extracted content:', content.substring(0, 50))
 
               if (firstChunk && content) {
                 firstChunk = false
@@ -113,7 +119,7 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
                 messageUpdateCallback?.([...messages])
               }
             } catch (e) {
-              // Skip invalid JSON
+              console.log('[AI] JSON parse error:', e)
             }
           }
         }

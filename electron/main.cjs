@@ -172,7 +172,10 @@ function startProxyServer() {
             res.setHeader('Content-Type', 'text/event-stream')
             res.setHeader('Cache-Control', 'no-cache')
             res.setHeader('Connection', 'keep-alive')
+            console.log('[Proxy] Upstream status:', upstream.status)
+            console.log('[Proxy] Upstream body type:', typeof upstream.body)
             for await (const chunk of upstream.body) {
+              console.log('[Proxy] Forwarding chunk:', chunk.toString().substring(0, 100))
               res.write(chunk)
             }
             res.end()
