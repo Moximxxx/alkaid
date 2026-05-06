@@ -11,14 +11,17 @@ interface Message {
   id: string
   role: "user" | "assistant"
   content: string
+  isLoading?: boolean
 }
 
 export function HomePage() {
   const { settings } = useSettings()
+  const [streamingId, setStreamingId] = useState<string | null>(null)
   const { messages: aiMessages, loading, sendMessage, setMessageUpdateCallback } = useAI({
     provider: settings.textProvider,
     apiKey: settings.textApiKey,
     model: settings.textModel,
+    onFirstToken: () => setStreamingId(null),
   })
 
   const [messages, setMessages] = useState<Message[]>([
@@ -62,13 +65,23 @@ export function HomePage() {
       content: input.trim(),
     }
 
-    setMessages((prev) => [...prev, userMessage])
+    const tempLoadingId = `loading-${Date.now()}`
+    const loadingMessage: Message = {
+      id: tempLoadingId,
+      role: "assistant",
+      content: "",
+      isLoading: true,
+    }
+
+    setMessages((prev) => [...prev, userMessage, loadingMessage])
+    setStreamingId(tempLoadingId)
     const contentToSend = input.trim()
     setInput("")
 
     try {
       await sendMessage(contentToSend)
     } catch (error) {
+      setMessages((prev) => prev.filter((m) => m.id !== tempLoadingId))
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -111,7 +124,14 @@ export function HomePage() {
                     : "bg-muted"
                 }`}
               >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                {message.isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm text-muted-foreground">思考中...</span>
+                  </div>
+                ) : (
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                )}
               </div>
               {message.role === "user" && (
                 <Avatar className="h-8 w-8">

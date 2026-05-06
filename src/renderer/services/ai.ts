@@ -51,10 +51,11 @@ interface UseAIOptions {
   provider: string
   apiKey?: string
   model: string
+  onFirstToken?: () => void
 }
 
 export const useAI = (options: UseAIOptions): UseAIReturn => {
-  const { provider, apiKey: externalApiKey, model } = options
+  const { provider, apiKey: externalApiKey, model, onFirstToken } = options
   const messages: ChatMessage[] = []
     let messageUpdateCallback: ((msgs: ChatMessage[]) => void) | null = null
 
@@ -116,6 +117,7 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
 
       const decoder = new TextDecoder()
       let buffer = ''
+      let firstTokenCalled = false
 
       while (true) {
         const { done, value } = await reader.read()
@@ -133,6 +135,10 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
               const parsed = JSON.parse(data)
               const content = parsed.choices?.[0]?.delta?.content
               if (content) {
+                if (!firstTokenCalled) {
+                  firstTokenCalled = true
+                  onFirstToken?.()
+                }
                 assistantMsg.content += content
                 messageUpdateCallback?.([...messages])
               }
