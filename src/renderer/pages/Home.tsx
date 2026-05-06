@@ -109,10 +109,19 @@ export function HomePage() {
     }
   }
 
+  useEffect(() => {
+    console.log('[Home] Messages container debug:', {
+      scrollHeight: messagesEndRef.current?.parentElement?.scrollHeight,
+      scrollTop: messagesEndRef.current?.parentElement?.scrollTop,
+      clientHeight: messagesEndRef.current?.parentElement?.clientHeight,
+      offsetHeight: messagesEndRef.current?.parentElement?.offsetHeight,
+    })
+  }, [messages])
+
   return (
     <div className="flex flex-col" style={{ height: "calc(100vh - 64px)" }}>
       {/* Chat Area - 占满剩余空间 */}
-      <div className="flex-1 overflow-hidden px-4 py-6">
+      <div className="flex-1 px-4 py-6 min-h-0">
         <div className="h-full overflow-y-auto space-y-6">
           {messages.map((message) => (
             <div
