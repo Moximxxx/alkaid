@@ -1,5 +1,7 @@
-// AI对话服务 - 渲染进程版本
+// AI对话服务 - 渲染进程版本 (LangChain)
 
+import { ChatOpenAI } from '@langchain/openai'
+import { HumanMessage, SystemMessage, BaseMessage } from '@langchain/core/messages'
 import type { ChatMessage } from '@shared/types'
 import { SYSTEM_PROMPT } from '@shared/constants'
 
@@ -58,110 +60,67 @@ interface UseAIOptions {
 export const useAI = (options: UseAIOptions): UseAIReturn => {
   const { provider, apiKey: externalApiKey, model, onFirstToken, onComplete } = options
   const messages: ChatMessage[] = []
-    let messageUpdateCallback: ((msgs: ChatMessage[]) => void) | null = null
+  let messageUpdateCallback: ((msgs: ChatMessage[]) => void) | null = null
 
-    const sendMessage = async (content: string, image?: string, streamingId?: string): Promise<void> => {
-      console.log('[AI] sendMessage called', { provider, model, streamingId })
-      const config = PROVIDER_CONFIGS[provider]
-      if (!config) {
-        throw new Error(`不支持的 provider: ${provider}`)
-      }
+  const sendMessage = async (content: string, image?: string, streamingId?: string): Promise<void> => {
+    console.log('[AI] sendMessage called', { provider, model, streamingId })
+    const config = PROVIDER_CONFIGS[provider]
+    if (!config) {
+      throw new Error(`不支持的 provider: ${provider}`)
+    }
 
-      const apiKey = externalApiKey || import.meta.env[config.apiKeyEnv]
-      if (!apiKey) {
-        throw new Error(`请设置 ${config.apiKeyEnv} 环境变量`)
-      }
+    const apiKey = externalApiKey || import.meta.env[config.apiKeyEnv]
+    if (!apiKey) {
+      throw new Error(`请设置 ${config.apiKeyEnv} 环境变量`)
+    }
 
-      const assistantMsg: ChatMessage = {
-        id: streamingId || `${Date.now()}-assistant`,
-        role: 'assistant',
-        content: '',
-        timestamp: Date.now(),
-      }
-      messages.push(assistantMsg)
+    const assistantMsg: ChatMessage = {
+      id: streamingId || `${Date.now()}-assistant`,
+      role: 'assistant',
+      content: '',
+      timestamp: Date.now(),
+    }
+    messages.push(assistantMsg)
 
-      const msgs = buildMessages(content, image, provider)
-      const response = await fetch(`${config.baseUrl}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-          ...(provider === 'claude' ? { 'anthropic-version': '2023-06-01' } : {}),
-        },
-        body: JSON.stringify({
-          model,
-          messages: msgs,
-          max_tokens: 1024,
-          stream: true,
-          ...(provider === 'claude' ? { max_tokens_to_sample: 1024 } : {}),
-        }),
-      })
-      console.log('[AI] API request body:', JSON.stringify({
-        model,
-        messages: msgs,
-        max_tokens: 1024,
-        stream: true,
-        ...(provider === 'claude' ? { max_tokens_to_sample: 1024 } : {}),
-      }))
+    const langchainMessages = buildLangChainMessages(content, image, provider)
 
-      if (!response.ok) {
-        const err = await response.text()
-        throw new Error(`API 错误: ${response.status} - ${err}`)
-      }
+    let firstChunk = true
 
-      const reader = response.body?.getReader()
-      if (!reader) {
-        throw new Error('无法读取响应流')
-      }
+    const llm = new ChatOpenAI({
+      model,
+      apiKey,
+      streaming: true,
+      configuration: {
+        baseURL: config.baseUrl,
+      },
+    })
 
-      const decoder = new TextDecoder()
-      let buffer = ''
-      let firstTokenCalled = false
-
-      console.log('[AI] Stream started')
-      while (true) {
-        const { done, value } = await reader.read()
-        console.log('[AI] Chunk received:', { done, value: decoder.decode(value, { stream: false }) })
-        if (done) break
-
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || ''
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6)
-            if (data === '[DONE]') continue
-            try {
-              const parsed = JSON.parse(data)
-              const deltaContent = parsed.choices?.[0]?.delta?.content
-              const textContent = parsed.choices?.[0]?.text
-              const messageContent = parsed.choices?.[0]?.message?.content
-              const content = deltaContent || textContent || messageContent
-              console.log('[AI] Parsed content:', { deltaContent, textContent, messageContent, content, finish_reason: parsed.choices?.[0]?.finish_reason })
-              if (content) {
-                if (!firstTokenCalled) {
-                  firstTokenCalled = true
-                  console.log('[AI] onFirstToken called')
-                  onFirstToken?.()
-                }
-                assistantMsg.content += content
-                messageUpdateCallback?.([...messages])
-              }
-            } catch (e) {
-              console.error('流式解析错误:', e, '原始数据:', data)
-              console.log('[AI] Error:', e)
-            }
-          }
+    try {
+      console.log('[AI] LangChain stream started')
+      const stream = await llm.stream(langchainMessages)
+      for await (const chunk of stream) {
+        if (firstChunk) {
+          firstChunk = false
+          console.log('[AI] First token received')
+          onFirstToken?.()
+        }
+        const content = typeof chunk.content === 'string' ? chunk.content : ''
+        if (content) {
+          assistantMsg.content += content
+          messageUpdateCallback?.([...messages])
         }
       }
-      console.log('[AI] onComplete called')
+      console.log('[AI] Stream completed')
       onComplete?.()
+    } catch (error) {
+      console.error('[AI] LangChain error:', error)
+      throw error
     }
+  }
 
-    const setMessageUpdateCallback = (callback: (msgs: ChatMessage[]) => void) => {
-      messageUpdateCallback = callback
-    }
+  const setMessageUpdateCallback = (callback: (msgs: ChatMessage[]) => void) => {
+    messageUpdateCallback = callback
+  }
 
   const clearMessages = () => {
     messages.length = 0
@@ -177,31 +136,33 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
   }
 }
 
-function buildMessages(content: string, image?: string, provider?: string) {
-  const msgs: any[] = [
-    { role: 'system', content: SYSTEM_PROMPT },
+function buildLangChainMessages(content: string, image?: string, provider?: string): BaseMessage[] {
+  const msgs: BaseMessage[] = [
+    new SystemMessage(SYSTEM_PROMPT),
   ]
 
   if (image) {
     if (provider === 'claude') {
-      msgs.push({
-        role: 'user',
-        content: [
-          { type: 'text', text: content },
-          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: image.split(',')[1] } },
-        ],
-      })
+      msgs.push(
+        new HumanMessage({
+          content: [
+            { type: 'text', text: content },
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: image.split(',')[1] } },
+          ],
+        })
+      )
     } else {
-      msgs.push({
-        role: 'user',
-        content: [
-          { type: 'text', text: content },
-          { type: 'image_url', image_url: { url: image } },
-        ],
-      })
+      msgs.push(
+        new HumanMessage({
+          content: [
+            { type: 'text', text: content },
+            { type: 'image_url', image_url: { url: image } },
+          ],
+        })
+      )
     }
   } else {
-    msgs.push({ role: 'user', content })
+    msgs.push(new HumanMessage(content))
   }
 
   return msgs
