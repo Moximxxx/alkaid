@@ -1,7 +1,5 @@
-// AI对话服务 - 渲染进程版本 (LangChain)
+// AI对话服务 - 渲染进程版本 (通过Electron主进程代理)
 
-import { ChatOpenAI } from '@langchain/openai'
-import { HumanMessage, SystemMessage, BaseMessage } from '@langchain/core/messages'
 import type { ChatMessage } from '@shared/types'
 import { SYSTEM_PROMPT } from '@shared/constants'
 
@@ -14,39 +12,15 @@ export interface UseAIReturn {
   setMessageUpdateCallback: (callback: (msgs: ChatMessage[]) => void) => void
 }
 
-const PROVIDER_CONFIGS: Record<string, { baseUrl: string; apiKeyEnv: string }> = {
-  doubao: {
-    baseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
-    apiKeyEnv: 'VITE_DOUBAO_API_KEY',
-  },
-  openai: {
-    baseUrl: 'https://api.openai.com/v1',
-    apiKeyEnv: 'VITE_OPENAI_API_KEY',
-  },
-  glm: {
-    baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
-    apiKeyEnv: 'VITE_GLM_API_KEY',
-  },
-  minimax: {
-    baseUrl: 'https://api.minimax.chat/v1',
-    apiKeyEnv: 'VITE_MINIMAX_API_KEY',
-  },
-  xiaomi: {
-    baseUrl: 'https://api.mimo.minimax.io/v1',
-    apiKeyEnv: 'VITE_XIAOMI_API_KEY',
-  },
-  kimi: {
-    baseUrl: 'https://api.moonshot.cn/v1',
-    apiKeyEnv: 'VITE_KIMI_API_KEY',
-  },
-  deepseek: {
-    baseUrl: 'https://api.deepseek.com/v1',
-    apiKeyEnv: 'VITE_DEEPSEEK_API_KEY',
-  },
-  claude: {
-    baseUrl: 'https://api.anthropic.com/v1',
-    apiKeyEnv: 'VITE_CLAUDE_API_KEY',
-  },
+const PROVIDER_CONFIGS: Record<string, { apiKeyEnv: string }> = {
+  doubao: { apiKeyEnv: 'VITE_DOUBAO_API_KEY' },
+  openai: { apiKeyEnv: 'VITE_OPENAI_API_KEY' },
+  glm: { apiKeyEnv: 'VITE_GLM_API_KEY' },
+  minimax: { apiKeyEnv: 'VITE_MINIMAX_API_KEY' },
+  xiaomi: { apiKeyEnv: 'VITE_XIAOMI_API_KEY' },
+  kimi: { apiKeyEnv: 'VITE_KIMI_API_KEY' },
+  deepseek: { apiKeyEnv: 'VITE_DEEPSEEK_API_KEY' },
+  claude: { apiKeyEnv: 'VITE_CLAUDE_API_KEY' },
 }
 
 interface UseAIOptions {
@@ -82,51 +56,69 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
     }
     messages.push(assistantMsg)
 
-    const langchainMessages = buildLangChainMessages(content, image, provider)
-
-    const llm = new ChatOpenAI({
-      model,
-      apiKey,
-      streaming: true,
-      configuration: {
-        baseURL: config.baseUrl,
-      },
-    })
+    const apiMessages = buildAPIMessages(content, image, provider)
 
     try {
-      console.log('[AI] LangChain stream starting...')
-      const stream = await llm.stream(langchainMessages)
-      console.log('[AI] Stream object type:', typeof stream, stream?.constructor?.name)
-      
-      if (!stream) {
-        console.error('[AI] Stream is null/undefined!')
-        throw new Error('Stream is null')
+      console.log('[AI] Fetching via proxy...')
+      const response = await fetch('http://localhost:3000/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider,
+          model,
+          messages: apiMessages,
+          apiKey,
+          stream: true,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(error.error || `HTTP ${response.status}`)
       }
-      
+
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error('No response body')
+      }
+
+      const decoder = new TextDecoder()
       let firstChunk = true
-      for await (const chunk of stream) {
-        console.log('[AI] ===== CHUNK RECEIVED =====')
-        console.log('[AI] Chunk type:', typeof chunk)
-        console.log('[AI] Chunk:', chunk)
-        console.log('[AI] Chunk content:', chunk.content)
-        console.log('[AI] Chunk content type:', typeof chunk.content)
+      let buffer = ''
 
-        if (chunk.content && typeof chunk.content === 'object') {
-          console.log('[AI] Chunk is object, keys:', Object.keys(chunk.content))
-        }
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
 
-        if (firstChunk) {
-          firstChunk = false
-          console.log('[AI] First token callback')
-          onFirstToken?.()
-        }
-        const content = typeof chunk.content === 'string' ? chunk.content : ''
-        if (content) {
-          assistantMsg.content += content
-          console.log('[AI] Updated content:', assistantMsg.content.substring(0, 50))
-          messageUpdateCallback?.([...messages])
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6)
+            if (data === '[DONE]') continue
+
+            try {
+              const parsed = JSON.parse(data)
+              const content = parsed.choices?.[0]?.delta?.content || parsed.choices?.[0]?.text || ''
+
+              if (firstChunk && content) {
+                firstChunk = false
+                onFirstToken?.()
+              }
+
+              if (content) {
+                assistantMsg.content += content
+                messageUpdateCallback?.([...messages])
+              }
+            } catch (e) {
+              // Skip invalid JSON
+            }
+          }
         }
       }
+
       console.log('[AI] Stream completed')
       onComplete?.()
     } catch (error: unknown) {
@@ -154,33 +146,31 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
   }
 }
 
-function buildLangChainMessages(content: string, image?: string, provider?: string): BaseMessage[] {
-  const msgs: BaseMessage[] = [
-    new SystemMessage(SYSTEM_PROMPT),
+function buildAPIMessages(content: string, image?: string, provider?: string) {
+  const msgs: any[] = [
+    { role: 'system', content: SYSTEM_PROMPT },
   ]
 
   if (image) {
     if (provider === 'claude') {
-      msgs.push(
-        new HumanMessage({
-          content: [
-            { type: 'text', text: content },
-            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: image.split(',')[1] } },
-          ],
-        })
-      )
+      msgs.push({
+        role: 'user',
+        content: [
+          { type: 'text', text: content },
+          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: image.split(',')[1] } },
+        ],
+      })
     } else {
-      msgs.push(
-        new HumanMessage({
-          content: [
-            { type: 'text', text: content },
-            { type: 'image_url', image_url: { url: image } },
-          ],
-        })
-      )
+      msgs.push({
+        role: 'user',
+        content: [
+          { type: 'text', text: content },
+          { type: 'image_url', image_url: { url: image } },
+        ],
+      })
     }
   } else {
-    msgs.push(new HumanMessage(content))
+    msgs.push({ role: 'user', content })
   }
 
   return msgs
