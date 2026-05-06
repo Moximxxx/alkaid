@@ -236,6 +236,27 @@ bun run typecheck
 
 **违规**：无合同或超范围修改直接拒绝。
 
+### R-10: Contract-Format（合同格式）
+
+任务合同必须使用 JSON 格式，参考 `.opencode/contracts/example_contract.json`：
+
+```json
+{
+  "task_id": "xxx",
+  "timestamp": 1234567890,
+  "goal": "任务目标",
+  "files_to_modify": ["file1.ts", "file2.ts"],
+  "constraints": ["约束引用"],
+  "verification": ["验证方式"],
+  "status": "active"
+}
+```
+
+**合同状态流转**：
+- `active`: 执行中
+- `completed`: 已完成
+- `template`: 模板
+
 ### R-9: Network-Search-Timestamp（网络搜索时间戳）
 
 **强制要求**：进行网络搜索前**必须**先获取当前动态时间。
@@ -392,6 +413,7 @@ bun run typecheck
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
+| v6.0.0 | 2026-05-06 | 更新合同规范为 JSON 格式，添加 R-10 合同格式规则 |
 | v5.0.0 | 2026-05-03 | 添加 R-9 网络搜索必须先获取动态时间戳规则 |
 | v4.0.0 | 2026-05-03 | 强制完整工作流：每个任务必须执行 Retro 复盘 |
 | v3.0.0 | 2026-05-03 | 严格角色边界：Coordinator 不写代码，Builder 不改源码，Crash-Doctor 只分析 |

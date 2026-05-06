@@ -33,15 +33,26 @@ permission:
 
 ## 交接合同
 
-每个子任务委派时必须明确以下信息：
+每个子任务委派时必须使用 JSON 格式合同：
 
+```json
+{
+  "task_id": "任务唯一标识，格式 {任务类型}-{序号} 如 H1-H4-001",
+  "timestamp": 1234567890,
+  "goal": "任务目标描述",
+  "files_to_modify": ["file1.ts", "file2.ts"],
+  "constraints": ["约束引用，如 arch-layering, contract-mechanism"],
+  "verification": ["验证方式，如 verify_arch.sh"],
+  "status": "active"
+}
 ```
-### 任务合同
-- 目标：[做什么]
-- 修改文件：[哪些文件]
-- 约束引用：[约束文档中的规则编号]
-- 验证标准：[怎么算做好]
-```
+
+**合同状态流转**：
+- `active`: 执行中
+- `completed`: 已完成
+- `template`: 模板
+
+详细规范参考 `.opencode/contracts/example_contract.json`
 
 ## 工作区隔离
 
