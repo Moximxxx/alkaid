@@ -52,10 +52,11 @@ interface UseAIOptions {
   apiKey?: string
   model: string
   onFirstToken?: () => void
+  onComplete?: () => void
 }
 
 export const useAI = (options: UseAIOptions): UseAIReturn => {
-  const { provider, apiKey: externalApiKey, model, onFirstToken } = options
+  const { provider, apiKey: externalApiKey, model, onFirstToken, onComplete } = options
   const messages: ChatMessage[] = []
     let messageUpdateCallback: ((msgs: ChatMessage[]) => void) | null = null
 
@@ -123,7 +124,7 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
             if (data === '[DONE]') continue
             try {
               const parsed = JSON.parse(data)
-              const content = parsed.choices?.[0]?.delta?.content
+              const content = parsed.choices?.[0]?.delta?.content || parsed.choices?.[0]?.text
               if (content) {
                 if (!firstTokenCalled) {
                   firstTokenCalled = true
@@ -132,10 +133,13 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
                 assistantMsg.content += content
                 messageUpdateCallback?.([...messages])
               }
-            } catch {}
+            } catch (e) {
+              console.error('流式解析错误:', e, '原始数据:', data)
+            }
           }
         }
       }
+      onComplete?.()
     }
 
     const setMessageUpdateCallback = (callback: (msgs: ChatMessage[]) => void) => {

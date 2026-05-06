@@ -22,6 +22,7 @@ export function HomePage() {
     apiKey: settings.textApiKey,
     model: settings.textModel,
     onFirstToken: () => setStreamingId(null),
+    onComplete: () => setStreamingId(null),
   })
 
   const [messages, setMessages] = useState<Message[]>([
@@ -81,6 +82,7 @@ export function HomePage() {
     try {
       await sendMessage(contentToSend, undefined, tempLoadingId)
     } catch (error) {
+      setStreamingId(null)
       setMessages((prev) => prev.filter((m) => m.id !== tempLoadingId))
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
