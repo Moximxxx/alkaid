@@ -61,6 +61,7 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
     let messageUpdateCallback: ((msgs: ChatMessage[]) => void) | null = null
 
     const sendMessage = async (content: string, image?: string, streamingId?: string): Promise<void> => {
+      console.log('[AI] sendMessage called', { provider, model, streamingId })
       const config = PROVIDER_CONFIGS[provider]
       if (!config) {
         throw new Error(`不支持的 provider: ${provider}`)
@@ -95,6 +96,7 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
           ...(provider === 'claude' ? { max_tokens_to_sample: 1024 } : {}),
         }),
       })
+      console.log('[AI] API request body:', { messages: msgs })
 
       if (!response.ok) {
         const err = await response.text()
@@ -110,8 +112,10 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
       let buffer = ''
       let firstTokenCalled = false
 
+      console.log('[AI] Stream started')
       while (true) {
         const { done, value } = await reader.read()
+        console.log('[AI] Chunk received:', { done, value: decoder.decode(value, { stream: false }) })
         if (done) break
 
         buffer += decoder.decode(value, { stream: true })
@@ -128,6 +132,7 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
               if (content) {
                 if (!firstTokenCalled) {
                   firstTokenCalled = true
+                  console.log('[AI] onFirstToken called')
                   onFirstToken?.()
                 }
                 assistantMsg.content += content
@@ -135,10 +140,12 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
               }
             } catch (e) {
               console.error('流式解析错误:', e, '原始数据:', data)
+              console.log('[AI] Error:', e)
             }
           }
         }
       }
+      console.log('[AI] onComplete called')
       onComplete?.()
     }
 

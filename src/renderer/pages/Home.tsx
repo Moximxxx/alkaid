@@ -17,6 +17,7 @@ interface Message {
 export function HomePage() {
   const { settings } = useSettings()
   const [streamingId, setStreamingId] = useState<string | null>(null)
+  console.log('[Home] streamingId changed:', streamingId)
   const { messages: aiMessages, loading, sendMessage, setMessageUpdateCallback } = useAI({
     provider: settings.textProvider,
     apiKey: settings.textApiKey,
@@ -58,6 +59,7 @@ export function HomePage() {
   }, [setMessageUpdateCallback])
 
   const handleSend = async () => {
+    console.log('[Home] handleSend called', { content: input.trim() })
     if (!input.trim()) return
 
     const userMessage: Message = {
@@ -74,7 +76,9 @@ export function HomePage() {
       isLoading: true,
     }
 
+    console.log('[Home] handleSend called', { content: input.trim(), tempLoadingId })
     setMessages((prev) => [...prev, userMessage, loadingMessage])
+    console.log('[Home] Messages after send:', messages)
     setStreamingId(tempLoadingId)
     const contentToSend = input.trim()
     setInput("")

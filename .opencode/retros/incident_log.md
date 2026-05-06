@@ -30,3 +30,13 @@
 - **约束引用**：UPDATE_VERIFIER
 - **复盘结论**：NO_ACTION（P-01 约束本身已正确遵守，问题是验证脚本）
 
+### INC-2026-0506-001: Builder 验证未检测未提交源码
+
+- **日期**：2026-05-06
+- **类型**：验证漏检
+- **现象**：Builder 构建验证通过，但有未提交的源码变更（console.log 调试日志）
+- **根因**：verify_arch.sh 只检查架构约束和构建结果，未检查 git working tree 状态
+- **修复**：在 verify_arch.sh 中添加 `git status --porcelain` 检查，如有待提交源码变更则报告 WARNING
+- **约束引用**：UPDATE_VERIFIER
+- **复盘结论**：UPDATE_VERIFIER（验证脚本需要增加 git status 检查项）
+
