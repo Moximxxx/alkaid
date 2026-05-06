@@ -10,14 +10,7 @@ export interface UseAIReturn {
   clearMessages: () => void
 }
 
-const MODEL_CONFIG = {
-  provider: 'doubao_vision',
-  baseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
-  apiKey: import.meta.env.VITE_DOUBAO_API_KEY || '',
-  model: 'doubao-2.0-vision-pro',
-}
-
-const PROVIDER_CONFIGS = {
+const PROVIDER_CONFIGS: Record<string, { baseUrl: string; apiKeyEnv: string }> = {
   doubao: {
     baseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
     apiKeyEnv: 'VITE_DOUBAO_API_KEY',
@@ -52,16 +45,23 @@ const PROVIDER_CONFIGS = {
   },
 }
 
-export const useAI = (provider: string = MODEL_CONFIG.provider, model: string = MODEL_CONFIG.model): UseAIReturn => {
+interface UseAIOptions {
+  provider: string
+  apiKey?: string
+  model: string
+}
+
+export const useAI = (options: UseAIOptions): UseAIReturn => {
+  const { provider, apiKey: externalApiKey, model } = options
   const messages: ChatMessage[] = []
 
   const sendMessage = async (content: string, image?: string): Promise<void> => {
-    const config = PROVIDER_CONFIGS[provider as keyof typeof PROVIDER_CONFIGS]
+    const config = PROVIDER_CONFIGS[provider]
     if (!config) {
       throw new Error(`不支持的 provider: ${provider}`)
     }
 
-    const apiKey = import.meta.env[config.apiKeyEnv]
+    const apiKey = externalApiKey || import.meta.env[config.apiKeyEnv]
     if (!apiKey) {
       throw new Error(`请设置 ${config.apiKeyEnv} 环境变量`)
     }

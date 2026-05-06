@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect, KeyboardEvent } from "react"
 import { Link } from "react-router-dom"
-import { Send, Settings, Video, User } from "lucide-react"
+import { Send, Settings, Video, User, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useSettings } from "@/hooks/useSettings"
+import { useAI } from "../services/ai"
 
 interface Message {
   id: string
@@ -12,6 +14,13 @@ interface Message {
 }
 
 export function HomePage() {
+  const { settings } = useSettings()
+  const { messages: aiMessages, loading, sendMessage } = useAI({
+    provider: settings.textProvider,
+    apiKey: settings.textApiKey,
+    model: settings.textModel,
+  })
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -30,7 +39,23 @@ export function HomePage() {
     scrollToBottom()
   }, [messages])
 
-  const handleSend = () => {
+  useEffect(() => {
+    if (aiMessages.length > messages.length) {
+      const newMessages = aiMessages.slice(messages.length)
+      const assistantMessages = newMessages
+        .filter((m) => m.role === "assistant")
+        .map((m) => ({
+          id: m.id,
+          role: m.role as "user" | "assistant",
+          content: m.content,
+        }))
+      if (assistantMessages.length > 0) {
+        setMessages((prev) => [...prev, ...assistantMessages])
+      }
+    }
+  }, [aiMessages, messages.length])
+
+  const handleSend = async () => {
     if (!input.trim()) return
 
     const userMessage: Message = {
@@ -40,16 +65,19 @@ export function HomePage() {
     }
 
     setMessages((prev) => [...prev, userMessage])
+    const contentToSend = input.trim()
     setInput("")
 
-    setTimeout(() => {
-      const assistantMessage: Message = {
+    try {
+      await sendMessage(contentToSend)
+    } catch (error) {
+      const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "这是模拟回复，实际功能请等待AI服务集成。",
+        content: `错误: ${error instanceof Error ? error.message : "未知错误"}`,
       }
-      setMessages((prev) => [...prev, assistantMessage])
-    }, 500)
+      setMessages((prev) => [...prev, errorMessage])
+    }
   }
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -117,8 +145,8 @@ export function HomePage() {
               className="flex-1 min-h-[40px] max-h-[120px] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               rows={1}
             />
-            <Button onClick={handleSend} size="icon" disabled={!input.trim()}>
-              <Send className="h-4 w-4" />
+            <Button onClick={handleSend} size="icon" disabled={!input.trim() || loading}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-2 text-center">
