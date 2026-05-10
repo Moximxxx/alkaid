@@ -1,0 +1,40 @@
+{
+  "task_id": "FEAT-007",
+  "timestamp": 1778460751,
+  "goal": "实现AI伴侣交互逻辑：对话状态机（聆听→思考→说话→中断循环）、双场景系统提示词系统（文本对话 vs 视频通话AI伴侣）、系统提示词构建器。实现AI伴侣人格化交互，主动观察并评论画面。",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\shared\\constants.ts",
+    "D:\\projects\\alkaid\\src\\shared\\types.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useVideoChat.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\VideoChat.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\ai.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\context-merge.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useVideoCallState.ts"
+  ],
+  "constraints": [
+    "R-0", "R-6", "R-7", "R-8",
+    "arch-layering",
+    "contract-mechanism",
+    "tech-stack/typescript",
+    "tech-stack/react"
+  ],
+  "tech_stack_constraints": [
+    "react.md",
+    "typescript.md"
+  ],
+  "verification": [
+    "bun run typecheck",
+    "bun run build"
+  ],
+  "coverage_checklist": {
+    "system_prompt_builder": "assert: 创建 system-prompt-builder.ts 服务，支持构建文本对话提示词和视频通话AI伴侣提示词",
+    "text_chat_prompt": "assert: 定义文本对话系统提示词（功能型助手，简洁专业）",
+    "video_chat_prompt": "assert: 定义视频通话AI伴侣系统提示词（情感型伴侣，主动观察，自然交流）",
+    "prompt_composition": "assert: 两个prompt共享基座（{system_core}），通过{role_definition}/{interaction_mode}/{visual_guidance}差异化",
+    "ai_companion_persona": "assert: AI伴侣人格定义（温柔、细心、带点幽默感），主动描述画面但不频繁",
+    "conversation_state_machine": "assert: 对话状态机在 useVideoChat 中实现，idle→listening→thinking→speaking→interrupted 循环",
+    "active_observation": "assert: AI在画面变化时主动评论（非仅被动回答），帧分析结果自动触发主动对话",
+    "build_verify": "assert: bun run build 和 bun run typecheck 通过"
+  },
+  "status": "completed"
+}

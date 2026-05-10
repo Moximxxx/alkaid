@@ -8,6 +8,9 @@ import {
   AI_MODELS,
   VISION_MODELS,
   AI_PROVIDERS,
+  VIDEO_CALL_DEFAULTS,
+  SYSTEM_PROMPTS,
+  PIPELINE_DEFAULTS,
 } from '../constants'
 
 describe('应用常量', () => {
@@ -113,5 +116,84 @@ describe('视觉模型列表', () => {
 
   it('应该包含 Gemini 2.5 Pro Vision', () => {
     expect(VISION_MODELS.find(m => m.value === 'gemini-2.5-pro-vision')).toBeDefined()
+  })
+})
+
+describe('视频通话常量 VIDEO_CALL_DEFAULTS', () => {
+  it('aiName 应该是摇光', () => {
+    expect(VIDEO_CALL_DEFAULTS.aiName).toBe('摇光')
+  })
+
+  it('aiStatusText 包含四种状态', () => {
+    expect(VIDEO_CALL_DEFAULTS.aiStatusText).toEqual({
+      listening: '聆听中...',
+      thinking: '思考中...',
+      speaking: '说话中...',
+      idle: '待命中',
+    })
+  })
+})
+
+describe('系统提示词 SYSTEM_PROMPTS', () => {
+  it('text_chat 提示词包含"功能型AI助手"', () => {
+    expect(SYSTEM_PROMPTS.text_chat).toContain('功能型AI助手')
+  })
+
+  it('text_chat 提示词包含"摇光"', () => {
+    expect(SYSTEM_PROMPTS.text_chat).toContain('摇光')
+  })
+
+  it('text_chat 提示词包含"中文回复"', () => {
+    expect(SYSTEM_PROMPTS.text_chat).toContain('中文回复')
+  })
+
+  it('video_call 提示词包含"实时视频AI伴侣"', () => {
+    expect(SYSTEM_PROMPTS.video_call).toContain('实时视频AI伴侣')
+  })
+
+  it('video_call 提示词包含"视觉分析策略"', () => {
+    expect(SYSTEM_PROMPTS.video_call).toContain('视觉分析策略')
+  })
+
+  it('video_call 提示词包含"摇光"', () => {
+    expect(SYSTEM_PROMPTS.video_call).toContain('摇光')
+  })
+
+  it('video_call 提示词包含对话规则', () => {
+    expect(SYSTEM_PROMPTS.video_call).toContain('对话规则')
+  })
+
+  it('两个场景提示词不同', () => {
+    expect(SYSTEM_PROMPTS.text_chat).not.toBe(SYSTEM_PROMPTS.video_call)
+  })
+})
+
+describe('管线默认配置 PIPELINE_DEFAULTS', () => {
+  it('maxContextTokens 应该是 8000', () => {
+    expect(PIPELINE_DEFAULTS.maxContextTokens).toBe(8000)
+  })
+
+  it('visionCaptureInterval 应该是 3000', () => {
+    expect(PIPELINE_DEFAULTS.visionCaptureInterval).toBe(3000)
+  })
+
+  it('vadThreshold 应该是 0.3', () => {
+    expect(PIPELINE_DEFAULTS.vadThreshold).toBe(0.3)
+  })
+
+  it('frameMaxWidth 应该是 320', () => {
+    expect(PIPELINE_DEFAULTS.frameMaxWidth).toBe(320)
+  })
+
+  it('frameMaxHeight 应该是 240', () => {
+    expect(PIPELINE_DEFAULTS.frameMaxHeight).toBe(240)
+  })
+
+  it('vadSilenceTimeoutMs 应该是 500', () => {
+    expect(PIPELINE_DEFAULTS.vadSilenceTimeoutMs).toBe(500)
+  })
+
+  it('frameDedupThreshold 应该是 0.05', () => {
+    expect(PIPELINE_DEFAULTS.frameDedupThreshold).toBe(0.05)
   })
 })

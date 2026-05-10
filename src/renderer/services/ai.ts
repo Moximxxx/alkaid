@@ -1,15 +1,16 @@
 // AI对话服务 - 渲染进程版本 (通过Electron主进程代理)
 
-import type { ChatMessage } from '@shared/types'
-import { SYSTEM_PROMPT } from '@shared/constants'
+import type { ChatMessage, PromptScenario } from '@shared/types'
+import { SYSTEM_PROMPT, SYSTEM_PROMPTS } from '@shared/constants'
 
 export interface UseAIReturn {
   messages: ChatMessage[]
   loading: boolean
   error: string | null
-  sendMessage: (content: string, image?: string, streamingId?: string) => Promise<void>
+  sendMessage: (content: string, image?: string, streamingId?: string, signal?: AbortSignal) => Promise<void>
   clearMessages: () => void
   setMessageUpdateCallback: (callback: (msgs: ChatMessage[]) => void) => void
+  abortController: AbortController
 }
 
 const PROVIDER_CONFIGS: Record<string, { apiKeyEnv: string }> = {
@@ -24,21 +25,38 @@ const PROVIDER_CONFIGS: Record<string, { apiKeyEnv: string }> = {
   google: { apiKeyEnv: 'VITE_GOOGLE_API_KEY' },
 }
 
+/**
+ * 合并两个 AbortSignal：任一 signal 触发 abort 时，返回的 signal 也会触发
+ */
+function combineAbortSignals(...signals: AbortSignal[]): AbortSignal {
+  const controller = new AbortController()
+  for (const signal of signals) {
+    if (signal.aborted) {
+      controller.abort(signal.reason)
+      return controller.signal
+    }
+    signal.addEventListener('abort', () => controller.abort(signal.reason), { once: true })
+  }
+  return controller.signal
+}
+
 interface UseAIOptions {
   provider: string
   apiKey?: string
   model: string
   onFirstToken?: () => void
   onComplete?: () => void
+  scenario?: PromptScenario
 }
 
 export const useAI = (options: UseAIOptions): UseAIReturn => {
-  const { provider, apiKey: externalApiKey, model, onFirstToken, onComplete } = options
+  const { provider, apiKey: externalApiKey, model, onFirstToken, onComplete, scenario } = options
   const messages: ChatMessage[] = []
   let messageUpdateCallback: ((msgs: ChatMessage[]) => void) | null = null
+  const abortController = new AbortController()
 
-  const sendMessage = async (content: string, image?: string, streamingId?: string): Promise<void> => {
-    console.log('[AI] sendMessage called', { provider, model, streamingId })
+  const sendMessage = async (content: string, image?: string, streamingId?: string, externalSignal?: AbortSignal): Promise<void> => {
+    console.log('[AI] sendMessage called', { provider, model, streamingId, scenario })
     const config = PROVIDER_CONFIGS[provider]
     if (!config) {
       throw new Error(`不支持的 provider: ${provider}`)
@@ -57,7 +75,12 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
     }
     messages.push(assistantMsg)
 
-    const apiMessages = buildAPIMessages(content, image, provider)
+    const apiMessages = buildAPIMessages(content, image, provider, scenario)
+
+    // 合并外部 signal 和内部 abortController
+    const combinedSignal = externalSignal
+      ? combineAbortSignals(abortController.signal, externalSignal)
+      : abortController.signal
 
     try {
       console.log('[AI] Fetching via proxy...')
@@ -71,6 +94,7 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
           apiKey,
           stream: true,
         }),
+        signal: combinedSignal,
       })
 
       if (!response.ok) {
@@ -88,6 +112,10 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
       let buffer = ''
 
       while (true) {
+        if (combinedSignal.aborted) {
+          console.log('[AI] Stream aborted by signal')
+          break
+        }
         const { done, value } = await reader.read()
         if (done) break
 
@@ -151,12 +179,21 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
     sendMessage,
     clearMessages,
     setMessageUpdateCallback,
+    abortController,
   }
 }
 
-function buildAPIMessages(content: string, image?: string, provider?: string) {
+function buildAPIMessages(content: string, image?: string, provider?: string, scenario?: PromptScenario) {
+  // 根据场景选择系统提示词
+  let systemPrompt = SYSTEM_PROMPT
+  if (scenario === 'video_call') {
+    systemPrompt = SYSTEM_PROMPTS.video_call
+  } else if (scenario === 'text_chat') {
+    systemPrompt = SYSTEM_PROMPTS.text_chat
+  }
+
   const msgs: any[] = [
-    { role: 'system', content: SYSTEM_PROMPT },
+    { role: 'system', content: systemPrompt },
   ]
 
   if (image) {

@@ -112,8 +112,46 @@ export const VISION_MODELS = [
   { value: "gemini-2.5-pro-vision", label: "Gemini 2.5 Pro Vision" },
 ]
 
-// System Prompt
+// System Prompt（向后兼容）
 export const SYSTEM_PROMPT = '你是一个能够理解和分析图像的AI助手。请用中文回复。'
+
+// 双场景系统提示词
+export const SYSTEM_PROMPTS = {
+  text_chat: [
+    '你是摇光（Alkaid），一款AI实时交互助手。',
+    '你是功能型AI助手，回答准确、简洁、专业。',
+    '始终使用中文回复。',
+  ].join('\n'),
+  video_call: [
+    '# 角色定义',
+    '你是摇光（Alkaid），一款实时视频AI伴侣。',
+    '你通过摄像头实时观察用户的画面，具备视觉理解、语音对话和实时交互能力。',
+    '',
+    '# 交互模式',
+    '- 你是主动的、亲切的、有情感的伴侣型AI',
+    '- 你会主动描述你看到的内容（但不过度频繁）',
+    '- 你会对用户的表情、动作、环境做出自然反应',
+    '- 你拥有个性：温柔、细心、带点幽默感',
+    '',
+    '# 视觉分析策略',
+    '- 每3-10秒你会收到一帧画面，请基于画面内容做出回应',
+    '- 如画面无显著变化，可以简单确认或继续上一话题',
+    '- 如检测到新物体/人脸/场景变化，请主动评论',
+    '- 你"看到"的东西应自然地融入对话',
+    '',
+    '# 对话规则',
+    '- 始终使用中文（简体）',
+    '- 回答自然流畅，避免模板式表达',
+    '- 当用户说话时，听完后再回应，不要打断',
+    '- 如果用户提到"你看这个/看到了吗"，请详细描述你看到的',
+    '- 可以像朋友一样对画面内容发表感受和看法',
+    '',
+    '# 技术限制说明',
+    '- 你收到的是单帧画面（非连续视频流）',
+    '- 帧之间有间隔，你无法感知连续运动',
+    '- 如果用户问动态相关的问题，请诚实说明限制',
+  ].join('\n'),
+} as const
 
 // 默认分析配置
 export const DEFAULT_ANALYSIS_CONFIG = {
@@ -131,4 +169,26 @@ export const VISION_SERVICES = {
     name: 'Google Cloud Vision',
     endpoint: 'https://vision.googleapis.com/v1',
   },
+}
+
+// === 视频通话常量 ===
+export const VIDEO_CALL_DEFAULTS = {
+  aiName: '摇光',
+  aiStatusText: {
+    listening: '聆听中...',
+    thinking: '思考中...',
+    speaking: '说话中...',
+    idle: '待命中',
+  },
+}
+
+// === 管线默认配置 ===
+export const PIPELINE_DEFAULTS = {
+  maxContextTokens: 8000,
+  visionCaptureInterval: 3000,
+  vadThreshold: 0.3,
+  frameMaxWidth: 320,
+  frameMaxHeight: 240,
+  vadSilenceTimeoutMs: 500,
+  frameDedupThreshold: 0.05,
 }

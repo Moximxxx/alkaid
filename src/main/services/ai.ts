@@ -46,8 +46,8 @@ export class AIService {
     this.config = config
   }
 
-  // 发送消息（支持图像）
-  async sendMessage(content: string, image?: string): Promise<ChatMessage> {
+  // 发送消息（支持图像 + 可中断）
+  async sendMessage(content: string, image?: string, signal?: AbortSignal): Promise<ChatMessage> {
     const provider = this.config.provider
 
     // 添加用户消息
@@ -60,14 +60,14 @@ export class AIService {
     }
     this.messages.push(userMessage)
 
-    // 调用对应的API
+    // 调用对应的API（传递中断信号）
     let response: string
     if (provider === 'claude') {
-      response = await this.callClaude(content, image)
+      response = await this.callClaude(content, image, signal)
     } else if (provider === 'google') {
-      response = await this.callGoogle(content, image)
+      response = await this.callGoogle(content, image, signal)
     } else {
-      response = await this.callOpenAICompatible(content, image)
+      response = await this.callOpenAICompatible(content, image, signal)
     }
 
     // 添加助手消息
@@ -82,8 +82,8 @@ export class AIService {
     return assistantMessage
   }
 
-  // 调用OpenAI兼容格式的API
-  private async callOpenAICompatible(content: string, image?: string): Promise<string> {
+  // 调用OpenAI兼容格式的API（支持中断）
+  private async callOpenAICompatible(content: string, image?: string, signal?: AbortSignal): Promise<string> {
     const messages = this.buildOpenAIMessages(content, image)
     const providerConfig = PROVIDER_CONFIGS[this.config.provider]
 
@@ -100,6 +100,7 @@ export class AIService {
           messages,
           max_tokens: 1024,
         }),
+        signal,
       }
     )
 
@@ -111,8 +112,8 @@ export class AIService {
     return data.choices[0].message.content
   }
 
-  // 调用Claude API
-  private async callClaude(content: string, image?: string): Promise<string> {
+  // 调用Claude API（支持中断）
+  private async callClaude(content: string, image?: string, signal?: AbortSignal): Promise<string> {
     const messages = this.buildClaudeMessages(content, image)
 
     const response = await fetch(
@@ -129,6 +130,7 @@ export class AIService {
           max_tokens: 1024,
           messages,
         }),
+        signal,
       }
     )
 
@@ -241,8 +243,8 @@ export class AIService {
     return messages
   }
 
-  // 调用 Google Gemini API
-  private async callGoogle(content: string, image?: string): Promise<string> {
+  // 调用 Google Gemini API（支持中断）
+  private async callGoogle(content: string, image?: string, signal?: AbortSignal): Promise<string> {
     const providerConfig = PROVIDER_CONFIGS[this.config.provider]
 
     // 构建 Gemini 格式的请求
@@ -297,6 +299,7 @@ export class AIService {
           system_instruction: { parts: [{ text: systemMessage }] },
           generationConfig: { maxOutputTokens: 1024 },
         }),
+        signal,
       }
     )
 

@@ -1,0 +1,35 @@
+{
+  "task_id": "PLAN-003",
+  "timestamp": 1778460751,
+  "goal": "分析AI实时视频通话（AI伴侣模式）的完整架构方案，输出可执行的分批迭代计划。核心目标：仿微信视频通话界面 + AI实时多模态并行（视觉+语音+文字） + TTS语音合成输出，实现AI伴侣式交互体验。",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\AGENTS.md"
+  ],
+  "constraints": [
+    "R-0", "R-6", "R-7", "R-8",
+    "arch-layering",
+    "contract-mechanism",
+    "tech-stack/typescript",
+    "tech-stack/react",
+    "tech-stack/nodejs"
+  ],
+  "tech_stack_constraints": [
+    "react.md",
+    "typescript.md",
+    "nodejs.md"
+  ],
+  "verification": [
+    "人工评审：方案需涵盖UI设计、多模态并行架构、AI调度、STT/TTS协同、系统提示词设计"
+  ],
+  "coverage_checklist": {
+    "wechat_ui_design": "assert: 分析微信视频通话UI（全屏视频、浮层控件、画中画、来电画面）并输出设计方案",
+    "multimodal_parallel": "assert: 研究多模态并行输入方案（视觉帧+STT语音+文字融合），分析GPT-4o Realtime/Gemini/VITA等方案可行性",
+    "async_pipeline": "assert: 输出异步管线架构图：Camera→FrameCapture→VisionAPI + STT→ContextMerge→LLM→TTS→Speaker",
+    "open_source_ref": "assert: 参考Pipecat/VITA-1.5/AwesomeRealtimeAI等开源项目，输出可借鉴的设计模式",
+    "doubao_reference": "assert: 参考豆包视频通话的实时问答+视觉理解设计",
+    "batch_plan": "assert: 输出分3-4批的可执行迭代计划，每批包含目标、涉及文件、工作量估算",
+    "system_prompt_design": "assert: 包含文本对话 vs 视频对话的系统提示词设计方案（下版本实现）",
+    "feasibility_assessment": "assert: 评估在Electron+React+TypeScript+Vite技术栈下的实现可行性和风险"
+  },
+  "status": "completed"
+}

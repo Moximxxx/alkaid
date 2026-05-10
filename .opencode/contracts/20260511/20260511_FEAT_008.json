@@ -1,0 +1,36 @@
+{
+  "task_id": "FEAT-008",
+  "timestamp": 1778460751,
+  "goal": "编写新服务的单元测试，更新现有测试兼容新类型，执行完整测试套件确保32+测试全部通过。更新E2E冒烟测试覆盖视频通话流程。",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\shared\\__tests__\\constants.test.ts",
+    "D:\\projects\\alkaid\\scripts\\e2e\\smoke.test.ts"
+  ],
+  "constraints": [
+    "R-0", "R-6", "R-7", "R-8",
+    "arch-layering",
+    "contract-mechanism",
+    "tech-stack/typescript",
+    "tech-stack/react"
+  ],
+  "tech_stack_constraints": [
+    "test-writing.md"
+  ],
+  "verification": [
+    "bun run typecheck",
+    "bun run test",
+    "bun run build"
+  ],
+  "coverage_checklist": {
+    "vision_pipeline_tests": "assert: 测试帧捕获调度、自适应频率、pause/resume、帧去重逻辑",
+    "context_merge_tests": "assert: 测试视觉意图检测、帧附加策略、STT+文字合并、场景判断",
+    "context_manager_tests": "assert: 测试滑动窗口裁剪、token估算、优先丢弃视觉帧策略",
+    "interrupt_controller_tests": "assert: 测试abort/reset/isInterrupted生命周期、AbortController管理",
+    "system_prompt_builder_tests": "assert: 测试双场景提示词构建、基座共享、场景差异化",
+    "useVAD_tests": "assert: 测试VAD基本功能（语音活动检测逻辑，非UI）",
+    "constants_test_update": "assert: 更新constants.test.ts覆盖新增的SYSTEM_PROMPTS和PIPELINE_DEFAULTS",
+    "all_tests_pass": "assert: bun run test 全部通过（32+项）",
+    "build_verify": "assert: bun run build 和 bun run typecheck 通过"
+  },
+  "status": "completed"
+}

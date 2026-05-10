@@ -68,6 +68,9 @@ export interface VisionConfig {
   model: string
 }
 
+// AI对话场景类型
+export type PromptScenario = 'text_chat' | 'video_call'
+
 // 应用配置
 export interface AppConfig {
   camera: CameraConfig
@@ -77,3 +80,49 @@ export interface AppConfig {
   autoRecognize: boolean
   recognizeInterval: number  // 自动识别间隔（毫秒）
 }
+
+// === 视频通话状态类型 ===
+export type CallState = 'idle' | 'calling' | 'connecting' | 'connected' | 'ended'
+export type AIStatus = 'listening' | 'thinking' | 'speaking' | 'idle'
+
+export interface ControlState {
+  micEnabled: boolean
+  speakerEnabled: boolean
+  cameraEnabled: boolean
+  chatOpen: boolean
+  isPipMode: boolean
+}
+
+export interface VideoCallState {
+  callState: CallState
+  aiStatus: AIStatus
+  controls: ControlState
+  duration: number
+  error: string | null
+}
+
+export type VideoCallAction =
+  | { type: 'START_CALL' }
+  | { type: 'CONNECT' }
+  | { type: 'CONNECTED' }
+  | { type: 'END_CALL' }
+  | { type: 'SET_AI_STATUS'; payload: AIStatus }
+  | { type: 'TOGGLE_MIC' }
+  | { type: 'TOGGLE_SPEAKER' }
+  | { type: 'TOGGLE_CAMERA' }
+  | { type: 'TOGGLE_CHAT' }
+  | { type: 'SET_PIP'; payload: boolean }
+  | { type: 'SET_ERROR'; payload: string }
+  | { type: 'TICK' }
+  | { type: 'RESET' }
+
+// === 管道/管线类型 ===
+export interface PipelineState {
+  isVisionActive: boolean
+  isSTTActive: boolean
+  isLLMStreaming: boolean
+  isTTSActive: boolean
+  isInterrupted: boolean
+}
+
+export type PipelineStatus = 'running' | 'paused' | 'stopped'

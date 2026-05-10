@@ -1,0 +1,42 @@
+{
+  "task_id": "FEAT-006",
+  "timestamp": 1778460751,
+  "goal": "实现多模态异步并行管线：Camera → VisionAPI + STT → ContextMerge → LLM → Splitter → TTS，并集成 VAD 语音活动检测实现 AI 说话可打断。实现异步管线调度、上下文滑动窗口、中断控制器。",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\shared\\types.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useVideoChat.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useAI.ts",
+    "D:\\projects\\alkaid\\src\\main\\services\\ai.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\VideoChat.tsx",
+    "D:\\projects\\alkaid\\src\\shared\\constants.ts"
+  ],
+  "constraints": [
+    "R-0", "R-6", "R-7", "R-8",
+    "arch-layering",
+    "contract-mechanism",
+    "tech-stack/typescript",
+    "tech-stack/react"
+  ],
+  "tech_stack_constraints": [
+    "react.md",
+    "typescript.md",
+    "nodejs.md"
+  ],
+  "verification": [
+    "bun run typecheck",
+    "bun run build"
+  ],
+  "coverage_checklist": {
+    "useVAD_hook": "assert: 创建 useVAD hook，基于 Web Audio API AnalyserNode 检测语音活动能量阈值，返回 isSpeaking 状态",
+    "vision_pipeline": "assert: 创建 vision-pipeline 服务，管理帧捕获队列、去重（SSIM 简单判断）、自适应频率调度",
+    "context_merge": "assert: 创建 context-merge 服务，裁决每次LLM请求包含哪些模态数据（视觉帧+语音文本+文字输入）",
+    "context_manager": "assert: 创建 context-manager 服务，滑动窗口上下文管理，按 token 估算裁剪最早内容",
+    "interrupt_controller": "assert: 创建 interrupt-controller 服务，VAD检测到用户说话时立即停止TTS、中止LLM流、切换AI状态",
+    "useVideoChat_rewrite": "assert: 重写 useVideoChat hook，集成上述所有服务构建完整异步管线",
+    "useAI_abort": "assert: 扩展 useAI 支持 AbortController，允许中断控制器中止正在进行的流式请求",
+    "main_ai_parallel": "assert: 扩展 main/services/ai.ts 支持并发/中断请求处理",
+    "videochat_integration": "assert: 更新 VideoChat.tsx 使用新的 useVideoChat 管线，添加 VAD 和中断交互",
+    "build_verify": "assert: bun run build 和 bun run typecheck 通过"
+  },
+  "status": "completed"
+}

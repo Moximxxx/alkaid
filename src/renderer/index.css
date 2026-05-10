@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 自定义动画：脉冲光晕 */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 旋转 135 度用于挂断图标 */
+.rotate-135 {
+  transform: rotate(135deg);
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

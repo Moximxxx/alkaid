@@ -1,0 +1,39 @@
+{
+  "task_id": "FEAT-005",
+  "timestamp": 1778460751,
+  "goal": "将 VideoChat 页面改造为 WeChat 风格视频通话界面，包含全屏视频画面、画中画、底部浮层控件、来电画面、AI状态指示器、可展开文字聊天侧栏。建立完善的通话状态管理（useReducer状态机）。",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\shared\\types.ts",
+    "D:\\projects\\alkaid\\src\\shared\\constants.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\VideoChat.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\components\\VideoChat.tsx"
+  ],
+  "constraints": [
+    "R-0", "R-6", "R-7", "R-8",
+    "arch-layering",
+    "contract-mechanism",
+    "tech-stack/typescript",
+    "tech-stack/react"
+  ],
+  "tech_stack_constraints": [
+    "react.md",
+    "typescript.md"
+  ],
+  "verification": [
+    "bun run typecheck",
+    "bun run build"
+  ],
+  "coverage_checklist": {
+    "call_state_types": "assert: 在 types.ts 中添加 CallState, AIStatus, VideoCallState, ControlState 类型定义",
+    "useVideoCallState_hook": "assert: 创建 useReducer 状态机 hook，管理 idle→calling→connecting→connected→ended 流转",
+    "call_alert_screen": "assert: 创建 CallAlertScreen 组件（AI头像、接听/拒绝按钮、响铃动画）",
+    "video_container": "assert: 创建 VideoContainer 组件（全屏视频 + 画中画 + AI浮层）",
+    "pip_component": "assert: 创建 LocalPiP 组件（本地摄像头预览小窗，可拖拽）",
+    "call_controls": "assert: 创建 CallControls 组件（麦克风/扬声器/切换摄像头/挂断按钮，毛玻璃底栏）",
+    "ai_status_bar": "assert: 创建 AIStatusBar 组件（AI头像脉冲、状态文字、通话时长）",
+    "chat_drawer": "assert: 创建 ChatDrawer 侧栏组件（消息列表+输入框，通话中可展开）",
+    "video_chat_integration": "assert: 重写 VideoChat.tsx 集成所有新组件，保留现有功能（摄像头、AI对话、STT/TTS、自动分析）",
+    "build_verify": "assert: bun run build 和 bun run typecheck 通过"
+  },
+  "status": "completed"
+}
