@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "任务合同 Schema",
+  "description": "定义多 Agent 工作流中任务合同的字段规范。所有合同文件（.opencode/contracts/*.json）必须符合此 Schema。",
+  "type": "object",
+  "required": [
+    "task_id",
+    "timestamp",
+    "goal",
+    "files_to_modify",
+    "constraints",
+    "verification",
+    "coverage_checklist",
+    "status"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9]+-\\d+$",
+      "description": "任务唯一标识，格式 {前缀}-{序号}，如 TASK-001"
+    },
+    "timestamp": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix 时间戳（秒）"
+    },
+    "goal": {
+      "type": "string",
+      "minLength": 1,
+      "description": "任务目标描述"
+    },
+    "files_to_modify": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "description": "允许修改的文件列表（相对于项目根目录）"
+    },
+    "constraints": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "description": "引用的约束文档名称列表（对应 AGENTS.md 中的 R-XX / P-XX）"
+    },
+    "verification": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "description": "验证方式列表（脚本路径或命令）"
+    },
+    "coverage_checklist": {
+      "type": "object",
+      "minProperties": 1,
+      "patternProperties": {
+        "^.*$": {
+          "type": "string",
+          "pattern": "^(assert:|SKIP:)"
+        }
+      },
+      "additionalProperties": false,
+      "description": "功能覆盖清单，值必须以 assert: 或 SKIP: 开头"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "active", "completed"],
+      "description": "合同状态：pending（待执行）→ active（执行中）→ completed（已完成）"
+    },
+    "tech_stack_constraints": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "技术栈约束引用列表（可选）"
+    },
+    "hooks": {
+      "type": "object",
+      "description": "AOP 切面钩子，定义任务执行前/后的插桩脚本",
+      "properties": {
+        "pre_task": {
+          "type": "array",
+          "description": "任务执行前运行的 hook 列表（在 delegate 子 Agent 之前）",
+          "items": {
+            "type": "string",
+            "enum": ["pre-model-check", "resource-guard"]
+          }
+        },
+        "post_task": {
+          "type": "array",
+          "description": "任务执行后运行的 hook 列表（子 Agent 返回后）",
+          "items": {
+            "type": "string",
+            "enum": ["post-edit-verify", "post-tool-verify", "dual-check-hook", "self-improvement-trigger"]
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

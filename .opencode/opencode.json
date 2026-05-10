@@ -1,11 +1,139 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": [
-    "./AGENTS.md"
+    "./AGENTS.md",
+    ".opencode/constraints/agent-system.md",
+    ".opencode/constraints/arch-layering.md",
+    ".opencode/constraints/contract-mechanism.md",
+    ".opencode/constraints/tech-stack/typescript.md",
+    ".opencode/constraints/tech-stack/react.md",
+    ".opencode/constraints/tech-stack/nodejs.md"
   ],
+  "default_agent": "coordinator",
+  "model": "deepseek/deepseek-v4-flash",
+  "small_model": "minimax/minimax-m2-7-highspeed",
   "permission": {
     "edit": "ask",
     "bash": "ask",
-    "delete": "ask"
-  }
+    "delete": "ask",
+    "task": {
+      "*": "allow"
+    }
+  },
+  "agent": {
+    "coordinator": {
+      "description": "任务协调者。负责任务拆分、委派执行、验证结果。",
+      "mode": "primary",
+      "model": "deepseek/deepseek-v4-pro",
+      "temperature": 0.2,
+      "prompt": "{file:./agents/coordinator.md}",
+      "permission": {
+        "edit": "ask",
+        "bash": "ask",
+        "task": {
+          "*": "allow"
+        }
+      }
+    },
+    "plan": {
+      "description": "计划者，负责只读分析、方案评审和架构规划。",
+      "mode": "subagent",
+      "model": "deepseek/deepseek-v4-flash",
+      "temperature": 0.1,
+      "steps": 10,
+      "prompt": "{file:./agents/plan.md}",
+      "permission": {
+        "edit": "deny",
+        "bash": "deny"
+      }
+    },
+    "task-executor": {
+      "description": "任务执行者，按合同规范编写代码。接收合同后在范围内修改文件。",
+      "mode": "subagent",
+      "model": "deepseek/deepseek-v4-flash",
+      "temperature": 0.3,
+      "steps": 50,
+      "prompt": "{file:./agents/task-executor.md}",
+      "permission": {
+        "edit": "allow",
+        "bash": "ask"
+      }
+    },
+    "builder": {
+      "description": "构建者，负责执行构建、部署、验证。不改源码。",
+      "mode": "subagent",
+      "model": "minimax/minimax-m2-7-highspeed",
+      "temperature": 0.1,
+      "steps": 15,
+      "prompt": "{file:./agents/builder.md}",
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "*": "ask",
+          "git *": "allow",
+          "bun *": "allow",
+          "npm *": "allow",
+          "node *": "allow",
+          "tsc*": "allow",
+          "vite*": "allow",
+          "grep *": "allow",
+          "ls *": "allow",
+          "dir *": "allow"
+        }
+      }
+    },
+    "crash-doctor": {
+      "description": "崩溃诊断者，分析崩溃日志、定位根因。不改代码。",
+      "mode": "subagent",
+      "model": "deepseek/deepseek-v4-pro",
+      "temperature": 0.2,
+      "prompt": "{file:./agents/crash-doctor.md}",
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "*": "ask",
+          "grep *": "allow",
+          "git log *": "allow",
+          "bun *": "allow"
+        }
+      }
+    },
+    "code-reviewer": {
+      "description": "代码审查者，审查代码质量、安全性和最佳实践。只读。",
+      "mode": "subagent",
+      "model": "minimax/minimax-m2-7-highspeed",
+      "temperature": 0.1,
+      "prompt": "{file:./agents/code-reviewer.md}",
+      "permission": {
+        "edit": "deny",
+        "bash": "deny"
+      }
+    },
+    "retro": {
+      "description": "复盘者，负责任务完成后复盘、约束更新、事故记录。",
+      "mode": "subagent",
+      "model": "deepseek/deepseek-v4-pro",
+      "temperature": 0.3,
+      "prompt": "{file:./agents/retro.md}",
+      "permission": {
+        "edit": "ask",
+        "bash": "ask",
+        "task": {
+          "*": "deny"
+        }
+      }
+    }
+  },
+  "mcp": {
+    "MiniMax": {
+      "type": "local",
+      "command": ["uvx", "minimax-coding-plan-mcp", "-y"],
+      "environment": {
+        "MINIMAX_API_KEY": "{env:MINIMAX_API_KEY}",
+        "MINIMAX_API_HOST": "https://api.minimaxi.com"
+      },
+      "enabled": true
+    }
+  },
+  "lsp": true
 }

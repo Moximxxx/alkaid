@@ -1,421 +1,193 @@
-# AGENTS.md — 项目规则定义
+# AGENTS.md — 摇光 (Alkaid)
 
-> 本文件定义了项目的多智能体工作流约束、角色职责和验证规则。
-> **所有任务必须严格遵守这些规则，违规操作将被拦截。**
+> 摄像头 AI 对话助手 — Electron + React + TypeScript 项目
+> 多 Agent 协同开发规范入口。详细约束见 `instructions` 引用的文件。
 
----
+## **R-0: 语言强制规范 — 所有思考过程与输出必须使用简体中文**
 
-## 角色定义与职责边界
+**所有 Agent（含主 Agent 与所有子 Agent）的思考过程、分析、回答、代码注释、文档编写、交接报告，必须使用简体中文。**
 
-### 1. Coordinator（协调者）
-
-**触发条件**：所有任务开始前必须由 Coordinator 分析和拆分。
-
-**核心职责**：
-- 分析用户需求，拆分为可执行的子任务
-- 判断任务涉及的架构层级
-- 生成任务合同（TODOWRITE）
-- 委派给正确的执行智能体
-- 验证执行结果是否符合预期
-- 维护任务进度（TODO 状态更新）
-
-**严格禁止**：
-- ❌ 直接编写代码（除非是极简的配置文件）
-- ❌ 执行构建/部署命令
-- ❌ 修改他人负责的模块
-
-**工作模式**：
-```
-用户任务 → Coordinator 分析 → 生成合同 → 委派执行
-                                         ↓
-                              ┌──────────┴──────────┐
-                              ↓                     ↓
-                        Builder               Task-Executor
-                      (构建验证)              (实际实现)
-```
+唯一例外：代码标识符（变量名、函数名、类型名）、英文术语、命令行指令、JSON 字段名 / YAML 键名可使用英文。
 
 ---
 
-### 2. Builder（构建者）
+## 技术栈
 
-**触发条件**：源码修改后需要构建/部署时。
+| 层级 | 技术 |
+|------|------|
+| 桌面框架 | Electron 33 |
+| 前端 | React 18 + TypeScript 5 |
+| 构建 | Vite 5 + tsc |
+| 样式 | Tailwind CSS 3 |
+| AI SDK | LangChain |
+| 测试 | Vitest + @testing-library/react |
+| 包管理 | bun |
 
-**核心职责**：
-- 执行标准构建流程（Vite build, Electron build 等）
-- 执行部署命令
-- 运行冒烟测试验证
-- 检查构建产物完整性
-- 确保 CI/CD 流程正常
+---
 
-**严格禁止**：
-- ❌ 修改任何源码文件
-- ❌ 编写业务逻辑代码
-- ❌ 介入需求分析和任务拆分
+## 常用命令
 
-**构建命令白名单**：
 ```bash
-# 前端构建
-bun run build
-bun run dev
-
-# Electron 构建
-bun run electron:build
-bun run electron:dev
-
-# 测试
-bun run test
-bun run typecheck
+bun run dev              # 启动 Vite 开发服务器
+bun run dev:electron      # 启动 Vite + Electron 开发模式
+bun run build             # tsc 编译 + Vite 打包
+bun run lint              # ESLint 检查
+bun run typecheck         # TypeScript 类型检查
+bun run test              # Vitest 运行测试
+bun run electron:build    # electron-builder 构建桌面安装包
 ```
 
 ---
 
-### 3. Crash-Doctor（崩溃诊断者）
+## Agent 工作流
 
-**触发条件**：出现以下情况时必须调用
-- 进程崩溃（exit code != 0）
-- CppCrash / SIGSEGV / SIGABRT
-- ANR（应用无响应）
-- 命令异常退出
-- 运行时 panic
+```pseudo
+// ================================================================
+// coordinator 是唯一的主 Agent，一切任务的入口与出口
+// ================================================================
+FUNCTION main(user_task):
+    // ---------- Phase 1: 分析 ----------
+    contract = coordinator.analyze(user_task)
+    // contract 对象包含: goal, estimated_subagent, constraints 引用
 
-**核心职责**：
-- 分析崩溃日志和堆栈信息
-- 定位根因（Root Cause）
-- 识别问题发生的调用链路
-- 提出修复建议
-- 记录事故到 `incidents/` 目录
+    // ---------- Phase 2: 生成合同 ----------
+    contract = coordinator.generate_contract(contract)
+    // 写入 .opencode/contracts/{task_id}.json
+    contract.status = pending
+    // 合同必填: task_id, timestamp, goal, files_to_modify,
+    //          constraints, verification, coverage_checklist, status
 
-**严格禁止**：
-- ❌ 直接修改源码修复问题
-- ❌ 忽略任何崩溃或异常
-- ❌ 猜测原因而不分析日志
+    // ---------- Phase 3: 验证合同 ----------
+    validation = validate_contract(contract)
+    // validate_contract 读取 contract-schema.json 做 JSON Schema 校验
+    // 返回值: { valid: bool, errors: string[] }
+    IF validation.result == FAIL:
+        // 合同不规范，打回给 coordinator 修正
+        coordinator.fix_contract(contract, validation.errors)
+        GOTO validation
 
-**分析输出格式**：
-```
-## 崩溃报告
+    // ---------- Phase 4: 委派 plan 分析 ----------
+    // plan 子 Agent 只读分析、评估影响范围、推荐子 Agent、判断是否需构建
+    plan = coordinator.delegate(plan, contract)
 
-**问题描述**：xxx
-**根因分析**：xxx
-**影响范围**：xxx
-**修复建议**：xxx
-```
+    // ---------- Phase 5: 委派执行 ----------
+    contract.status = active
+    // 根据 plan.recommended_subagent 决定委派目标:
+    //   - 代码修改 → task-executor
+    //   - 纯构建   → builder
+    result = coordinator.delegate(plan.recommended_subagent, contract)
+    // result 结构: { success: bool, handoff: report, files_modified: string[] }
 
----
+    // ---------- Phase 6: 执行结果判断 ----------
+    IF result.success == false:
+        contract.status = failed
+        crash = coordinator.delegate(crash-doctor, result.errors)
+        // crash 诊断事故根因
+        coordinator.handle_failure(result.handoff, crash)
+        GOTO retro_phase
 
-### 4. Task-Executor（任务执行者）
+    // ---------- Phase 7: 代码审查（条件触发）----------
+    IF contract.type == code_modification:
+        review = coordinator.delegate(code-reviewer, {
+            contract: contract,
+            modified_files: result.files_modified
+        })
+        // code-reviewer 对照 constraints 逐文件审查
+        // review 结构: { pass: bool, issues: [{severity, file, line, message}] }
+        IF review.pass == false:
+            // 问题回传给 task-executor 修复
+            fix_contract = coordinator.create_fix_contract(contract, review.issues)
+            fix_result = coordinator.delegate(task-executor, fix_contract)
+            IF fix_result.success == false:
+                contract.status = failed
+                GOTO retro_phase
 
-**触发条件**：收到 Coordinator 委派的任务合同时。
+    // ---------- Phase 8: 构建验证（条件触发）----------
+    IF plan.requires_build == true:
+        build_result = coordinator.delegate(builder, contract)
+        IF build_result.success == false:
+            contract.status = failed
+            crash = coordinator.delegate(crash-doctor, build_result.errors)
+            coordinator.handle_failure(build_result.handoff, crash)
+            GOTO retro_phase
 
-**核心职责**：
-- 按照合同规范实现代码
-- 遵守约束文档中的规则（tech-stack, operation-boundary 等）
-- 完成后报告给 Coordinator
-- 进行自验，确保实现符合合同
+    // ---------- Phase 9: 完成 ----------
+    contract.status = completed
+    // coordinator 汇总所有子 Agent 的交接报告
 
-**严格禁止**：
-- ❌ 超出合同范围修改其他模块
-- ❌ 跳过约束检查
-- ❌ 直接与用户沟通技术细节（通过 Coordinator 中转）
+    // ---------- Phase 10: 复盘（强制，R-6）----------
+    label retro_phase:
+    retro = coordinator.delegate(retro, {
+        contract: contract,
+        plan: plan,
+        execution_result: result,
+        review: review,            // 可能为 null
+        build_result: build_result  // 可能为 null
+    })
+    // retro 输出:
+    //   1. 落盘复盘报告 → .opencode/retros/{task_id}.md
+    //   2. 如有事故 → 写入 .opencode/incidents/INC-YYYY-MMDD-NNN.md
+    //   3. 如有新约束 → 更新 AGENTS.md + .opencode/constraints/
+    //   4. 返回复盘结论: PENDING / NO_ACTION / NEW_CONSTRAINT / UPDATE_CONSTRAINT
 
----
-
-### 5. Retro（复盘者）
-
-**触发条件**：每个任务完成后**必须调用**。
-
-**核心职责**：
-- 任务完成后复盘执行过程
-- 验证失败时分析原因
-- 更新约束文档（如有新问题需添加约束）
-- 记录事故经验教训
-- 维护 `incidents/` 日志
-- 评估工作流执行效率
-
-**强制要求**：
-- ❌ 禁止跳过 Retro 环节
-- ❌ 禁止 Coordinator 自行复盘（必须委派）
-
-**复盘输出格式**：
-```markdown
-## 复盘报告
-
-**任务**：xxx
-**执行者**：xxx
-**耗时**：xxx
-**结果**：成功/失败
-**问题**：xxx（如有）
-**约束更新**：xxx（如有）
-**经验教训**：xxx
-```
-
-
-## 强制规则
-
-### P-01: 模型列表一致性（Model List Consistency）
-
-**触发条件**：当任务涉及 AI 模型列表更新时。
-
-**要求**：AI 模型列表必须在所有相关文件中保持一致：
-- `src/shared/constants.ts` (AI_MODELS - 共享常量)
-- `src/renderer/pages/Welcome.tsx` (MODELS - 欢迎页)
-- `src/renderer/pages/Settings.tsx` (MODELS - 设置页)
-- `src/renderer/services/ai.ts` (MODEL_CONFIG.model - AI 服务)
-
-**一致性检查清单**：
-1. ✅ 所有 provider 的模型数量一致
-2. ✅ 每个模型的 `value`/`id` 字段一致
-3. ✅ 默认模型在各处一致
-
-**违规处理**：回滚并强制同步后再继续
-
-**事故引用**：INC-2026-0503-001
-
----
-
-### R-1: Coordinator-Guard（协调者护栏）
-
-所有 Edit/Write 操作必须先检查：
-- 是否在有效的任务合同范围内
-- 合同是否过期（>30 分钟）
-- 是否通过了决策门
-
-**违规**：拦截并要求重新走 Coordinator 流程。
-
-### R-2: Decision-Gate（决策门）
-
-高风险操作（删除文件、修改配置等）必须：
-1. 显示操作警告
-2. 等待用户确认
-3. 记录操作日志
-
-### R-3: Builder-Must（构建调用）
-
-源码修改后如需构建/部署：
-- **必须调用 Builder 智能体**
-- **禁止**主 agent 直接执行构建命令
-
-### R-4: Crash-Call（崩溃必诊）
-
-出现任何崩溃/异常：
-- **必须调用 Crash-Doctor**
-- **禁止**忽略错误或猜测修复
-
-### R-5: Dual-Verify（双重校验）
-
-代码编写后双重验证：
-1. Agent 自验（自检代码正确性）
-2. 工具校验（调用验证脚本）
-
-**不一致**：质疑 Agent 结果，重新分析。
-
-### R-6: Full-Workflow（完整工作流）
-
-每个任务**必须**完整执行以下闭环：
-1. Coordinator 分析 → 生成合同
-2. Coordinator 委派给执行者
-3. 执行者执行
-4. Builder 构建验证（如涉及源码修改）
-5. **Retro 复盘** ← 禁止跳过
-
-**违规**：未执行 Retro 复盘的任务视为未完成。
-
-### R-7: No-Skip-Coordinator（禁止跳过协调者）
-
-- 所有代码修改必须通过 Coordinator 委派
-- 禁止主 agent 直接执行 Edit/Write
-- 禁止主 agent 直接调用其他 agent
-
-**违规**：自动拦截并要求重新走 Coordinator 流程。
-
-### R-8: Contract-Required（合同必须）
-
-所有 Edit/Write 操作必须：
-1. 持有有效的任务合同（30分钟内）
-2. 在合同范围内修改文件
-3. 通过 decision-gate
-
-**违规**：无合同或超范围修改直接拒绝。
-
-### R-10: Contract-Format（合同格式）
-
-任务合同必须使用 JSON 格式，参考 `.opencode/contracts/example_contract.json`：
-
-```json
-{
-  "task_id": "xxx",
-  "timestamp": 1234567890,
-  "goal": "任务目标",
-  "files_to_modify": ["file1.ts", "file2.ts"],
-  "constraints": ["约束引用"],
-  "verification": ["验证方式"],
-  "status": "active"
-}
+    RETURN coordinator.generate_handoff(
+        contract, plan, result, review, build_result, retro
+    )
 ```
 
-**合同状态流转**：
-- `active`: 执行中
-- `completed`: 已完成
-- `template`: 模板
+### Agent 列表
 
-### R-9: Network-Search-Timestamp（网络搜索时间戳）
-
-**强制要求**：进行网络搜索前**必须**先获取当前动态时间。
-
-**执行步骤**：
-1. 执行 `date "+%Y-%m-%d %H:%M:%S"` 获取当前时间（动态时间，非固定值）
-2. 将获取到的时间作为搜索关键词的一部分
-
-**示例**：
-```
-❌ 错误：搜索 "GLM 最新模型"
-✅ 正确：先 `date` 获取时间如 "2026-05-03"，然后搜索 "GLM 最新模型 2026-05-03"
-```
-
-**原因**：模型知识有截止日期，带当前时间搜索确保获取最新数据
-
-**违规处理**：未获取时间直接搜索视为违规
+| Agent | 类型 | 模型 | 职责 | 提示词文件 |
+|-------|------|------|------|-----------|
+| coordinator | primary | V4 Pro | 任务入口与出口：拆分、合同、委派、验证 | `agents/coordinator.md` |
+| plan | subagent | V4 Flash | 只读分析、方案评审 | `agents/plan.md` |
+| task-executor | subagent | V4 Flash | 代码编写（合同范围内） | `agents/task-executor.md` |
+| builder | subagent | M2.7-HS | 构建、部署、冒烟测试 | `agents/builder.md` |
+| code-reviewer | subagent | M2.7-HS | 代码审查 | `agents/code-reviewer.md` |
+| crash-doctor | subagent | V4 Pro | 崩溃诊断 | `agents/crash-doctor.md` |
+| retro | subagent | V4 Pro | 复盘、约束更新 | `agents/retro.md` |
 
 ---
 
-## 工作流执行循环
+## 核心规则
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        用户任务输入                               │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     Coordinator 分析                             │
-│  - 需求分析                                                      │
-│  - 任务拆分                                                      │
-│  - 生成合同                                                      │
-│  - 委派执行                                                      │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   Task-Executor 执行                             │
-│  - 按合同实现                                                    │
-│  - 自验                                                          │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-                    ┌───────────────────────┐
-                    │    决策门检查         │
-                    │  高风险 → 确认        │
-                    │  中风险 → 记录        │
-                    └───────────────────────┘
-                                │
-                                ▼
-                    ┌───────────────────────┐
-                    │     双重校验         │
-                    │  post-edit-verify    │
-                    └───────────────────────┘
-                                │
-                    ┌───────────┴───────────┐
-                    │                       │
-               验证通过                验证失败
-                    │                       │
-                    ▼                       ▼
-┌─────────────────────┐    ┌─────────────────────────────────────┐
-│   Builder 构建      │    │     自迭代闭环                      │
-│   - 冒烟测试        │    │     1. 错误分析                     │
-└─────────────────────┘    │     2. 依赖追踪                     │
-                            │     3. 约束更新                     │
-                            │     4. 验证复验                     │
-                            └─────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    Retro 复盘 ← 禁止跳过                         │
-│  - 任务完成记录                                                  │
-│  - 经验教训归档                                                  │
-│  - 约束更新（如需）                                              │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-                          交接报告
-```
+### R-0: 语言强制规范 — 所有思考过程与输出必须使用简体中文
+→ 见本文件开头详细说明
+
+### R-7: 禁止跳过 Coordinator
+一切任务（含代码修改、构建、诊断、复盘、查询分析）必须通过 Coordinator 生成合同并委派给子 Agent 执行。禁止主 agent 绕过 Coordinator 直接执行 Edit / Write / Bash / Task。
+
+### R-8: 合同必须
+Task-Executor 仅能修改合同 `files_to_modify` 指定的文件，合同有效期 30 分钟。
+
+### R-6: 完整工作流闭环
+每个任务必须走完：Coordinator → Plan → Task-Executor → Builder → Retro。
+
+### R-9: 网络搜索时间戳
+网络搜索前必须先执行 `date` 获取当前时间，将时间加入搜索关键词。
+
+### R-10: Builder 构建前工作区洁净检查
+Builder 执行构建前必须检查 `git status --porcelain`，如有未提交的源码变更需报告 WARNING。
+→ 详细事故: INC-2026-0506-001 (`.opencode/incidents/INC-2026-0506-001.md`)
+
+### P-01: 模型列表一致性
+AI 模型列表需在以下文件保持一致：`src/shared/constants.ts`、`src/renderer/pages/Welcome.tsx`、`src/renderer/pages/Settings.tsx`、`src/renderer/services/ai.ts`。
+→ 详细事故: INC-2026-0503-002 (`.opencode/incidents/INC-2026-0503-002.md`)
 
 ---
 
-## 危险命令处理
+## 约束文档
 
-| 风险等级 | 命令模式 | 处理方式 |
-|---------|---------|---------|
-| **绝对拦截** | `rm -rf /`, `mkfs`, `shutdown` | 直接拒绝 |
-| **高风险** | `rm `, `curl.*\|`, `chmod 777`, `dd` | 显示警告，等待确认 |
-| **中风险** | `git reset`, `git rebase` | 记录并放行 |
-| **低风险** | `git `, `npm `, `python ` | 检查参数后放行 |
+详细约束规则通过 `opencode.json` 的 `instructions` 字段引用，位于 `.opencode/constraints/` 目录：
+- `agent-system.md` — Agent 角色分离与工作区隔离
+- `arch-layering.md` — 三层架构依赖规则
+- `contract-mechanism.md` — 合同机制与生命周期
+- `tech-stack/typescript.md` — TypeScript 约束
+- `tech-stack/react.md` — React 编码约束
 
----
+合同模板：`.opencode/contracts/contract-schema.json`
 
-## 资源限制
-
-| 资源 | 限制 |
-|------|------|
-| Token/任务 | 180,000 |
-| 工具调用/任务 | 500 |
-| 循环迭代 | 200 |
-| 任务时长 | 30 分钟 |
-| 内存 | 2 GB |
+验证工具：`tools/validate-contract`（OpenCode 原生工具）
 
 ---
 
-## 约束文档体系
-
-### 架构约束
-| 文档 | 内容 |
-|------|------|
-| `harness-layers.md` | 六层架构规范 |
-| `operation-boundary.md` | 操作边界定义 |
-
-### 执行约束
-| 文档 | 内容 |
-|------|------|
-| `execution-loop.md` | 执行循环规范 |
-| `decision-points.md` | 决策点定义 |
-| `context-management.md` | 上下文管理 |
-
-### 技术约束
-| 技术栈 | 约束文档 |
-|--------|---------|
-| TypeScript | `tech-stack/typescript.md` |
-| React | `tech-stack/react.md` |
-| Electron | `tech-stack/electron.md` |
-| Tailwind CSS | `tech-stack/tailwindcss.md` |
-
----
-
-## 验证脚本
-
-| 脚本 | 用途 |
-|------|------|
-| `bash scripts/coordinator-guard.sh` | 工作流守卫：检查合同有效性、拦截违规操作 |
-| `bash scripts/retro-scaffold.sh` | 复盘脚手架：生成复盘报告、维护 incidents 目录 |
-| `bash scripts/auto-verify.sh` | 完整验证 |
-| `bash scripts/incremental-verify.sh` | 增量验证 |
-| `bash scripts/git-diff-analyzer.sh` | 变更分析 |
-| `bash scripts/verify_arch.sh` | 架构规则验证 |
-
----
-
-## 事故记录
-
-所有事故必须记录到 `incidents/` 目录下的对应文件中。
-
-**文件命名**：`YYYY-MM-DD_${事故类型}.md`
-
----
-
-## 版本历史
-
-| 版本 | 日期 | 变更 |
-|------|------|------|
-| v6.0.0 | 2026-05-06 | 更新合同规范为 JSON 格式，添加 R-10 合同格式规则 |
-| v5.0.0 | 2026-05-03 | 添加 R-9 网络搜索必须先获取动态时间戳规则 |
-| v4.0.0 | 2026-05-03 | 强制完整工作流：每个任务必须执行 Retro 复盘 |
-| v3.0.0 | 2026-05-03 | 严格角色边界：Coordinator 不写代码，Builder 不改源码，Crash-Doctor 只分析 |
-| v2.0.0 | 2026-04-30 | 全面升级：决策门、资源护栏、双重校验、自迭代闭环 |
-| v1.0.0 | 2026-04-29 | 初始版本 |
