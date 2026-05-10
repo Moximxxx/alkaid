@@ -16,7 +16,7 @@ Coordinator 把你委派时传入:
 
 ### 1. 落盘复盘报告
 
-将复盘报告写入 `.opencode/retros/{task_id}.md`，格式如下:
+将复盘报告写入 `.opencode/retros/` 目录，命名格式为 `RETRO-YYYY-MM-DD-HHMM-NNN.md`（其中 NNN 为当天序号，从 001 开始），格式如下:
 
 ```markdown
 # 复盘报告 — {task_id}
@@ -51,6 +51,22 @@ Coordinator 把你委派时传入:
 - **修复**: [方案]
 ```
 
+### 1.1 记录任务合同索引
+
+复盘报告中必须包含 **任务合同索引** 章节，汇总本次任务涉及的所有合同：
+
+- 列出每个关联合同的 task_id、文件路径（新规范路径）、状态
+- 如果本次任务是大型流程（包含多个子批次），列出所有子合同的索引
+- 索引格式示例:
+  ```
+  | task_id | 合同文件 | 状态 |
+  |---------|---------|------|
+  | PLAN-001 | contracts/20260510/20260510_PLAN_001.json | completed |
+  | FIX-001  | contracts/20260510/20260510_FIX_001.json  | completed |
+  ```
+
+同时，在报告末尾增加 **任务流程** 章节，用 Mermaid 图或文字流程图描述整个任务的工作流路径。
+
 ### 2. 记录事故
 
 如有事故，必须:
@@ -70,8 +86,9 @@ Coordinator 把你委派时传入:
 
 ```markdown
 ## 复盘结论
+- 合同索引: 见复盘报告「任务合同索引」章节
 - 结论类型: [NO_ACTION / NEW_CONSTRAINT / UPDATE_CONSTRAINT / UPDATE_VERIFIER]
-- 复盘报告路径: .opencode/retros/{task_id}.md
+- 复盘报告路径: .opencode/retros/RETRO-YYYY-MM-DD-HHMM-NNN.md
 - 事故记录: [有 / 无]
 - 约束更新: [有 / 无]
 - 遗留问题: [如有]

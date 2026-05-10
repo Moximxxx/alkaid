@@ -1,0 +1,34 @@
+{
+  "task_id": "FIX-001",
+  "timestamp": 1778429859,
+  "goal": "修复架构分层违规：ConfigManager 将 localStorage 替换为 fs 文件存储；删除 main 进程中不属于该层的摄像头服务（浏览器 API）；清理 main/index.ts 无用导出；修复 electron 代理服务器对 Claude API 的特殊处理支持。",
+  "files_to_modify": [
+    "src/main/config.ts",
+    "src/main/services/camera.ts",
+    "src/main/index.ts",
+    "electron/main.cjs"
+  ],
+  "constraints": [
+    "arch-layering",
+    "tech-stack/nodejs",
+    "contract-mechanism",
+    "agent-system"
+  ],
+  "tech_stack_constraints": [
+    "nodejs.md",
+    "typescript.md"
+  ],
+  "verification": [
+    "bun run typecheck",
+    "bun run test"
+  ],
+  "coverage_checklist": {
+    "config.ts localStorage替换为fs": "assert: ConfigManager 使用 fs.readFileSync/writeFileSync 存储 JSON 配置文件，不再引用 localStorage",
+    "main摄像头服务删除": "assert: src/main/services/camera.ts 被删除或标记移除，浏览器 API 不再出现在 main 进程",
+    "main/index.ts清理": "assert: 移除不再存在的 cameraService 导出，清理无用代码",
+    "代理服务器Claude支持": "assert: electron/main.cjs 代理服务器检测 provider 为 claude 时使用 /messages 端点和 x-api-key 鉴权头",
+    "类型检查通过": "assert: bun run typecheck 无错误",
+    "测试通过": "assert: bun run test 全部通过"
+  },
+  "status": "completed"
+}

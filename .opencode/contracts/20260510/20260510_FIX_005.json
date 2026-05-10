@@ -1,0 +1,33 @@
+{
+  "task_id": "FIX-005",
+  "timestamp": 1778429859,
+  "goal": "AI 服务整合：合并两个同名的 useAI（hooks/useAI.ts 硬编码 doubao 版本 vs services/ai.ts 多 provider 支持版本），统一使用功能更完整的 services/ai.ts 版本；更新所有调用方指向统一版本。",
+  "files_to_modify": [
+    "src/renderer/hooks/useAI.ts",
+    "src/renderer/hooks/useVideoChat.ts",
+    "src/renderer/pages/VideoChat.tsx",
+    "src/renderer/pages/Home.tsx"
+  ],
+  "constraints": [
+    "tech-stack/typescript",
+    "tech-stack/react",
+    "contract-mechanism"
+  ],
+  "tech_stack_constraints": [
+    "typescript.md",
+    "react.md"
+  ],
+  "verification": [
+    "bun run typecheck",
+    "bun run test"
+  ],
+  "coverage_checklist": {
+    "hooks/useAI.ts 标识废弃": "assert: hooks/useAI.ts 被标记为 @deprecated 或重定向到 services/ai.ts",
+    "useVideoChat 改用 services/ai": "assert: useVideoChat.ts 从 services/ai 导入 useAI 并传入正确的 AI 配置参数",
+    "VideoChat 页面改用 services/ai": "assert: VideoChat.tsx 从 services/ai 导入 useAI 并传入 settings 配置",
+    "Home 页面保持不变": "assert: Home.tsx 继续使用 services/ai 导入，不受影响",
+    "类型检查通过": "assert: bun run typecheck 无错误",
+    "测试全部通过": "assert: bun run test 全部通过"
+  },
+  "status": "completed"
+}

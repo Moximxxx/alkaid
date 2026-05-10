@@ -1,0 +1,23 @@
+{
+  "task_id": "FIX-006",
+  "timestamp": 1778429859,
+  "goal": "技术债清理：移除 src/renderer/pages/Home.tsx 中所有生产环境不需要的 console.log 调试日志。",
+  "files_to_modify": [
+    "src/renderer/pages/Home.tsx"
+  ],
+  "constraints": [
+    "tech-stack/typescript",
+    "contract-mechanism"
+  ],
+  "verification": [
+    "bun run typecheck",
+    "bun run test"
+  ],
+  "coverage_checklist": {
+    "移除所有 console.log 调试代码": "assert: Home.tsx 中无任意形式的 console.log 调用",
+    "保留正常功能不变": "assert: Home.tsx 的 UI 渲染和交互逻辑完全不受影响",
+    "类型检查通过": "assert: bun run typecheck 无错误",
+    "测试全部通过": "assert: bun run test 全部通过"
+  },
+  "status": "completed"
+}

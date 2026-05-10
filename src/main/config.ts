@@ -1,23 +1,42 @@
 // 配置管理
 
+/// <reference types="node" />
+
+import fs from 'fs'
+import path from 'path'
 import type { AppConfig } from '@shared/types'
 import { DEFAULT_APP_CONFIG } from '@shared/constants'
 
-const CONFIG_KEY = 'camera-ai-config'
+// 配置存储路径：优先使用 APPDATA 环境变量（Windows），回退到当前工作目录
+const CONFIG_DIR = path.join(process.env.APPDATA || process.cwd(), 'alkaid')
+const CONFIG_PATH = path.join(CONFIG_DIR, 'config.json')
 
 export class ConfigManager {
   private config: AppConfig
 
   constructor() {
+    // 确保配置目录存在
+    this.ensureConfigDir()
     this.config = this.loadConfig()
+  }
+
+  // 确保配置目录存在
+  private ensureConfigDir(): void {
+    try {
+      if (!fs.existsSync(CONFIG_DIR)) {
+        fs.mkdirSync(CONFIG_DIR, { recursive: true })
+      }
+    } catch (error) {
+      console.error('创建配置目录失败:', error)
+    }
   }
 
   // 加载配置
   private loadConfig(): AppConfig {
     try {
-      const saved = localStorage.getItem(CONFIG_KEY)
-      if (saved) {
-        return { ...DEFAULT_APP_CONFIG, ...JSON.parse(saved) }
+      if (fs.existsSync(CONFIG_PATH)) {
+        const raw = fs.readFileSync(CONFIG_PATH, 'utf-8')
+        return { ...DEFAULT_APP_CONFIG, ...JSON.parse(raw) }
       }
     } catch (error) {
       console.error('加载配置失败:', error)
@@ -28,7 +47,8 @@ export class ConfigManager {
   // 保存配置
   private saveConfig(): void {
     try {
-      localStorage.setItem(CONFIG_KEY, JSON.stringify(this.config))
+      this.ensureConfigDir()
+      fs.writeFileSync(CONFIG_PATH, JSON.stringify(this.config, null, 2), 'utf-8')
     } catch (error) {
       console.error('保存配置失败:', error)
     }

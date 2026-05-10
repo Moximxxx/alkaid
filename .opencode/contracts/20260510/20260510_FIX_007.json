@@ -1,0 +1,21 @@
+{
+  "task_id": "FIX-007",
+  "timestamp": 1778429859,
+  "goal": "更新 AGENTS.md 中 code-reviewer 和 builder 子 Agent 的模型配置：将无法使用的 MiniMax M2.7-HS 模型替换为 DeepSeek V4 Flash，确保子 Agent 可正常调用。",
+  "files_to_modify": [
+    "AGENTS.md"
+  ],
+  "constraints": [
+    "agent-system",
+    "contract-mechanism"
+  ],
+  "verification": [
+    "bun run typecheck"
+  ],
+  "coverage_checklist": {
+    "code-reviewer模型更新": "assert: AGENTS.md 中 code-reviewer 的模型字段从 M2.7-HS 改为 V4 Flash",
+    "builder模型更新": "assert: AGENTS.md 中 builder 的模型字段从 M2.7-HS 改为 V4 Flash",
+    "其他Agent不受影响": "assert: coordinator/plan/task-executor/crash-doctor/retro 的模型配置保持不变"
+  },
+  "status": "completed"
+}

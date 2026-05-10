@@ -16,8 +16,8 @@
   "properties": {
     "task_id": {
       "type": "string",
-      "pattern": "^[A-Za-z0-9]+-\\d+$",
-      "description": "任务唯一标识，格式 {前缀}-{序号}，如 TASK-001"
+      "pattern": "^[A-Za-z0-9]+-\\d+$|^\\d{8}_[A-Z]+_\\d{3}$",
+      "description": "任务唯一标识，格式 {前缀}-{序号}（如 TASK-001）或 YYYYMMDD_TYPE_NNN（如 20260510_NORM_001）"
     },
     "timestamp": {
       "type": "integer",

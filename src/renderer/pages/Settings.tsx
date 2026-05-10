@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSettings, type Settings } from "@/hooks/useSettings"
+import { APP_NAME, APP_VERSION } from '@shared/constants'
 
 const VISION_MODELS = [
   { value: "doubao-2.0-vision-pro", label: "豆包 2.0 视觉专业版" },
@@ -20,6 +21,7 @@ const TEXT_PROVIDERS = [
   { value: "xiaomi", label: "Xiaomi MiMo" },
   { value: "kimi", label: "Kimi" },
   { value: "deepseek", label: "DeepSeek" },
+  { value: "claude", label: "Claude" },
 ] as const
 
 const TEXT_MODELS = {
@@ -239,7 +241,7 @@ export function SettingsPage() {
               <CardDescription>应用程序信息</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <p><strong>版本：</strong>0.2.0</p>
+              <p><strong>版本：</strong>{APP_VERSION}</p>
               <p><strong>描述：</strong>智能摄像头AI助手</p>
               <p className="text-muted-foreground text-sm mt-4">
                 摇光是一个基于 Electron + React 的多模态AI助手，支持拍照分析、实时视频通话和AI对话功能。

@@ -1,0 +1,36 @@
+{
+  "task_id": "FIX-004",
+  "timestamp": 1778429859,
+  "goal": "恢复摄像头核心功能：重写 useCamera hook 使其不再依赖 main 进程 cameraService（已被清空），直接在渲染进程中使用 navigator.mediaDevices；恢复 VideoStream 组件的摄像头初始化；统一 VideoChat 页面的摄像头初始化方式。",
+  "files_to_modify": [
+    "src/renderer/hooks/useCamera.ts",
+    "src/renderer/components/VideoStream.tsx",
+    "src/renderer/pages/VideoChat.tsx"
+  ],
+  "constraints": [
+    "tech-stack/typescript",
+    "tech-stack/react",
+    "arch-layering",
+    "contract-mechanism"
+  ],
+  "tech_stack_constraints": [
+    "typescript.md",
+    "react.md"
+  ],
+  "verification": [
+    "bun run typecheck",
+    "bun run test"
+  ],
+  "coverage_checklist": {
+    "useCamera 不再引用 main 进程 cameraService": "assert: useCamera.ts 中无任何 import from '@/main/services/camera' 引用",
+    "useCamera start 功能恢复": "assert: start() 调用 navigator.mediaDevices.getUserMedia() 并返回 stream",
+    "useCamera stop 功能恢复": "assert: stop() 停止所有 tracks 并清理 stream",
+    "useCamera captureFrame 功能恢复": "assert: captureFrame() 使用 canvas 捕获视频帧并返回 base64",
+    "useCamera 设备列表获取恢复": "assert: fetchDevices() 调用 enumerateDevices() 并过滤 videoinput",
+    "VideoStream 组件恢复摄像头初始化": "assert: VideoStream.tsx 使用 useCamera hook 初始化摄像头",
+    "VideoChat 页面统一摄像头初始化": "assert: VideoChat.tsx 不再使用内联 getUserMedia，改为使用 useCamera hook",
+    "类型检查通过": "assert: bun run typecheck 无错误",
+    "测试全部通过": "assert: bun run test 全部通过"
+  },
+  "status": "completed"
+}

@@ -1,0 +1,24 @@
+{
+  "task_id": "FIX-003",
+  "timestamp": 1778429859,
+  "goal": "修复 src/shared/__tests__/constants.test.ts 中断言与 src/shared/constants.ts 实际值不匹配的问题，使测试全部通过。",
+  "files_to_modify": [
+    "src/shared/__tests__/constants.test.ts"
+  ],
+  "constraints": [
+    "tech-stack/typescript",
+    "contract-mechanism"
+  ],
+  "tech_stack_constraints": [
+    "typescript.md"
+  ],
+  "verification": [
+    "bun run test"
+  ],
+  "coverage_checklist": {
+    "DEFAULT_AI_CONFIG model 断言修复": "assert: model 断言值从 'gpt-4-vision-preview' 改为 'gpt-4.1'",
+    "DEFAULT_AI_CONFIG baseUrl 字段添加": "assert: 测试 toEqual 断言中包含 baseUrl: '' 字段",
+    "全部测试通过": "assert: bun run test 全部通过，无失败用例"
+  },
+  "status": "completed"
+}

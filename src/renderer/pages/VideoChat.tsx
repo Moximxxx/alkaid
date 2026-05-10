@@ -1,30 +1,37 @@
-import React, { useState, useCallback } from "react"
+import React, { useState, useCallback, useRef, useEffect } from "react"
 import { Camera, Send, Loader2, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useSettings } from "@/hooks/useSettings"
-import { useAI } from "@/hooks/useAI"
+import { useAI } from "../services/ai"
+import { useCamera } from "@/hooks/useCamera"
 
 export function VideoChatPage() {
   const { settings } = useSettings()
-  const { messages, loading, sendMessage } = useAI()
+  const { messages, loading, sendMessage } = useAI({
+    provider: settings.textProvider,
+    apiKey: settings.textApiKey,
+    model: settings.textModel,
+  })
   const [input, setInput] = useState("")
   const [image, setImage] = useState<string | null>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  const { stream, isReady, captureFrame } = useCamera({ autoStart: true })
+
+  // 绑定 stream 到 video 元素
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream
+    }
+  }, [stream])
 
   const handleCapture = useCallback(() => {
-    const video = document.querySelector("video")
-    if (video) {
-      const canvas = document.createElement("canvas")
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-      const ctx = canvas.getContext("2d")
-      if (ctx) {
-        ctx.drawImage(video, 0, 0)
-        const dataUrl = canvas.toDataURL("image/jpeg")
-        setImage(dataUrl)
-      }
+    const frame = captureFrame(videoRef.current || undefined)
+    if (frame) {
+      setImage(frame)
     }
-  }, [])
+  }, [captureFrame])
 
   const handleSend = async () => {
     if (!input.trim()) return
@@ -56,20 +63,11 @@ export function VideoChatPage() {
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-[7fr_3fr]">
         <div className="relative bg-black lg:static">
           <video
+            ref={videoRef}
             autoPlay
             playsInline
             muted
             className="w-full h-full object-cover"
-            ref={(el) => {
-              if (el && !el.srcObject) {
-                navigator.mediaDevices
-                  .getUserMedia({ video: true })
-                  .then((stream) => {
-                    el.srcObject = stream
-                  })
-                  .catch(console.error)
-              }
-            }}
           />
           {image && (
             <img
@@ -79,13 +77,13 @@ export function VideoChatPage() {
             />
           )}
           <div className="absolute top-4 left-4 lg:hidden">
-            <Button size="sm" variant="secondary" onClick={handleCapture}>
+            <Button size="sm" variant="secondary" onClick={handleCapture} disabled={!isReady}>
               <Camera className="w-4 h-4 mr-1" />
               捕获
             </Button>
           </div>
           <div className="hidden lg:block absolute top-4 right-4">
-            <Button size="sm" variant="secondary" onClick={handleCapture}>
+            <Button size="sm" variant="secondary" onClick={handleCapture} disabled={!isReady}>
               <Camera className="w-4 h-4 mr-1" />
               捕获
             </Button>

@@ -1,0 +1,23 @@
+{
+  "task_id": "FIX-008",
+  "timestamp": 1778429859,
+  "goal": "修改 opencode.json 中 code-reviewer 和 builder 子 Agent 的模型配置，将 minimax/minimax-m2-7-highspeed 替换为 deepseek/deepseek-v4-flash，确保子 Agent 可正常调用。同时同步更新 AGENTS.md 中的对应模型描述。",
+  "files_to_modify": [
+    ".opencode/opencode.json",
+    "AGENTS.md"
+  ],
+  "constraints": [
+    "agent-system",
+    "contract-mechanism"
+  ],
+  "verification": [
+    "确认配置文件修改正确"
+  ],
+  "coverage_checklist": {
+    "opencode.json code-reviewer模型更新": "assert: opencode.json 第104行 code-reviewer model 从 minimax/minimax-m2-7-highspeed 改为 deepseek/deepseek-v4-flash",
+    "opencode.json builder模型更新": "assert: opencode.json 第65行 builder model 从 minimax/minimax-m2-7-highspeed 改为 deepseek/deepseek-v4-flash",
+    "AGENTS.md同步": "assert: AGENTS.md 中 builder 和 code-reviewer 的模型字段已同步为 V4 Flash",
+    "其他配置不变": "assert: opencode.json 中其他 Agent 和 AGENTS.md 中其他 Agent 的配置保持不变"
+  },
+  "status": "completed"
+}

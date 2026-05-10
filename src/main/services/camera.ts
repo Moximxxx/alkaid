@@ -1,72 +1,13 @@
-// 摄像头管理服务
+// ================================================================
+// 摄像头管理服务（暂被注释 — 浏览器 API 不可用于 Electron 主进程）
+// 后续批次二会在渲染进程中重写摄像头功能
+// ================================================================
+//
+// 保留文件骨架以避免 import 断链，所有浏览器 API 相关代码已移除
 
 export class CameraService {
-  private stream: MediaStream | null = null
-  private videoElement: HTMLVideoElement | null = null
-
-  // 初始化摄像头
-  async initialize(deviceId?: string): Promise<boolean> {
-    try {
-      const constraints: MediaStreamConstraints = {
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          frameRate: { ideal: 30 },
-          ...(deviceId ? { deviceId: { exact: deviceId } } : {}),
-        },
-        audio: false,
-      }
-
-      this.stream = await navigator.mediaDevices.getUserMedia(constraints)
-      return true
-    } catch (error) {
-      console.error('摄像头初始化失败:', error)
-      return false
-    }
-  }
-
-  // 获取视频流
-  getStream(): MediaStream | null {
-    return this.stream
-  }
-
-  // 捕获当前帧
-  captureFrame(): string | null {
-    if (!this.videoElement) return null
-
-    const canvas = document.createElement('canvas')
-    canvas.width = this.videoElement.videoWidth
-    canvas.height = this.videoElement.videoHeight
-
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return null
-
-    ctx.drawImage(this.videoElement, 0, 0)
-    return canvas.toDataURL('image/jpeg', 0.8)
-  }
-
-  // 获取可用设备列表
-  async getDevices(): Promise<MediaDeviceInfo[]> {
-    const devices = await navigator.mediaDevices.enumerateDevices()
-    return devices.filter(device => device.kind === 'videoinput')
-  }
-
-  // 停止摄像头
-  stop(): void {
-    if (this.stream) {
-      this.stream.getTracks().forEach(track => track.stop())
-      this.stream = null
-    }
-  }
-
-  // 绑定视频元素
-  bindVideoElement(element: HTMLVideoElement): void {
-    this.videoElement = element
-    if (this.stream) {
-      element.srcObject = this.stream
-    }
-  }
+  // 占位 — 后续在渲染进程实现
 }
 
-// 导出单例
+// 占位导出
 export const cameraService = new CameraService()

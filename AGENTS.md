@@ -142,8 +142,8 @@ FUNCTION main(user_task):
 | coordinator | primary | V4 Pro | 任务入口与出口：拆分、合同、委派、验证 | `agents/coordinator.md` |
 | plan | subagent | V4 Flash | 只读分析、方案评审 | `agents/plan.md` |
 | task-executor | subagent | V4 Flash | 代码编写（合同范围内） | `agents/task-executor.md` |
-| builder | subagent | M2.7-HS | 构建、部署、冒烟测试 | `agents/builder.md` |
-| code-reviewer | subagent | M2.7-HS | 代码审查 | `agents/code-reviewer.md` |
+| builder | subagent | V4 Flash | 构建、部署、冒烟测试 | `agents/builder.md` |
+| code-reviewer | subagent | V4 Flash | 代码审查 | `agents/code-reviewer.md` |
 | crash-doctor | subagent | V4 Pro | 崩溃诊断 | `agents/crash-doctor.md` |
 | retro | subagent | V4 Pro | 复盘、约束更新 | `agents/retro.md` |
 

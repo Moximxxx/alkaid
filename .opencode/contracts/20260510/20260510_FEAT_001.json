@@ -1,0 +1,26 @@
+{
+  "task_id": "FEAT-001",
+  "timestamp": 1778429859,
+  "goal": "完善工作流基础设施：新增合同命名规范（日期文件夹+YYYYMMDD_TYPE_NNN格式）、按新规范整理现有合同文件、更新复盘智能体描述使其记录任务合同索引、更新复盘文档模板包含合同索引部分。",
+  "files_to_modify": [
+    ".opencode/constraints/contract-mechanism.md",
+    ".opencode/contracts/contract-schema.json",
+    ".opencode/agents/retro.md",
+    ".opencode/retros/_TEMPLATE.md"
+  ],
+  "constraints": [
+    "agent-system",
+    "contract-mechanism"
+  ],
+  "verification": [
+    "bun run typecheck"
+  ],
+  "coverage_checklist": {
+    "contract-mechanism 新增命名规范规则": "assert: contract-mechanism.md 新增 R-05 规则规定合同按日期子文件夹 + YYYYMMDD_TYPE_NNN.json 格式命名",
+    "contract-schema task_id 模式更新": "assert: contract-schema.json 的 task_id pattern 更新为兼容新命名格式",
+    "retro.md 增加合同索引记录要求": "assert: agents/retro.md 职责部分增加记录任务合同索引的要求",
+    "_TEMPLATE.md 增加合同索引章节": "assert: retros/_TEMPLATE.md 模板中增加合同索引章节",
+    "类型检查通过": "assert: bun run typecheck 无错误"
+  },
+  "status": "completed"
+}

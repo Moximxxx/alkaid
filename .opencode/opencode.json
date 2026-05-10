@@ -13,8 +13,8 @@
   "model": "deepseek/deepseek-v4-flash",
   "small_model": "minimax/minimax-m2-7-highspeed",
   "permission": {
-    "edit": "ask",
-    "bash": "ask",
+    "edit": "allow",
+    "bash": "allow",
     "delete": "ask",
     "task": {
       "*": "allow"
@@ -62,7 +62,7 @@
     "builder": {
       "description": "构建者，负责执行构建、部署、验证。不改源码。",
       "mode": "subagent",
-      "model": "minimax/minimax-m2-7-highspeed",
+      "model": "deepseek/deepseek-v4-flash",
       "temperature": 0.1,
       "steps": 15,
       "prompt": "{file:./agents/builder.md}",
@@ -101,7 +101,7 @@
     "code-reviewer": {
       "description": "代码审查者，审查代码质量、安全性和最佳实践。只读。",
       "mode": "subagent",
-      "model": "minimax/minimax-m2-7-highspeed",
+      "model": "deepseek/deepseek-v4-flash",
       "temperature": 0.1,
       "prompt": "{file:./agents/code-reviewer.md}",
       "permission": {

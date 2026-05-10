@@ -31,7 +31,8 @@ describe('默认配置', () => {
     expect(DEFAULT_AI_CONFIG).toEqual({
       provider: 'openai',
       apiKey: '',
-      model: 'gpt-4-vision-preview',
+      model: 'gpt-4.1',
+      baseUrl: '',
     })
   })
 })

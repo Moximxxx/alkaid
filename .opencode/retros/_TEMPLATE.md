@@ -1,3 +1,9 @@
+<!--
+复盘报告命名规则: RETRO-YYYY-MM-DD-HHMM-NNN.md
+  YYYY-MM-DD = 日期, HHMM = 时间(24h), NNN = 当天序号(001起)
+  示例: RETRO-2026-05-10-1721-001.md
+-->
+
 # 复盘报告 — {task_id}
 
 **日期**: YYYY-MM-DD HH:MM
@@ -37,3 +43,26 @@
 - **现象**: [描述]
 - **根因**: [分析]
 - **修复**: [方案]
+
+## 任务合同索引
+
+| task_id | 合同文件 | 状态 |
+|---------|---------|------|
+| {task_id} | contracts/{YYYYMMDD}/{YYYYMMDD}_{TYPE}_{NNN}.json | completed / failed |
+
+## 任务流程
+
+```mermaid
+graph LR
+    A[用户需求] --> B[PLAN 分析]
+    B --> C[合同生成]
+    C --> D[执行]
+    D --> E{审查}
+    E -->|PASS| F[构建]
+    E -->|FAIL| D
+    F -->|PASS| G[复盘]
+    F -->|FAIL| H[Crash-Doctor]
+    H --> D
+```
+
+（或文字版流程图，描述本次任务的完整执行路径）

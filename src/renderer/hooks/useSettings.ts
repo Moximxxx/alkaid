@@ -4,7 +4,7 @@ export interface Settings {
   visionProvider: "doubao_vision"
   visionApiKey: string
   visionModel: string
-  textProvider: "doubao" | "openai" | "glm" | "minimax" | "xiaomi" | "kimi" | "deepseek"
+  textProvider: "doubao" | "openai" | "glm" | "minimax" | "xiaomi" | "kimi" | "deepseek" | "claude"
   textApiKey: string
   textModel: string
   setupCompleted?: boolean

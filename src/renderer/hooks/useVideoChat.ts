@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useRef } from 'react'
 import { useCamera } from './useCamera'
-import { useAI } from './useAI'
+import { useAI } from '../services/ai'
+import { useSettings } from './useSettings'
 // import { visionService } from '@/main/services/vision'
 import type { RecognitionResult } from '@shared/types'
 
@@ -49,11 +50,17 @@ export const useVideoChat = (options: UseVideoChatOptions = {}): UseVideoChatRet
     stopAutoCapture,
   } = useCamera({ autoStart: false })
   
+  const { settings } = useSettings()
+
   const {
     messages,
     loading: aiLoading,
     sendMessage: sendAIMessage,
-  } = useAI()
+  } = useAI({
+    provider: settings.textProvider,
+    apiKey: settings.textApiKey,
+    model: settings.textModel,
+  })
   
   const [isActive, setIsActive] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)

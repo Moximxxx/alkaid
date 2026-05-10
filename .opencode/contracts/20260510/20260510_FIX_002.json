@@ -1,0 +1,31 @@
+{
+  "task_id": "FIX-002",
+  "timestamp": 1778429859,
+  "goal": "修复模型列表一致性（P-01 约束违规）：Settings.tsx 和 Welcome.tsx 的 TEXT_PROVIDERS 缺少 claude 导致用户无法选择 Claude 提供商；修复 useSettings.ts 中 textProvider 类型缺少 claude；修复 Settings.tsx 中版本号与 constants.ts 不一致。",
+  "files_to_modify": [
+    "src/renderer/pages/Settings.tsx",
+    "src/renderer/pages/Welcome.tsx",
+    "src/renderer/hooks/useSettings.ts"
+  ],
+  "constraints": [
+    "tech-stack/typescript",
+    "tech-stack/react",
+    "contract-mechanism"
+  ],
+  "tech_stack_constraints": [
+    "typescript.md",
+    "react.md"
+  ],
+  "verification": [
+    "bun run typecheck",
+    "bun run test"
+  ],
+  "coverage_checklist": {
+    "Settings.tsx 添加 claude 到 TEXT_PROVIDERS": "assert: Settings.tsx TEXT_PROVIDERS 数组包含 claude 条目",
+    "Welcome.tsx 添加 claude 到 TEXT_PROVIDERS": "assert: Welcome.tsx TEXT_PROVIDERS 数组包含 claude 条目",
+    "useSettings.ts textProvider 类型添加 claude": "assert: useSettings.ts 中 textProvider 的联合类型包含 'claude'",
+    "Settings.tsx 版本号与 constants.ts 一致": "assert: Settings.tsx 中显示的版本号与 constants.ts 中的 APP_VERSION 一致",
+    "类型检查通过": "assert: bun run typecheck 无错误"
+  },
+  "status": "completed"
+}

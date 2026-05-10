@@ -17,7 +17,6 @@ interface Message {
 export function HomePage() {
   const { settings } = useSettings()
   const [streamingId, setStreamingId] = useState<string | null>(null)
-  console.log('[Home] streamingId changed:', streamingId)
   const { messages: aiMessages, loading, sendMessage, setMessageUpdateCallback } = useAI({
     provider: settings.textProvider,
     apiKey: settings.textApiKey,
@@ -45,18 +44,13 @@ export function HomePage() {
   }, [messages])
 
   useEffect(() => {
-    console.log('[Home] messageUpdateCallback being set, current messages:', messages.length)
     setMessageUpdateCallback((msgs) => {
-      console.log('[Home] messageUpdateCallback invoked, msgs:', msgs.length, msgs.map(m => ({ id: m.id, role: m.role, contentLength: m.content.length })))
       for (const msg of msgs) {
         setMessages((prev) => {
-          console.log('[Home] setMessages prev:', prev.length, 'processing msg id:', msg.id)
           const exists = prev.some((m) => m.id === msg.id)
           if (exists) {
-            console.log('[Home] Updating existing message:', msg.id)
             return prev.map((m) => (m.id === msg.id ? { ...m, content: msg.content } : m))
           }
-          console.log('[Home] Adding new message:', msg.id)
           return [...prev, { id: msg.id, role: msg.role as "user" | "assistant", content: msg.content }]
         })
       }
@@ -64,7 +58,6 @@ export function HomePage() {
   }, [setMessageUpdateCallback])
 
   const handleSend = async () => {
-    console.log('[Home] handleSend called', { content: input.trim() })
     if (!input.trim()) return
 
     const userMessage: Message = {
@@ -81,9 +74,7 @@ export function HomePage() {
       isLoading: true,
     }
 
-    console.log('[Home] handleSend called', { content: input.trim(), tempLoadingId })
     setMessages((prev) => [...prev, userMessage, loadingMessage])
-    console.log('[Home] Messages after send:', messages)
     setStreamingId(tempLoadingId)
     const contentToSend = input.trim()
     setInput("")
@@ -109,15 +100,6 @@ export function HomePage() {
     }
   }
 
-  useEffect(() => {
-    console.log('[Home] Messages container debug:', {
-      scrollHeight: messagesEndRef.current?.parentElement?.scrollHeight,
-      scrollTop: messagesEndRef.current?.parentElement?.scrollTop,
-      clientHeight: messagesEndRef.current?.parentElement?.clientHeight,
-      offsetHeight: messagesEndRef.current?.parentElement?.offsetHeight,
-    })
-  }, [messages])
-
   return (
     <div className="flex flex-col" style={{ height: "calc(100vh - 64px)" }}>
       {/* Chat Area - 占满剩余空间 */}
@@ -130,7 +112,6 @@ export function HomePage() {
                 message.role === "user" ? "flex-row-reverse" : "flex-row"
               }`}
             >
-              {(() => { console.log('[Home] Rendering message:', message.id, message.role, message.content.length); return null; })()}
               {message.role === "assistant" && (
                 <Avatar className="h-8 w-8">
                   <AvatarFallback>

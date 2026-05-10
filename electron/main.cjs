@@ -136,14 +136,14 @@ function startProxyServer() {
     if (req.method === 'OPTIONS' && req.url === '/api/ai/chat') {
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, anthropic-version')
       res.end()
       return
     }
     if (req.method === 'POST' && req.url === '/api/ai/chat') {
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, anthropic-version')
       let body = ''
       req.on('data', chunk => { body += chunk })
       req.on('end', async () => {
@@ -156,16 +156,27 @@ function startProxyServer() {
             return
           }
 
-          const apiUrl = `${providerConfig.baseUrl}/chat/completions`
+          const isClaude = provider === 'claude'
+          const apiUrl = isClaude
+            ? `${providerConfig.baseUrl}/messages`
+            : `${providerConfig.baseUrl}/chat/completions`
           console.log('[Proxy] Forwarding to:', apiUrl)
+
+          const headers = {
+            'Content-Type': 'application/json',
+            ...(isClaude
+              ? { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' }
+              : { 'Authorization': `Bearer ${apiKey}` }),
+          }
+
+          const body = isClaude
+            ? { model, max_tokens: 4096, messages, stream }
+            : { model, messages, stream }
 
           const upstream = await fetch(apiUrl, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({ model, messages, stream }),
+            headers,
+            body: JSON.stringify(body),
           })
 
           if (stream) {

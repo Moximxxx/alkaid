@@ -64,6 +64,27 @@ Edit/Write 操作会触发 `coordinator-guard.sh` 检查：
 
 将 `status` 从 `in_progress` 改为 `completed`。
 
+### R-05: 合同命名规范
+
+合同文件必须按照以下规范命名和组织：
+
+1. **目录结构**: 按日期分文件夹，格式为 `.opencode/contracts/YYYYMMDD/`
+2. **文件名格式**: `YYYYMMDD_TYPE_NNN.json`
+   - `YYYYMMDD`: 创建合同的日期
+    - `TYPE`: 任务类型缩写，基于子 Agent 职责：
+      - `PLAN` — 分析计划（plan 子 Agent）
+      - `FIX` — 代码修复/修改（task-executor 子 Agent）
+      - `FEAT` — 需求开发（task-executor 子 Agent）
+      - `BUILD` — 构建部署（builder 子 Agent）
+      - `REVIEW` — 代码审查（code-reviewer 子 Agent）
+      - `RETRO` — 复盘（retro 子 Agent）
+      - `DOCTOR` — 崩溃诊断（crash-doctor 子 Agent）
+   - `NNN`: 3 位数字编号，从 001 开始
+3. **task_id**: 应与文件名中的 `TYPE_NNN` 部分对应，格式为 `TYPE-NNN`（如 `FIX-001`）
+4. **示例**: `contracts/20260510/20260510_FIX_001.json` → `task_id: "FIX-001"`
+
+**注意**: 旧格式的合同文件（直接放在 contracts/ 根目录）将在下次整理时迁移。
+
 ## 验证方法
 
 ```bash

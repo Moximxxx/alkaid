@@ -1,0 +1,53 @@
+{
+  "task_id": "PLAN-001",
+  "timestamp": 1778429859,
+  "goal": "全面分析项目架构与代码质量，识别所有需要修复的问题（架构违规、功能失效、测试失败、代码重复、模型列表不一致等），评估影响范围，规划修复优先级与策略，推荐子Agent和执行路径。",
+  "files_to_modify": [
+    "src/main/config.ts",
+    "src/main/services/camera.ts",
+    "src/main/services/vision.ts",
+    "src/main/services/ai.ts",
+    "src/main/index.ts",
+    "src/renderer/hooks/useCamera.ts",
+    "src/renderer/hooks/useAI.ts",
+    "src/renderer/hooks/useVideoChat.ts",
+    "src/renderer/services/ai.ts",
+    "src/renderer/components/VideoStream.tsx",
+    "src/renderer/components/VideoChat.tsx",
+    "src/renderer/pages/Settings.tsx",
+    "src/renderer/pages/Welcome.tsx",
+    "src/renderer/pages/Home.tsx",
+    "src/shared/constants.ts",
+    "src/shared/types.ts",
+    "src/shared/__tests__/constants.test.ts",
+    "electron/main.cjs",
+    "electron/preload.cjs"
+  ],
+  "constraints": [
+    "agent-system",
+    "arch-layering",
+    "contract-mechanism",
+    "tech-stack/typescript",
+    "tech-stack/react",
+    "tech-stack/nodejs"
+  ],
+  "tech_stack_constraints": [
+    "typescript.md",
+    "react.md",
+    "nodejs.md"
+  ],
+  "verification": [
+    "读取plan回传的完整分析报告"
+  ],
+  "coverage_checklist": {
+    "架构分层违规检查": "assert: 识别所有跨层违规引用（main进程中的浏览器API）",
+    "功能失效范围评估": "assert: 评估useCamera/VideoStream等注释代码的恢复方案",
+    "模型列表一致性检查": "assert: 给出Settings/Welcome与constants.ts模型列表对齐方案",
+    "测试失败修复策略": "assert: 给出constants.test.ts断言修复方案",
+    "代码重复分析": "assert: 分析两套useAI的整合策略",
+    "Electron进程架构评估": "assert: 评估main.cjs与src/main/的职责划分",
+    "修复优先级排序": "assert: 按严重程度给出修复优先级与分批建议",
+    "推荐子Agent路径": "assert: 给出各修复项应委派哪个子Agent执行的建议"
+  },
+  "status": "completed"
+}

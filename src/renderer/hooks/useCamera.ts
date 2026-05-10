@@ -1,7 +1,6 @@
-// 摄像头Hook
+// 摄像头Hook - 渲染进程直接使用浏览器 API
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-// import { cameraService } from '@/main/services/camera'
 
 interface UseCameraOptions {
   autoStart?: boolean
@@ -16,7 +15,7 @@ interface UseCameraReturn {
   start: () => Promise<boolean>
   stop: () => void
   switchDevice: (deviceId: string) => Promise<boolean>
-  captureFrame: () => string | null
+  captureFrame: (videoElement?: HTMLVideoElement) => string | null
   startAutoCapture: (interval: number, onCapture: (frame: string) => void) => void
   stopAutoCapture: () => void
   isCapturing: boolean
@@ -31,77 +30,108 @@ export const useCamera = (options: UseCameraOptions = {}): UseCameraReturn => {
   const [isCapturing, setIsCapturing] = useState(false)
   const captureTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const captureCallbackRef = useRef<((frame: string) => void) | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
 
   // 获取设备列表
   const fetchDevices = useCallback(async () => {
-    // try {
-    //   const deviceList = await cameraService.getDevices()
-    //   setDevices(deviceList)
-    // } catch (err) {
-    //   console.error('获取设备列表失败:', err)
-    // }
+    try {
+      const allDevices = await navigator.mediaDevices.enumerateDevices()
+      setDevices(allDevices.filter(d => d.kind === 'videoinput'))
+    } catch (err) {
+      console.error('获取设备列表失败:', err)
+    }
   }, [])
 
   // 启动摄像头
   const start = useCallback(async () => {
-    // try {
-    //   setError(null)
-    //   const success = await cameraService.initialize(deviceId)
-    //   if (success) {
-    //     const newStream = cameraService.getStream()
-    //     setStream(newStream)
-    //     setIsReady(true)
-    //     return true
-    //   } else {
-    //     setError('摄像头初始化失败')
-    //     return false
-    //   }
-    // } catch (err: any) {
-    //   setError(err.message || '摄像头启动失败')
-    //   return false
-    // }
-    return false
+    try {
+      setError(null)
+      // 停止已有流
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop())
+      }
+
+      const constraints: MediaStreamConstraints = {
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 30 },
+          ...(deviceId ? { deviceId: { exact: deviceId } } : {}),
+        },
+        audio: false,
+      }
+
+      const newStream = await navigator.mediaDevices.getUserMedia(constraints)
+      setStream(newStream)
+      streamRef.current = newStream
+      setIsReady(true)
+      return true
+    } catch (err: any) {
+      setError(err.message || '摄像头启动失败')
+      return false
+    }
   }, [deviceId])
 
   // 停止摄像头
   const stop = useCallback(() => {
-    // cameraService.stop()
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop())
+    }
+    streamRef.current = null
     setStream(null)
     setIsReady(false)
   }, [])
 
   // 切换设备
   const switchDevice = useCallback(async (newDeviceId: string) => {
-    // stop()
-    // const success = await cameraService.initialize(newDeviceId)
-    // if (success) {
-    //   const newStream = cameraService.getStream()
-    //   setStream(newStream)
-    //   setIsReady(true)
-    //   return true
-    // }
-    return false
-  }, [stop])
+    // 停止当前流
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop())
+    }
+    streamRef.current = null
+    setStream(null)
+    setIsReady(false)
+
+    try {
+      const constraints: MediaStreamConstraints = {
+        video: { deviceId: { exact: newDeviceId } },
+        audio: false,
+      }
+      const newStream = await navigator.mediaDevices.getUserMedia(constraints)
+      setStream(newStream)
+      streamRef.current = newStream
+      setIsReady(true)
+      return true
+    } catch (err: any) {
+      setError(err.message || '切换摄像头失败')
+      return false
+    }
+  }, [])
 
   // 捕获帧
-  const captureFrame = useCallback(() => {
-    // return cameraService.captureFrame()
-    return null
+  const captureFrame = useCallback((videoElement?: HTMLVideoElement): string | null => {
+    if (!streamRef.current) return null
+
+    const video = videoElement || (() => {
+      const v = document.createElement('video')
+      v.srcObject = streamRef.current
+      v.play()
+      return v
+    })()
+
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth || 1280
+    canvas.height = video.videoHeight || 720
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return null
+
+    ctx.drawImage(video, 0, 0)
+    return canvas.toDataURL('image/jpeg', 0.8)
   }, [])
 
-  // 开始自动捕获
-  const startAutoCapture = useCallback((interval: number, onCapture: (frame: string) => void) => {
-    stopAutoCapture()
-    captureCallbackRef.current = onCapture
-    setIsCapturing(true)
-    
-    // captureTimerRef.current = setInterval(() => {
-    //   const frame = cameraService.captureFrame()
-    //   if (frame && captureCallbackRef.current) {
-    //     captureCallbackRef.current(frame)
-    //   }
-    // }, interval)
-  }, [])
+  // 使用 ref 保持 captureFrame 引用最新，避免定时器中的闭包问题
+  const captureFrameRef = useRef(captureFrame)
+  captureFrameRef.current = captureFrame
 
   // 停止自动捕获
   const stopAutoCapture = useCallback(() => {
@@ -113,6 +143,20 @@ export const useCamera = (options: UseCameraOptions = {}): UseCameraReturn => {
     setIsCapturing(false)
   }, [])
 
+  // 开始自动捕获
+  const startAutoCapture = useCallback((interval: number, onCapture: (frame: string) => void) => {
+    stopAutoCapture()
+    captureCallbackRef.current = onCapture
+    setIsCapturing(true)
+
+    captureTimerRef.current = setInterval(() => {
+      const frame = captureFrameRef.current()
+      if (frame && captureCallbackRef.current) {
+        captureCallbackRef.current(frame)
+      }
+    }, interval)
+  }, [stopAutoCapture])
+
   // 初始化
   useEffect(() => {
     fetchDevices()
@@ -121,9 +165,12 @@ export const useCamera = (options: UseCameraOptions = {}): UseCameraReturn => {
     }
     return () => {
       stopAutoCapture()
-      stop()
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop())
+      }
     }
-  }, [autoStart, fetchDevices, start, stop, stopAutoCapture])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return {
     stream,

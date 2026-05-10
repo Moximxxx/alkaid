@@ -25,6 +25,7 @@ const TEXT_PROVIDERS = [
   { value: "xiaomi", label: "Xiaomi MiMo" },
   { value: "kimi", label: "Kimi" },
   { value: "deepseek", label: "DeepSeek" },
+  { value: "claude", label: "Claude" },
 ] as const
 
 const TEXT_MODELS = {
