@@ -56,7 +56,7 @@ Coordinator 把你委派时传入:
 如有事故，必须:
 - 将事故写入独立文件 `.opencode/incidents/{事故编号}.md`
 - 如涉及约束违反，更新 `AGENTS.md` 中的对应约束并引用事故文件路径
-- 如验证脚本漏检，在 `scripts/verify_arch.sh` 添加检查项
+- 如验证脚本漏检，在 `.opencode/scripts/verify_arch.sh` 添加检查项
 
 ### 3. 约束更新
 
