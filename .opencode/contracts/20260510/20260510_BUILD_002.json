@@ -1,0 +1,20 @@
+{
+  "task_id": "BUILD-002",
+  "timestamp": 1778435840,
+  "goal": "使用 service-agent + heartbeat + smoke-tester 体系完成完整 E2E 冒烟测试",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\scripts\\e2e\\smoke.test.ts",
+    "D:\\projects\\alkaid\\scripts\\e2e\\electron-fixture.ts"
+  ],
+  "constraints": ["agent-system"],
+  "tech_stack_constraints": [],
+  "verification": ["smoke-test"],
+  "coverage_checklist": {
+    "build_pass": "assert: bun run build 通过",
+    "vite_started": "assert: service-agent 启动 Vite 并返回 PID",
+    "heartbeat_ready": "assert: heartbeat 验证 localhost:5173 就绪",
+    "smoke_test_pass": "assert: smoke-tester 执行 playwright test 通过",
+    "process_cleaned": "assert: service-agent 按 PID 精确杀 Vite 进程"
+  },
+  "status": "active"
+}

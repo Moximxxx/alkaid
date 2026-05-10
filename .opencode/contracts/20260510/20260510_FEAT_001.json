@@ -1,26 +1,34 @@
 {
   "task_id": "FEAT-001",
-  "timestamp": 1778429859,
-  "goal": "完善工作流基础设施：新增合同命名规范（日期文件夹+YYYYMMDD_TYPE_NNN格式）、按新规范整理现有合同文件、更新复盘智能体描述使其记录任务合同索引、更新复盘文档模板包含合同索引部分。",
+  "timestamp": 1778435840,
+  "goal": "批次1：更新AI模型列表（同步P-01合规）+ 引入Playwright E2E自动测试框架（截图、日志、点击测试），为后续迭代提供测试验证能力",
   "files_to_modify": [
-    ".opencode/constraints/contract-mechanism.md",
-    ".opencode/contracts/contract-schema.json",
-    ".opencode/agents/retro.md",
-    ".opencode/retros/_TEMPLATE.md"
+    "D:\\projects\\alkaid\\src\\shared\\constants.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\Welcome.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\Settings.tsx",
+    "D:\\projects\\alkaid\\src\\shared\\types.ts",
+    "D:\\projects\\alkaid\\src\\shared\\__tests__\\constants.test.ts",
+    "D:\\projects\\alkaid\\package.json",
+    "D:\\projects\\alkaid\\scripts\\e2e\\smoke.test.ts",
+    "D:\\projects\\alkaid\\scripts\\e2e\\electron-fixture.ts",
+    "D:\\projects\\alkaid\\scripts\\e2e\\screenshots\\README.md"
   ],
-  "constraints": [
-    "agent-system",
-    "contract-mechanism"
-  ],
-  "verification": [
-    "bun run typecheck"
-  ],
+  "constraints": ["agent-system", "arch-layering", "contract-mechanism", "tech-stack/typescript", "tech-stack/react"],
+  "tech_stack_constraints": ["typescript.md", "react.md"],
+  "verification": ["typecheck", "test", "build"],
   "coverage_checklist": {
-    "contract-mechanism 新增命名规范规则": "assert: contract-mechanism.md 新增 R-05 规则规定合同按日期子文件夹 + YYYYMMDD_TYPE_NNN.json 格式命名",
-    "contract-schema task_id 模式更新": "assert: contract-schema.json 的 task_id pattern 更新为兼容新命名格式",
-    "retro.md 增加合同索引记录要求": "assert: agents/retro.md 职责部分增加记录任务合同索引的要求",
-    "_TEMPLATE.md 增加合同索引章节": "assert: retros/_TEMPLATE.md 模板中增加合同索引章节",
-    "类型检查通过": "assert: bun run typecheck 无错误"
+    "model_list_updated_openai": "assert: AI_MODELS.openai 包含 GPT-5.4 和 GPT-4.1，移除已废弃的 GPT-4.5",
+    "model_list_updated_claude": "assert: AI_MODELS.claude 包含 Opus 4.7 和 Haiku 4.5",
+    "model_list_updated_minimax": "assert: AI_MODELS.minimax 包含 MiniMax-M1",
+    "model_list_updated_google": "assert: 新增 AI_MODELS.google 含 Gemini 2.5 Pro 和 Flash",
+    "model_list_updated_vision": "assert: VISION_MODELS 扩展包含 OpenAI Vision 和 Claude Vision",
+    "welcome_synced": "assert: Welcome.tsx 的模型选项与 constants.ts 同步",
+    "settings_synced": "assert: Settings.tsx 的模型选项与 constants.ts 同步",
+    "types_synced": "assert: types.ts 的 provider union 包含 'google'",
+    "tests_updated": "assert: constants.test.ts 测试通过",
+    "playwright_installed": "assert: package.json 包含 @playwright/test 依赖",
+    "smoke_test_exists": "assert: scripts/e2e/smoke.test.ts 存在且包含启动、截图、点击测试",
+    "electron_fixture_exists": "assert: scripts/e2e/electron-fixture.ts 存在"
   },
-  "status": "completed"
+  "status": "active"
 }

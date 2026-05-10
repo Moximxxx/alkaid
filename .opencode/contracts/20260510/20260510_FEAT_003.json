@@ -1,0 +1,28 @@
+{
+  "task_id": "FEAT-003",
+  "timestamp": 1778435840,
+  "goal": "实时视频帧分析功能：自动定期将摄像头画面发送给 AI 做连续视觉分析，支持多个视觉供应商，可配置分析帧率和间隔。实现真正的 AI 实时视频对话体验。",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useCamera.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useVideoChat.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\VideoChat.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\ai.ts",
+    "D:\\projects\\alkaid\\src\\shared\\constants.ts",
+    "D:\\projects\\alkaid\\src\\shared\\types.ts"
+  ],
+  "constraints": ["agent-system", "arch-layering", "contract-mechanism", "tech-stack/typescript", "tech-stack/react"],
+  "tech_stack_constraints": ["typescript.md", "react.md"],
+  "verification": ["typecheck", "test", "build"],
+  "coverage_checklist": {
+    "continuous_frame_analysis": "assert: useVideoChat 支持定期发送帧给 AI 分析",
+    "interval_configurable": "assert: 分析间隔可在 UI 中配置（支持 1s/3s/5s/10s）",
+    "multiple_vision_providers": "assert: 分析支持 google_vision / doubao_vision / claude 等视觉供应商",
+    "streaming_analysis_result": "assert: 分析结果显示为流式文本而非一次性输出",
+    "camera_disabled_state": "assert: 摄像头关闭时停止帧分析",
+    "visual_indicator": "assert: 分析进行中有视觉指示器（loading/spinner）",
+    "ui_enhanced": "assert: VideoChat 页面有帧分析开关和频率设置",
+    "types_passes": "assert: bun run typecheck 通过无错误",
+    "tests_passes": "assert: bun run test 通过"
+  },
+  "status": "active"
+}

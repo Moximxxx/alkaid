@@ -1,0 +1,29 @@
+{
+  "task_id": "PLAN-002",
+  "timestamp": 1778435840,
+  "goal": "综合分析2026年5月AI前沿技术，规划摇光(AI视频通话应用)的自我迭代方案，包括：最新模型列表更新、LangChain.js深度集成方案、Playwright自动测试框架、AI视频通话增强",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\shared\\constants.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\ai.ts",
+    "D:\\projects\\alkaid\\electron\\main.cjs",
+    "D:\\projects\\alkaid\\package.json",
+    "D:\\projects\\alkaid\\AGENTS.md",
+    "D:\\projects\\alkaid\\.opencode\\opencode.json",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useCamera.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\Welcome.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\Settings.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\VideoChat.tsx",
+    "D:\\projects\\alkaid\\vitest.config.ts"
+  ],
+  "constraints": ["agent-system", "arch-layering", "contract-mechanism", "tech-stack/typescript", "tech-stack/react", "tech-stack/nodejs"],
+  "tech_stack_constraints": ["typescript.md", "react.md", "nodejs.md"],
+  "verification": ["typecheck", "test", "build"],
+  "coverage_checklist": {
+    "ai_research_complete": "assert: 完成至少4家AI供应商最新模型和API接入方式的研究",
+    "langchain_research_complete": "assert: 完成LangChain.js最新版本和能力的调研",
+    "electron_testing_research_complete": "assert: 完成Electron UI自动化测试方案的调研",
+    "plan_delivered": "assert: 输出包含批次的执行计划",
+    "report_comprehensive": "assert: 输出包含成本、影响范围、风险分析的完整报告"
+  },
+  "status": "pending"
+}

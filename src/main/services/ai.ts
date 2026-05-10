@@ -28,6 +28,9 @@ const PROVIDER_CONFIGS = {
   claude: {
     baseUrl: 'https://api.anthropic.com/v1',
   },
+  google: {
+    baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
+  },
 }
 
 export class AIService {
@@ -61,6 +64,8 @@ export class AIService {
     let response: string
     if (provider === 'claude') {
       response = await this.callClaude(content, image)
+    } else if (provider === 'google') {
+      response = await this.callGoogle(content, image)
     } else {
       response = await this.callOpenAICompatible(content, image)
     }
@@ -234,6 +239,73 @@ export class AIService {
     }
 
     return messages
+  }
+
+  // 调用 Google Gemini API
+  private async callGoogle(content: string, image?: string): Promise<string> {
+    const providerConfig = PROVIDER_CONFIGS[this.config.provider]
+
+    // 构建 Gemini 格式的请求
+    const systemMessage = '你是一个能够理解和分析图像的AI助手。请用中文回复。'
+
+    // 构建 contents 数组
+    const contents: Array<{role: string; parts: any[]}> = []
+
+    // 添加历史消息
+    for (const msg of this.messages.slice(-10)) {
+      if (msg.role === 'user' || msg.role === 'assistant') {
+        const role = msg.role === 'assistant' ? 'model' : 'user'
+        if (msg.role === 'user' && msg.image) {
+          const base64Data = msg.image.replace(/^data:image\/\w+;base64,/, '')
+          contents.push({
+            role,
+            parts: [
+              { text: msg.content },
+              { inlineData: { mimeType: 'image/jpeg', data: base64Data } },
+            ],
+          })
+        } else {
+          contents.push({ role, parts: [{ text: msg.content }] })
+        }
+      }
+    }
+
+    // 添加当前消息
+    if (image) {
+      const base64Data = image.replace(/^data:image\/\w+;base64,/, '')
+      contents.push({
+        role: 'user',
+        parts: [
+          { text: content },
+          { inlineData: { mimeType: 'image/jpeg', data: base64Data } },
+        ],
+      })
+    } else {
+      contents.push({ role: 'user', parts: [{ text: content }] })
+    }
+
+    const response = await fetch(
+      `${this.config.baseUrl || providerConfig.baseUrl}/models/${this.config.model}:generateContent`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': this.config.apiKey,
+        },
+        body: JSON.stringify({
+          contents,
+          system_instruction: { parts: [{ text: systemMessage }] },
+          generationConfig: { maxOutputTokens: 1024 },
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Google Gemini API 错误: ${response.status}`)
+    }
+
+    const data = await response.json()
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || ''
   }
 
   // 获取对话历史

@@ -1,0 +1,26 @@
+{
+  "task_id": "FEAT-004",
+  "timestamp": 1778435840,
+  "goal": "语音输入（STT）和语音输出（TTS）功能：使用 Web Speech API 实现麦克风语音识别输入和 AI 回复语音朗读。在 VideoChat 页面集成麦克风按钮、语音朗读开关。",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useSpeechRecognition.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useTTS.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\VideoChat.tsx",
+    "D:\\projects\\alkaid\\src\\shared\\types.ts"
+  ],
+  "constraints": ["agent-system", "arch-layering", "contract-mechanism", "tech-stack/typescript", "tech-stack/react"],
+  "tech_stack_constraints": ["typescript.md", "react.md"],
+  "verification": ["typecheck", "test", "build"],
+  "coverage_checklist": {
+    "useSpeechRecognition_exists": "assert: src/renderer/hooks/useSpeechRecognition.ts 创建，支持语音识别返回文本",
+    "useTTS_exists": "assert: src/renderer/hooks/useTTS.ts 创建，支持文本转语音朗读",
+    "microphone_button_in_ui": "assert: VideoChat.tsx 有麦克风按钮用于语音输入",
+    "tts_toggle_in_ui": "assert: VideoChat.tsx 有语音朗读开关",
+    "voice_input_flow": "assert: 语音识别文本填入输入框或直接发送",
+    "tts_auto_read": "assert: AI 回复后可选自动朗读",
+    "types_passes": "assert: bun run typecheck 通过",
+    "tests_passes": "assert: bun run test 通过",
+    "build_passes": "assert: bun run build 通过"
+  },
+  "status": "active"
+}

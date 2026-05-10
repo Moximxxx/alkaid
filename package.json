@@ -15,7 +15,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test scripts/e2e/smoke.test.ts"
   },
   "keywords": [
     "camera",
@@ -45,6 +46,7 @@
     "tsx": "^4.21.0",
     "typescript": "^5.0.0",
     "vite": "^5.0.0",
+    "@playwright/test": "^1.52.0",
     "vitest": "^4.1.5"
   },
   "dependencies": {

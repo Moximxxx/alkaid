@@ -1,15 +1,18 @@
 # Agent 体系约束
 
-> 四角色分离：协调者(Coordinator)、构建者(Builder)、诊断者(Crash-Doctor)、复盘者(Retro)。
+> 多角色分离：协调者(Coordinator)、构建者(Builder)、服务者(Service-Agent)、心跳者(Heartbeat)、诊断者(Crash-Doctor)、冒烟测试者(Smoke-Tester)、复盘者(Retro)。
 
 ## 角色定义
 
 | 角色 | 职责 | 写代码 | 触发条件 |
 |------|------|--------|---------|
 | Coordinator | 任务拆分、委派、验证 | 否 | **所有任务开始前必须调用** |
-| Builder | 构建、部署、冒烟测试 | 否 | 修改源码后需要构建 |
-| Crash-Doctor | 崩溃分析、根因定位 | 否 | CppCrash/SIGSEGV/ANR |
+| Builder | 构建、部署 | 否 | 修改源码后需要构建 |
+| Service-Agent | 启动/停止常驻后台服务（Vite、Electron） | 否 | 需要后台服务时 |
+| Heartbeat | 检查服务 PID 和端口是否就绪 | 否 | 后台服务启动后 |
+| Crash-Doctor | 崩溃分析、根因定位 | 否 | 进程崩溃/异常 |
 | Retro | 复盘、约束更新、事故记录 | 否 | 任务完成/验证失败 |
+| Smoke-Tester | E2E 冒烟测试（服务需提前就绪） | 否 | 服务就绪后执行测试 |
 
 ## 强制调用规则
 
@@ -23,17 +26,25 @@
 
 **禁止**：主 agent 跳过 Coordinator 直接执行。
 
+### 后台服务必须由 Service-Agent 管理
+
+启动 Vite、Electron 等常驻后台进程时，**必须通过 service-agent**。
+service-agent 使用 `Start-Process -WindowStyle Hidden` 完全分离模式启动，立即返回 PID。
+
+**禁止**：任何子 Agent 直接执行 `Start-Job { bun run dev }` 或 `Start-Process -NoNewWindow`。
+
+### 后台服务启动后必须做心跳验证
+
+service-agent 返回 PID 后，Coordinator 必须**委派 heartbeat** 轮询检查服务就绪。
+heartbeat 返回 `READY` 后才能委派后续任务。超时未就绪 → 委派 crash-doctor。
+
 ### 构建/部署必须调用 Builder
 
 修改源码后需要构建/部署时，**必须调用 Builder**。
 
-**禁止**：主 agent 直接执行 ninja/adb/hdc install。
-
 ### 崩溃/异常必须调用 Crash-Doctor
 
-出现进程崩溃、ANR、命令异常退出时，**必须调用 Crash-Doctor**。
-
-**禁止**：主 agent 直接读日志分析（可能误判根因）。
+出现进程崩溃、异常退出时，**必须调用 Crash-Doctor**。
 
 ### 任务完成必须调用 Retro
 

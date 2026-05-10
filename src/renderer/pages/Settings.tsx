@@ -11,6 +11,9 @@ import { APP_NAME, APP_VERSION } from '@shared/constants'
 const VISION_MODELS = [
   { value: "doubao-2.0-vision-pro", label: "豆包 2.0 视觉专业版" },
   { value: "doubao-1.5-thinking-vision-pro", label: "豆包 1.5 视觉思考" },
+  { value: "gpt-4.1-vision", label: "GPT-4.1 Vision" },
+  { value: "claude-sonnet-4.6-vision", label: "Claude Sonnet 4.6 Vision" },
+  { value: "gemini-2.5-pro-vision", label: "Gemini 2.5 Pro Vision" },
 ]
 
 const TEXT_PROVIDERS = [
@@ -22,6 +25,7 @@ const TEXT_PROVIDERS = [
   { value: "kimi", label: "Kimi" },
   { value: "deepseek", label: "DeepSeek" },
   { value: "claude", label: "Claude" },
+  { value: "google", label: "Google Gemini" },
 ] as const
 
 const TEXT_MODELS = {
@@ -32,12 +36,14 @@ const TEXT_MODELS = {
   ],
   openai: [
     { value: "gpt-5", label: "GPT-5" },
-    { value: "gpt-4.5", label: "GPT-4.5" },
+    { value: "gpt-5.4", label: "GPT-5.4（最新旗舰）" },
     { value: "gpt-4.1", label: "GPT-4.1" },
   ],
   claude: [
     { value: "claude-opus-4.6", label: "Claude Opus 4.6" },
+    { value: "claude-opus-4.7", label: "Claude Opus 4.7（最强旗舰）" },
     { value: "claude-sonnet-4.6", label: "Claude Sonnet 4.6" },
+    { value: "claude-haiku-4.5", label: "Claude Haiku 4.5（高速低配）" },
     { value: "claude-mythos", label: "Claude Mythos" },
   ],
   glm: [
@@ -47,6 +53,7 @@ const TEXT_MODELS = {
   ],
   minimax: [
     { value: "minimax-m2.7", label: "MiniMax-M2.7（Agent自我进化）" },
+    { value: "minimax-m1", label: "MiniMax-M1（混合注意力推理）" },
     { value: "minimax-m2.5", label: "MiniMax-M2.5" },
     { value: "minimax-music-2.5-plus", label: "MiniMax-Music-2.5+（音乐）" },
   ],
@@ -65,6 +72,10 @@ const TEXT_MODELS = {
     { value: "deepseek-v4-pro", label: "DeepSeek-V4-Pro（1.6T参数）" },
     { value: "deepseek-r1-0528", label: "DeepSeek-R1-0528（推理升级）" },
     { value: "deepseek-v3.1", label: "DeepSeek-V3.1（思考模式切换）" },
+  ],
+  google: [
+    { value: "gemini-2.5-pro", label: "Gemini 2.5 Pro（旗舰编程）" },
+    { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash（轻量推理）" },
   ],
 }
 

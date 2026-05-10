@@ -55,7 +55,7 @@ export interface ChatMessage {
 
 // AI模型配置
 export interface AIModelConfig {
-  provider: 'doubao' | 'openai' | 'glm' | 'minimax' | 'xiaomi' | 'kimi' | 'deepseek' | 'claude'
+  provider: 'doubao' | 'openai' | 'glm' | 'minimax' | 'xiaomi' | 'kimi' | 'deepseek' | 'claude' | 'google'
   apiKey: string
   model: string
   baseUrl?: string
@@ -63,7 +63,7 @@ export interface AIModelConfig {
 
 // 图像识别服务配置
 export interface VisionConfig {
-  provider: 'doubao_vision'
+  provider: 'doubao_vision' | 'google_vision'
   apiKey: string
   model: string
 }

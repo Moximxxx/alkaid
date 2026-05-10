@@ -52,14 +52,15 @@ export const useVideoChat = (options: UseVideoChatOptions = {}): UseVideoChatRet
   
   const { settings } = useSettings()
 
+  // 优先使用视觉供应商（对于视频通话而言大多数模型都支持多模态），否则回退到文本供应商
   const {
     messages,
     loading: aiLoading,
     sendMessage: sendAIMessage,
   } = useAI({
-    provider: settings.textProvider,
-    apiKey: settings.textApiKey,
-    model: settings.textModel,
+    provider: settings.visionProvider || settings.textProvider,
+    apiKey: settings.visionApiKey || settings.textApiKey,
+    model: settings.visionModel || settings.textModel,
   })
   
   const [isActive, setIsActive] = useState(false)
@@ -76,26 +77,20 @@ export const useVideoChat = (options: UseVideoChatOptions = {}): UseVideoChatRet
     setIsAnalyzing(true)
     
     try {
-      // 调用图像识别
-      // const result = await visionService.recognize(frame)
-      // setLastRecognition(result)
+      // 使用 settings 中的 visionProvider 进行视觉分析
+      // 如果没用单独的 vision provider，就用 text provider（因为大部分模型都支持多模态）
+      const provider = settings.visionProvider || settings.textProvider
+      const apiKey = settings.visionApiKey || settings.textApiKey
+      const model = settings.visionModel || settings.textModel
       
-      // 如果开启了自动分析，将结果发送给AI
-      if (autoAnalyze) {
-        // const objects = result.objects.map((o: { name: string }) => o.name).join('、')
-        // const scene = result.scene.description || '未识别到场景'
-        
-        // const prompt = `我正在看这个画面：${scene}。${objects ? `看到了：${objects}。` : ''}请简短描述你在画面中看到的内容。`
-        
-        // await sendAIMessage(prompt, frame)
-      }
+      await sendAIMessage('请简短描述你在画面中看到了什么。', frame, `vision-${Date.now()}`)
     } catch (error) {
       console.error('分析画面失败:', error)
     } finally {
       analyzingRef.current = false
       setIsAnalyzing(false)
     }
-  }, [autoAnalyze, sendAIMessage])
+  }, [settings, sendAIMessage])
 
   // 开始视频通话
   const start = useCallback(async () => {

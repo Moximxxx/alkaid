@@ -11,6 +11,8 @@ const PROVIDER_CONFIGS = {
   kimi: { baseUrl: 'https://api.moonshot.cn/v1' },
   deepseek: { baseUrl: 'https://api.deepseek.com/v1' },
   claude: { baseUrl: 'https://api.anthropic.com/v1' },
+  google: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta' },
+  google_vision: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta' },
 }
 
 let mainWindow = null;
@@ -136,14 +138,14 @@ function startProxyServer() {
     if (req.method === 'OPTIONS' && req.url === '/api/ai/chat') {
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, anthropic-version')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, anthropic-version, x-goog-api-key')
       res.end()
       return
     }
     if (req.method === 'POST' && req.url === '/api/ai/chat') {
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, anthropic-version')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, anthropic-version, x-goog-api-key')
       let body = ''
       req.on('data', chunk => { body += chunk })
       req.on('end', async () => {
@@ -157,26 +159,78 @@ function startProxyServer() {
           }
 
           const isClaude = provider === 'claude'
-          const apiUrl = isClaude
-            ? `${providerConfig.baseUrl}/messages`
-            : `${providerConfig.baseUrl}/chat/completions`
+          const isGoogle = provider === 'google' || provider === 'google_vision'
+
+          // Build API URL
+          let apiUrl
+          if (isClaude) {
+            apiUrl = `${providerConfig.baseUrl}/messages`
+          } else if (isGoogle) {
+            apiUrl = `${providerConfig.baseUrl}/models/${model}:streamGenerateContent?alt=sse`
+          } else {
+            apiUrl = `${providerConfig.baseUrl}/chat/completions`
+          }
           console.log('[Proxy] Forwarding to:', apiUrl)
 
-          const headers = {
-            'Content-Type': 'application/json',
-            ...(isClaude
-              ? { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' }
-              : { 'Authorization': `Bearer ${apiKey}` }),
+          // Build headers
+          const headers = { 'Content-Type': 'application/json' }
+          if (isClaude) {
+            headers['x-api-key'] = apiKey
+            headers['anthropic-version'] = '2023-06-01'
+          } else if (isGoogle) {
+            headers['x-goog-api-key'] = apiKey
+          } else {
+            headers['Authorization'] = `Bearer ${apiKey}`
           }
 
-          const body = isClaude
-            ? { model, max_tokens: 4096, messages, stream }
-            : { model, messages, stream }
+          // Build request body
+          let requestBody
+          if (isClaude) {
+            requestBody = { model, max_tokens: 4096, messages, stream }
+          } else if (isGoogle) {
+            // Gemini 格式：contents 替代 messages，role assistant → model
+            const contents = messages
+              .filter(m => m.role === 'user' || m.role === 'assistant')
+              .map(m => {
+                const role = m.role === 'assistant' ? 'model' : 'user'
+                // 处理 content 为字符串（纯文本）或数组（多模态）
+                if (typeof m.content === 'string') {
+                  return { role, parts: [{ text: m.content }] }
+                }
+                if (Array.isArray(m.content)) {
+                  return {
+                    role,
+                    parts: m.content.map(item => {
+                      if (item.type === 'text') return { text: item.text }
+                      if (item.type === 'image') {
+                        return {
+                          inlineData: {
+                            mimeType: item.source?.media_type || 'image/jpeg',
+                            data: item.source?.data || ''
+                          }
+                        }
+                      }
+                      return { text: JSON.stringify(item) }
+                    })
+                  }
+                }
+                return { role, parts: [{ text: String(m.content) }] }
+              })
+            // 处理 system prompt → system_instruction
+            const systemMessage = messages.find(m => m.role === 'system')
+            requestBody = {
+              contents,
+              ...(systemMessage ? { system_instruction: { parts: [{ text: systemMessage.content }] } } : {}),
+              generationConfig: { maxOutputTokens: 4096 }
+            }
+          } else {
+            requestBody = { model, messages, stream }
+          }
 
           const upstream = await fetch(apiUrl, {
             method: 'POST',
             headers,
-            body: JSON.stringify(body),
+            body: JSON.stringify(requestBody),
           })
 
           if (stream) {

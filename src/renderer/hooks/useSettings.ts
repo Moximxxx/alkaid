@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react"
 
 export interface Settings {
-  visionProvider: "doubao_vision"
+  visionProvider: "doubao_vision" | "google_vision"
   visionApiKey: string
   visionModel: string
-  textProvider: "doubao" | "openai" | "glm" | "minimax" | "xiaomi" | "kimi" | "deepseek" | "claude"
+  textProvider: "doubao" | "openai" | "glm" | "minimax" | "xiaomi" | "kimi" | "deepseek" | "claude" | "google"
   textApiKey: string
   textModel: string
   setupCompleted?: boolean

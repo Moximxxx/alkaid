@@ -1,0 +1,28 @@
+{
+  "task_id": "FEAT-002",
+  "timestamp": 1778435840,
+  "goal": "Google Gemini 完整集成：添加到代理服务器、渲染进程 AI 服务、UI 完整的供应商切换流程。支持文本对话和视觉分析（Gemini 2.5 Pro / Flash）。",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\electron\\main.cjs",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\ai.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\Settings.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\VideoChat.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useVideoChat.ts",
+    "D:\\projects\\alkaid\\src\\main\\services\\ai.ts",
+    "D:\\projects\\alkaid\\src\\main\\services\\vision.ts"
+  ],
+  "constraints": ["agent-system", "arch-layering", "contract-mechanism", "tech-stack/typescript", "tech-stack/react"],
+  "tech_stack_constraints": ["typescript.md", "react.md"],
+  "verification": ["typecheck", "test", "build"],
+  "coverage_checklist": {
+    "proxy_server_gemini": "assert: electron/main.cjs 的 PROVIDER_CONFIGS 存在 google 且 proxy 能转发 Gemini API 请求",
+    "google_api_endpoint": "assert: electron/main.cjs 中 google 的 baseUrl 为 https://generativelanguage.googleapis.com/v1beta",
+    "gemini_vision_supported": "assert: src/renderer/services/ai.ts 中 buildAPIMessages 能处理 Gemini 多模态消息格式",
+    "settings_google_selectable": "assert: Settings.tsx 的 provider 下拉包含 Google",
+    "settings_gemini_models": "assert: Settings.tsx 的模型下拉包含 Gemini 2.5 Pro 和 Flash",
+    "video_chat_gemini_vision": "assert: VideoChat.tsx 能选择 google_vision provider 进行图像分析",
+    "types_passes": "assert: bun run typecheck 通过无错误",
+    "tests_passes": "assert: bun run test 32/32 通过"
+  },
+  "status": "active"
+}

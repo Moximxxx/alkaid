@@ -19,7 +19,7 @@ export const DEFAULT_VISION_CONFIG = {
 export const DEFAULT_AI_CONFIG = {
   provider: 'openai' as const,
   apiKey: '',
-  model: 'gpt-4.1',
+  model: 'gpt-5.4',
   baseUrl: '',
 }
 
@@ -45,12 +45,14 @@ export const AI_MODELS = {
   ],
   openai: [
     { value: "gpt-5", label: "GPT-5" },
-    { value: "gpt-4.5", label: "GPT-4.5" },
+    { value: "gpt-5.4", label: "GPT-5.4（最新旗舰）" },
     { value: "gpt-4.1", label: "GPT-4.1" },
   ],
   claude: [
     { value: "claude-opus-4.6", label: "Claude Opus 4.6" },
+    { value: "claude-opus-4.7", label: "Claude Opus 4.7（最强旗舰）" },
     { value: "claude-sonnet-4.6", label: "Claude Sonnet 4.6" },
+    { value: "claude-haiku-4.5", label: "Claude Haiku 4.5（高速低配）" },
     { value: "claude-mythos", label: "Claude Mythos" },
   ],
   glm: [
@@ -60,6 +62,7 @@ export const AI_MODELS = {
   ],
   minimax: [
     { value: "minimax-m2.7", label: "MiniMax-M2.7（Agent自我进化）" },
+    { value: "minimax-m1", label: "MiniMax-M1（混合注意力推理）" },
     { value: "minimax-m2.5", label: "MiniMax-M2.5" },
     { value: "minimax-music-2.5-plus", label: "MiniMax-Music-2.5+（音乐）" },
   ],
@@ -73,6 +76,10 @@ export const AI_MODELS = {
     { value: "kimi-k2.6", label: "Kimi-K2.6（代码对标GPT-5.4）" },
     { value: "kimi-k2.5", label: "Kimi-K2.5（多模态旗舰）" },
     { value: "kimi-k2.1", label: "Kimi-K2.1" },
+  ],
+  google: [
+    { value: "gemini-2.5-pro", label: "Gemini 2.5 Pro（旗舰编程）" },
+    { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash（轻量推理）" },
   ],
   deepseek: [
     { value: "deepseek-v4-pro", label: "DeepSeek-V4-Pro（1.6T参数）" },
@@ -92,16 +99,27 @@ export const AI_PROVIDERS = [
   { value: "kimi", label: "Kimi", type: "text" },
   { value: "deepseek", label: "DeepSeek", type: "text" },
   { value: "claude", label: "Claude", type: "text" },
+  { value: "google", label: "Google Gemini", type: "text" },
+  { value: "google_vision", label: "Google Vision", type: "vision" },
 ]
 
 // 视觉模型列表
 export const VISION_MODELS = [
   { value: "doubao-2.0-vision-pro", label: "豆包 2.0 视觉专业版" },
   { value: "doubao-1.5-thinking-vision-pro", label: "豆包 1.5 视觉思考" },
+  { value: "gpt-4.1-vision", label: "GPT-4.1 Vision" },
+  { value: "claude-sonnet-4.6-vision", label: "Claude Sonnet 4.6 Vision" },
+  { value: "gemini-2.5-pro-vision", label: "Gemini 2.5 Pro Vision" },
 ]
 
 // System Prompt
 export const SYSTEM_PROMPT = '你是一个能够理解和分析图像的AI助手。请用中文回复。'
+
+// 默认分析配置
+export const DEFAULT_ANALYSIS_CONFIG = {
+  enabled: false,
+  interval: 3000, // 毫秒
+}
 
 // 图像识别服务列表
 export const VISION_SERVICES = {

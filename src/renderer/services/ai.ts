@@ -21,6 +21,7 @@ const PROVIDER_CONFIGS: Record<string, { apiKeyEnv: string }> = {
   kimi: { apiKeyEnv: 'VITE_KIMI_API_KEY' },
   deepseek: { apiKeyEnv: 'VITE_DEEPSEEK_API_KEY' },
   claude: { apiKeyEnv: 'VITE_CLAUDE_API_KEY' },
+  google: { apiKeyEnv: 'VITE_GOOGLE_API_KEY' },
 }
 
 interface UseAIOptions {
@@ -106,6 +107,7 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
               const content = parsed.choices?.[0]?.delta?.content
                            || parsed.choices?.[0]?.text
                            || parsed.choices?.[0]?.message?.content
+                           || parsed.candidates?.[0]?.content?.parts?.[0]?.text
                            || ''
               console.log('[AI] Extracted content:', content.substring(0, 50))
 
@@ -164,6 +166,16 @@ function buildAPIMessages(content: string, image?: string, provider?: string) {
         content: [
           { type: 'text', text: content },
           { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: image.split(',')[1] } },
+        ],
+      })
+    } else if (provider === 'google_vision' || provider === 'google') {
+      // Gemini 多模态格式 — 与 claude 相同的 content array 结构，proxy 会转换为 Gemini 的 inlineData
+      const base64Data = image.split(',')[1]
+      msgs.push({
+        role: 'user',
+        content: [
+          { type: 'text', text: content },
+          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64Data } },
         ],
       })
     } else {
