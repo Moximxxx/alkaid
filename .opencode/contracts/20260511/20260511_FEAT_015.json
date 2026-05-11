@@ -1,0 +1,26 @@
+{
+  "task_id": "FEAT-015",
+  "timestamp": 1778535928,
+  "trace_id": "feat-015-20260511-default-hooks",
+  "goal": "引入默认钩子(Default Hooks)机制：定义每次任务自动执行的 pre_task/post_task 钩子（不依赖合同声明），确保前馈控制（workspace-clean + diff-size-guard）和熵治理（entropy-cleanup）在每次任务中强制执行",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\agents\\coordinator.md",
+    "D:\\projects\\alkaid\\AGENTS.md",
+    "D:\\projects\\alkaid\\.opencode\\constraints\\contract-mechanism.md"
+  ],
+  "constraints": ["R-0", "R-15", "P-03", "contract-mechanism"],
+  "tech_stack_constraints": [],
+  "verification": [
+    "grep '默认 pre_task' coordinator.md",
+    "grep 'default_pre_hooks' AGENTS.md",
+    "grep '默认' contract-mechanism.md"
+  ],
+  "coverage_checklist": {
+    "coordinator_default_hooks": "assert: coordinator.md 新增「默认 Hook」章节，定义每次任务自动执行的钩子",
+    "coordinator_flow_updated": "assert: coordinator.md 步骤5.1 和 6 改为先执行默认 hooks 再执行合同 hooks",
+    "agents_phase5_default": "assert: AGENTS.md Phase 5 先执行 default_pre_hooks 再执行 contract.hooks.pre_task",
+    "agents_phase7_default": "assert: AGENTS.md Phase 7 先执行 default_post_hooks 再执行 contract.hooks.post_task",
+    "contract_md_marked": "assert: contract-mechanism.md Hook 目录中标明哪些是默认钩子"
+  },
+  "status": "completed"
+}

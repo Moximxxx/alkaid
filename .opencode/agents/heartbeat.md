@@ -45,4 +45,13 @@ try {
   "max_retries": 6,
   "retry_interval_seconds": 10
 }
+
+## 交接报告
+
+```markdown
+### 交接报告
+- Trace ID：[trace_id]
+- 服务名：[service]
+- 状态：[READY/WAITING/DEAD/UNKNOWN]
+```
 ```

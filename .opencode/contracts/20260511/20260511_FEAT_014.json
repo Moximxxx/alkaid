@@ -1,0 +1,27 @@
+{
+  "task_id": "FEAT-014",
+  "timestamp": 1778535128,
+  "trace_id": "feat-014-20260511-entropy-lock",
+  "goal": "补全遗留的两个 Hook 脚本：1) file-lock-check.sh（pre_task 文件锁检查）；2) entropy-cleanup.sh（post_task 熵治理清理）。完成后从 contract-mechanism.md 移除(未实现)标注",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\hooks\\file-lock-check.sh",
+    "D:\\projects\\alkaid\\.opencode\\hooks\\entropy-cleanup.sh",
+    "D:\\projects\\alkaid\\.opencode\\constraints\\contract-mechanism.md"
+  ],
+  "constraints": ["R-0", "R-15", "P-03", "agent-system"],
+  "tech_stack_constraints": [],
+  "verification": [
+    "bash -n .opencode/hooks/file-lock-check.sh",
+    "bash -n .opencode/hooks/entropy-cleanup.sh",
+    "grep 'BLOCK' .opencode/hooks/file-lock-check.sh",
+    "grep 'WARN' .opencode/hooks/entropy-cleanup.sh"
+  ],
+  "coverage_checklist": {
+    "file_lock_script": "assert: file-lock-check.sh 扫描所有 active 合同的 files_to_modify 检查文件重叠",
+    "file_lock_block": "assert: file-lock-check.sh 发现重叠时输出 RESULT: BLOCK (exit 1)",
+    "entropy_script": "assert: entropy-cleanup.sh 清理 tmp/ 目录临时文件、过期追踪记录、空目录",
+    "entropy_warn": "assert: entropy-cleanup.sh 输出 RESULT: WARN 时带清理统计",
+    "annotations_removed": "assert: contract-mechanism.md 中 file-lock-check 和 entropy-cleanup 的(未实现)标注已移除"
+  },
+  "status": "completed"
+}

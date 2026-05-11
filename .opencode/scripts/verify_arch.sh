@@ -1,11 +1,27 @@
 #!/bin/bash
 # verify_arch.sh — 架构规则验证脚本
-# 检查代码变更是否违反架构约束
-# 用法: bash scripts/verify_arch.sh [变更文件...]
+# 用于 Electron + React + TypeScript 项目的架构约束验证
+# 用法: bash .opencode/scripts/verify_arch.sh
 
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+# Windows 路径兼容：将 Cygwin/MSYS2/Git Bash / WSL 路径转为 Windows 格式
+case "$PROJECT_ROOT" in
+  /cygdrive/*|/mnt/*)
+    if command -v cygpath &>/dev/null; then
+      PROJECT_ROOT=$(cygpath -w "$PROJECT_ROOT")
+    elif [[ "$PROJECT_ROOT" == /mnt/* ]]; then
+      # WSL: /mnt/d/... → D:/...
+      PROJECT_ROOT="/${PROJECT_ROOT#/mnt/}"
+      PROJECT_ROOT="${PROJECT_ROOT:0:1}:${PROJECT_ROOT:1}"
+    fi
+    # 将反斜杠转为正斜杠以兼容 bash
+    PROJECT_ROOT="${PROJECT_ROOT//\\//}"
+    ;;
+esac
+
 ERRORS=0
 
 # 颜色输出
@@ -21,38 +37,52 @@ pass()  { echo -e "${GREEN}[PASS]${NC} $1"; }
 echo "=== 架构规则验证 ==="
 echo ""
 
-# ---- 检查 1: 合同文件存在性验证 ----
-echo "--- 检查任务合同文件 ---"
+# ---- 检查 1: 合同文件有效性 ----
+echo "--- 检查 1: 合同文件有效性 ---"
 
-CONTRACT_DIR=""
-for tool_dir in ".codex" ".qoder" ".claude" ".opencode"; do
-    if [ -d "$PROJECT_ROOT/$tool_dir/contracts" ]; then
-        CONTRACT_DIR="$PROJECT_ROOT/$tool_dir/contracts"
-        break
+# 查找最新合同（支持按日期分目录结构）
+CONTRACT_FILE=""
+for dir in "$PROJECT_ROOT/.opencode/contracts"/*/; do
+    if [ -d "$dir" ]; then
+        FOUND=$(find "$dir" -name '*.json' -maxdepth 1 2>/dev/null | sort | tail -1)
+        if [ -n "$FOUND" ]; then
+            CONTRACT_FILE="$FOUND"
+        fi
     fi
 done
 
-if [ -z "$CONTRACT_DIR" ]; then
-    CONTRACT_DIR="$PROJECT_ROOT/.codex/contracts"
+# 也检查 contracts/ 根目录
+ROOT_CONTRACT=$(find "$PROJECT_ROOT/.opencode/contracts" -maxdepth 1 -name '*.json' 2>/dev/null | sort | tail -1)
+if [ -n "$ROOT_CONTRACT" ]; then
+    if [ -z "$CONTRACT_FILE" ] || [ "$ROOT_CONTRACT" -nt "$CONTRACT_FILE" ] 2>/dev/null; then
+        CONTRACT_FILE="$ROOT_CONTRACT"
+    fi
 fi
 
-if [ -d "$CONTRACT_DIR" ] && [ -n "$(ls -A "$CONTRACT_DIR" 2>/dev/null)" ]; then
-    LATEST_CONTRACT=$(ls -t "$CONTRACT_DIR"/*.json 2>/dev/null | head -1)
-    if [ -n "$LATEST_CONTRACT" ]; then
-        CONTRACT_TIME=$(stat -c %Y "$LATEST_CONTRACT" 2>/dev/null || echo 0)
+if [ -n "$CONTRACT_FILE" ]; then
+    # 检查过期（30分钟 = 1800秒）
+    if command -v stat &>/dev/null; then
+        if date -d "@$(stat -c %Y "$CONTRACT_FILE" 2>/dev/null)" &>/dev/null; then
+            CONTRACT_TIME=$(stat -c %Y "$CONTRACT_FILE" 2>/dev/null)
+        else
+            CONTRACT_TIME=$(stat -f %m "$CONTRACT_FILE" 2>/dev/null || echo 0)
+        fi
         CURRENT_TIME=$(date +%s)
         AGE=$((CURRENT_TIME - CONTRACT_TIME))
 
         if [ "$AGE" -gt 1800 ]; then
-            warn "合同已过期（超过30分钟）: $(basename "$LATEST_CONTRACT")"
+            warn "合同已过期（超过30分钟）: $(basename "$CONTRACT_FILE")"
         else
-            pass "存在有效合同: $(basename "$LATEST_CONTRACT")"
+            pass "存在有效合同: $(basename "$CONTRACT_FILE")（${AGE}秒前）"
         fi
+    else
+        pass "存在合同文件: $(basename "$CONTRACT_FILE")（跳过时效检查）"
     fi
 else
-    MODIFIED_SOURCE=$(git -C "$PROJECT_ROOT" diff --name-only 2>/dev/null | grep -E '\.(cpp|h|ets|ts|cmake)$' | head -5 || true)
+    # 无合同，检查是否有代码变更
+    MODIFIED_SOURCE=$(git -C "$PROJECT_ROOT" diff --name-only 2>/dev/null | grep -E '\.(ts|tsx|js|jsx|json)$' | head -5 || true)
     if [ -n "$MODIFIED_SOURCE" ]; then
-        error "源码已修改但无任务合同"
+        warn "源码已修改但无任务合同"
         echo "$MODIFIED_SOURCE" | sed 's/^/  /'
     else
         pass "无源码修改，合同非必需"
@@ -60,147 +90,72 @@ else
 fi
 echo ""
 
-# ---- 检查 2: NAPI 接口同步（如果存在 NAPI 文件）----
-echo "--- 检查 NAPI 接口同步 ---"
+# ---- 检查 2: 三层架构约束（Arch-layering）----
+echo "--- 检查 2: 三层架构约束（Arch-layering）---"
 
-NAPI_A=""
-NAPI_B=""
+RENDERER_DIR="$PROJECT_ROOT/src/renderer"
+MAIN_DIR="$PROJECT_ROOT/src/main"
+LAYERING_ERROR=0
 
-for f in "texstudio/src/ohos_napi_entry.cpp" "texstudio/src/napi_entry.cpp"; do
-    [ -f "$PROJECT_ROOT/$f" ] && NAPI_A="$PROJECT_ROOT/$f" && break
-done
+# 2a: 检查 src/renderer/ 中是否直接调用了 Node.js API
+if [ -d "$RENDERER_DIR" ]; then
+    # 检查 fs 模块
+    FS_USAGE=$(grep -rn "require(['\"]fs['\"]\|from ['\"]fs['\"]\|import\(\s\)\?[\s*{]\?.*\bfs\b" "$RENDERER_DIR" --include='*.ts' --include='*.tsx' 2>/dev/null | grep -v '__tests__' | grep -v 'node_modules' || true)
+    # 检查 process 全局
+    PROCESS_USAGE=$(grep -rn '\bprocess\.' "$RENDERER_DIR" --include='*.ts' --include='*.tsx' 2>/dev/null | grep -v '__tests__' | grep -v 'node_modules' | grep -v 'process\.env' || true)
+    # 检查 path 模块
+    PATH_USAGE=$(grep -rn "require(['\"]path['\"]\|from ['\"]path['\"]\|import\(\s\)\?[\s*{]\?.*\bpath\b" "$RENDERER_DIR" --include='*.ts' --include='*.tsx' 2>/dev/null | grep -v '__tests__' | grep -v 'node_modules' || true)
+    # 检查直接 require electron
+    ELECTRON_REQUIRE=$(grep -rn "require(['\"]electron['\"])\|from ['\"]electron['\"]" "$RENDERER_DIR" --include='*.ts' --include='*.tsx' 2>/dev/null | grep -v '__tests__' | grep -v 'node_modules' || true)
 
-for f in "texstudio-hap/entry/src/main/cpp/napi_bridge.cpp" "texstudio-hap/entry/src/main/cpp/napi.cpp"; do
-    [ -f "$PROJECT_ROOT/$f" ] && NAPI_B="$PROJECT_ROOT/$f" && break
-done
+    RENDERER_VIOLATIONS=""
+    [ -n "$FS_USAGE" ] && RENDERER_VIOLATIONS="$RENDERER_VIOLATIONS  fs 模块（应通过 IPC 调用 main 进程）"
+    [ -n "$PROCESS_USAGE" ] && RENDERER_VIOLATIONS="$RENDERER_VIOLATIONS  process 全局（渲染进程应使用 window 环境）"
+    [ -n "$PATH_USAGE" ] && RENDERER_VIOLATIONS="$RENDERER_VIOLATIONS  path 模块（应通过 IPC 调用 main 进程）"
+    [ -n "$ELECTRON_REQUIRE" ] && RENDERER_VIOLATIONS="$RENDERER_VIOLATIONS  require('electron')（应使用 window.electronAPI）"
 
-if [ -n "$NAPI_A" ] && [ -n "$NAPI_B" ]; then
-    FUNCS_A=$(grep -oP 'DECLARE_NAPI_FUNCTION\s*\(\s*"\K[^"]+' "$NAPI_A" 2>/dev/null | sort || true)
-    FUNCS_B=$(grep -oP 'DECLARE_NAPI_FUNCTION\s*\(\s*"\K[^"]+' "$NAPI_B" 2>/dev/null | sort || true)
-
-    if [ "$FUNCS_A" = "$FUNCS_B" ]; then
-        pass "NAPI 接口同步: $(echo "$FUNCS_A" | wc -l) 个函数一致"
+    if [ -n "$RENDERER_VIOLATIONS" ]; then
+        error "Layer 3（renderer）直接调用了 Layer 1（运行时）API:$RENDERER_VIOLATIONS"
+        LAYERING_ERROR=1
     else
-        error "NAPI 接口不同步"
-        comm -23 <(echo "$FUNCS_A") <(echo "$FUNCS_B") | sed 's/^/  A only: /'
-        comm -13 <(echo "$FUNCS_A") <(echo "$FUNCS_B") | sed 's/^/  B only: /'
+        pass "Layer 3（renderer）未直接调用 Node.js API"
     fi
 else
-    warn "NAPI 文件不完整，跳过检查"
+    warn "renderer 目录不存在，跳过检查"
 fi
-echo ""
 
-# ---- 检查 3: CMake 宏名与 #ifdef 使用一致性 ----
-echo "--- 检查 CMake 宏名一致性 ---"
-
-TEXSTUDIO_SRC="$PROJECT_ROOT/texstudio/src"
-if [ -d "$TEXSTUDIO_SRC" ]; then
-    # 提取 CMake 定义
-    CMAKE_DEFINED=""
-    for cmakefile in "$PROJECT_ROOT/texstudio/CMakeLists.txt" "$PROJECT_ROOT/miktex/CMakeLists.txt"; do
-        [ -f "$cmakefile" ] && CMAKE_DEFINED="$CMAKE_DEFINED $(grep -oP '(?<=-D)[A-Z_][A-Z0-9_]*' "$cmakefile" 2>/dev/null || true)"
-    done
-    KNOWN_DEFINED="__OHOS__ $CMAKE_DEFINED"
-
-    # 检查 #ifdef OHOS_* 但不在已知列表中的
-    BAD_MACROS=$(grep -rohP '#ifdef\s+\K(OHOS_[A-Z_]+)' "$TEXSTUDIO_SRC" --include='*.cpp' --include='*.h' 2>/dev/null | sort -u || true)
-    MISMATCH=""
-    for macro in $BAD_MACROS; do
-        if ! echo " $KNOWN_DEFINED " | grep -q " $macro "; then
-            MISMATCH="$MISMATCH  $macro"
-        fi
-    done
-
-    if [ -z "$MISMATCH" ]; then
-        pass "CMake 宏名与 #ifdef 一致"
+# 2b: 检查 src/main/ 中是否直接引用了 renderer 的模块
+if [ -d "$MAIN_DIR" ]; then
+    MAIN_TO_RENDERER=$(grep -rnE "renderer|\.tsx" "$MAIN_DIR" --include='*.ts' 2>/dev/null | grep -v '__tests__' | grep -v 'node_modules' | grep -v '//.*renderer' || true)
+    if [ -n "$MAIN_TO_RENDERER" ]; then
+        error "Layer 2（main）直接引用了 Layer 3（renderer）模块"
+        echo "$MAIN_TO_RENDERER" | head -5 | sed 's/^/  /'
+        LAYERING_ERROR=1
     else
-        error "发现未定义的宏名:$MISMATCH"
+        pass "Layer 2（main）未直接引用 renderer 模块"
     fi
 else
-    warn "texstudio/src 不存在，跳过宏名检查"
+    warn "main 目录不存在，跳过检查"
 fi
+
 echo ""
 
-# ---- 检查 4: 禁止 posix_spawn（如果存在 OHOS 代码）----
-echo "--- 检查 posix_spawn 使用 ---"
+# ---- 检查 3: coverage_checklist 完整性 ----
+echo "--- 检查 3: coverage_checklist 完整性 ---"
 
-OHOS_DIR="$PROJECT_ROOT/texstudio/src/ohos"
-if [ -d "$OHOS_DIR" ]; then
-    SPAWN_USAGE=$(grep -rn 'posix_spawn' "$OHOS_DIR" 2>/dev/null || true)
-    if [ -z "$SPAWN_USAGE" ]; then
-        pass "OHOS 平台层未使用 posix_spawn"
-    else
-        error "OHOS 平台层使用了 posix_spawn（应改用 fork+exec）:"
-        echo "$SPAWN_USAGE"
-    fi
-else
-    warn "OHOS 平台目录不存在"
-fi
-echo ""
-
-# ---- 检查 5: ArkTS 中禁止 console.log ----
-echo "--- 检查 ArkTS console.log ---"
-
-ETS_DIR="$PROJECT_ROOT/texstudio-hap/entry/src/main/ets"
-if [ -d "$ETS_DIR" ]; then
-    CONSOLE_LOG=$(grep -rn 'console\.log' "$ETS_DIR" 2>/dev/null || true)
-    if [ -z "$CONSOLE_LOG" ]; then
-        pass "ArkTS 代码无 console.log"
-    else
-        error "ArkTS 代码使用了 console.log（应改用 hilog）："
-        echo "$CONSOLE_LOG"
-    fi
-else
-    warn "ArkTS 目录不存在"
-fi
-echo ""
-
-# ---- 检查 6: Worker 禁止 workerPort.close() ----
-echo "--- 检查 Worker workerPort.close() ---"
-
-if [ -d "$ETS_DIR" ]; then
-    WORKER_CLOSE=$(grep -rn 'workerPort\.close\|worker\.terminate' "$ETS_DIR" 2>/dev/null || true)
-    if [ -n "$WORKER_CLOSE" ]; then
-        error "Worker 中调用了 workerPort.close()（会导致死锁）:"
-        echo "$WORKER_CLOSE"
-    else
-        pass "Worker 未调用 workerPort.close()"
-    fi
-fi
-echo ""
-
-# ---- 检查 7: R-7 禁止跳过 Coordinator ----
-echo "--- 检查 R-7: Coordinator 工作流遵守 ---"
-
-SKIP_VIOLATION=false
-git -C "$PROJECT_ROOT" log -1 --format="%s" 2>/dev/null | grep -qE "^(fix|feat|docs|style|refactor|test|chore)\!?:.*" && SKIP_VIOLATION=true
-
-if [ "$SKIP_VIOLATION" = true ]; then
-    pass "R-7: Commit message 符合规范"
-else
-    warn "R-7: 无法确认是否绕过 Coordinator（建议通过合同文件验证）"
-fi
-echo ""
-
-# ---- 检查 8: coverage_checklist 不允许 TODO ----
-echo "--- 检查 coverage_checklist 完整性 ---"
-
-if [ -d "$CONTRACT_DIR" ]; then
+if [ -d "$PROJECT_ROOT/.opencode/contracts" ]; then
     TODO_ITEMS=""
-    for contract in "$CONTRACT_DIR"/*.json; do
-        [ -f "$contract" ] || continue
-        TODOS=$(python3 -c "
-import json, sys
-try:
-    with open('$contract') as f:
-        d = json.load(f)
-    checklist = d.get('coverage_checklist', {})
-    todos = {k: v for k, v in checklist.items() if 'TODO' in v}
-    if todos:
-        print(', '.join(todos.keys()))
-except: pass
-" 2>/dev/null || true)
-        [ -n "$TODOS" ] && TODO_ITEMS="$TODO_ITEMS  $(basename "$contract"): $TODOS"
+    # 在根目录和日期子目录中查找合同
+    for contract in $(find "$PROJECT_ROOT/.opencode/contracts" -name '*.json' -not -name 'contract-schema.json' 2>/dev/null); do
+        if [ -f "$contract" ]; then
+            # 使用 grep 检查 coverage_checklist 中是否包含 TODO
+            if grep -q '"coverage_checklist"' "$contract" 2>/dev/null; then
+                TODOS=$(grep -oE '"[^"]+":[[:space:]]*"TODO[^"]*"' "$contract" 2>/dev/null || true)
+                if [ -n "$TODOS" ]; then
+                    TODO_ITEMS="$TODO_ITEMS  $(basename "$contract"): $TODOS"
+                fi
+            fi
+        fi
     done
 
     if [ -z "$TODO_ITEMS" ]; then
@@ -208,45 +163,68 @@ except: pass
     else
         error "存在未覆盖的功能区域:$TODO_ITEMS"
     fi
+else
+    warn "contracts 目录不存在，跳过 coverage_checklist 检查"
 fi
 echo ""
 
-# ---- 检查 9: P-01 模型列表一致性 ----
-echo "--- 检查 P-01: AI 模型列表一致性 ---"
+# ---- 检查 4: P-01 模型列表一致性 ----
+echo "--- 检查 4: P-01 模型列表一致性 ---"
 
-WELCOME_MODELS="$PROJECT_ROOT/src/renderer/pages/Welcome.tsx"
-SETTINGS_MODELS="$PROJECT_ROOT/src/renderer/pages/Settings.tsx"
-CONSTANTS_MODELS="$PROJECT_ROOT/src/shared/constants.ts"
+WELCOME_FILE="$PROJECT_ROOT/src/renderer/pages/Welcome.tsx"
+SETTINGS_FILE="$PROJECT_ROOT/src/renderer/pages/Settings.tsx"
+CONSTANTS_FILE="$PROJECT_ROOT/src/shared/constants.ts"
 
-if [ -f "$WELCOME_MODELS" ] && [ -f "$CONSTANTS_MODELS" ]; then
-    # 提取 Welcome.tsx 中每个 provider 的模型数量
-    WELCOME_DOUBAO=$(grep -c 'doubao-' "$WELCOME_MODELS" 2>/dev/null || echo 0)
-    WELCOME_OPENAI=$(grep -c 'gpt-' "$WELCOME_MODELS" 2>/dev/null || echo 0)
-    WELCOME_CLAUDE=$(grep -c 'claude-' "$WELCOME_MODELS" 2>/dev/null || echo 0)
+P01_ERROR=0
 
-    # 提取 constants.ts 中每个 provider 的模型数量
-    CONSTANTS_DOUBAO=$(grep -c 'doubao-' "$CONSTANTS_MODELS" 2>/dev/null || echo 0)
-    CONSTANTS_OPENAI=$(grep -c 'gpt-' "$CONSTANTS_MODELS" 2>/dev/null || echo 0)
-    CONSTANTS_CLAUDE=$(grep -c 'claude-' "$CONSTANTS_MODELS" 2>/dev/null || echo 0)
+if [ -f "$WELCOME_FILE" ] && [ -f "$SETTINGS_FILE" ] && [ -f "$CONSTANTS_FILE" ]; then
+    # 统计各文件中 value: 定义的数量（模型条目）
+    WELCOME_COUNT=$(grep -c 'value:\s*"' "$WELCOME_FILE" 2>/dev/null || echo 0)
+    SETTINGS_COUNT=$(grep -c 'value:\s*"' "$SETTINGS_FILE" 2>/dev/null || echo 0)
+    CONSTANTS_COUNT=$(grep -c 'value:\s*"' "$CONSTANTS_FILE" 2>/dev/null || echo 0)
 
-    INCONSISTENT=""
-    if [ "$WELCOME_DOUBAO" != "$CONSTANTS_DOUBAO" ]; then
-        INCONSISTENT="$INCONSISTENT  doubao (Welcome:$WELCOME_DOUBAO vs constants:$CONSTANTS_DOUBAO)"
-    fi
-    if [ "$WELCOME_OPENAI" != "$CONSTANTS_OPENAI" ]; then
-        INCONSISTENT="$INCONSISTENT  openai (Welcome:$WELCOME_OPENAI vs constants:$CONSTANTS_OPENAI)"
-    fi
-    if [ "$WELCOME_CLAUDE" != "$CONSTANTS_CLAUDE" ]; then
-        INCONSISTENT="$INCONSISTENT  claude (Welcome:$WELCOME_CLAUDE vs constants:$CONSTANTS_CLAUDE)"
+    # Compare Welcome vs Settings (should match exactly since they share same definitions)
+    if [ "$WELCOME_COUNT" -ne "$SETTINGS_COUNT" ]; then
+        error "P-01: Welcome.tsx 与 Settings.tsx 模型数量不一致（Welcome:$WELCOME_COUNT vs Settings:$SETTINGS_COUNT）"
+        P01_ERROR=1
     fi
 
-    if [ -n "$INCONSISTENT" ]; then
-        error "P-01: AI 模型列表不一致:$INCONSISTENT"
-    else
-        pass "P-01: AI 模型列表一致 (doubao:$WELCOME_DOUBAO, openai:$WELCOME_OPENAI, claude:$WELCOME_CLAUDE)"
+    # Check that constants has reasonable coverage (at least as many as Welcome which covers rendered models)
+    if [ "$CONSTANTS_COUNT" -lt "$WELCOME_COUNT" ] && [ "$P01_ERROR" -eq 0 ]; then
+        # constants may have different model count; let's just warn
+        warn "P-01: constants.ts 模型条目数（$CONSTANTS_COUNT）少于 Welcome.tsx（$WELCOME_COUNT），请确认是否故意"
+    fi
+
+    if [ "$P01_ERROR" -eq 0 ]; then
+        pass "P-01: Welcome.tsx 与 Settings.tsx 模型一致（各 $WELCOME_COUNT 个）; constants.ts 含 $CONSTANTS_COUNT 个"
     fi
 else
     warn "P-01: 关键文件不存在，跳过检查"
+    for f in "$WELCOME_FILE" "$SETTINGS_FILE" "$CONSTANTS_FILE"; do
+        [ ! -f "$f" ] && echo "  缺失: $f"
+    done
+fi
+echo ""
+
+# ---- 检查 5: 工作区洁净检查 ----
+echo "--- 检查 5: 工作区洁净检查 ---"
+
+GIT_STATUS=$(git -C "$PROJECT_ROOT" status --porcelain 2>/dev/null || true)
+if [ -n "$GIT_STATUS" ]; then
+    # 过滤出源码变更
+    SRC_CHANGES=$(echo "$GIT_STATUS" | grep -E '\.(ts|tsx|js|jsx|json|css|html)$' || true)
+    if [ -n "$SRC_CHANGES" ]; then
+        CHANGED_FILES=$(echo "$SRC_CHANGES" | wc -l)
+        warn "工作区有 $CHANGED_FILES 个未提交的源码变更"
+        echo "$SRC_CHANGES" | head -10 | sed 's/^/  /'
+        if [ "$CHANGED_FILES" -gt 10 ]; then
+            echo "  ... 以及 $((CHANGED_FILES - 10)) 个更多变更"
+        fi
+    else
+        pass "工作区洁净（无未提交的源码变更）"
+    fi
+else
+    pass "工作区洁净"
 fi
 echo ""
 

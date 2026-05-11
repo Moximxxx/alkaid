@@ -1,0 +1,22 @@
+{
+  "task_id": "FIX-012",
+  "timestamp": 1778531728,
+  "goal": "修复批次A验证中发现的两个问题：1) bun audit 服务返回404，audit脚本改为npm audit；2) verify_arch.sh的WSL路径兼容性或添加PowerShell版本。",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\package.json",
+    "D:\\projects\\alkaid\\.opencode\\scripts\\verify_arch.sh"
+  ],
+  "constraints": [
+    "R-0", "R-6", "R-7", "R-8"
+  ],
+  "tech_stack_constraints": [],
+  "verification": [
+    "npm audit --version",
+    "bash .opencode/scripts/verify_arch.sh"
+  ],
+  "coverage_checklist": {
+    "audit_fixed": "assert: package.json audit脚本从bun audit改为npm audit，bun run audit可执行",
+    "verify_arch_compatible": "assert: verify_arch.sh在项目根目录执行时可用bash .opencode/scripts/verify_arch.sh正常运行（如WSL不可用则添加PowerShell替代方案）"
+  },
+  "status": "completed"
+}

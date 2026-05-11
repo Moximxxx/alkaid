@@ -1,0 +1,28 @@
+{
+  "task_id": "FEAT-016",
+  "timestamp": 1778536328,
+  "trace_id": "feat-016-20260512-three-layer-hooks",
+  "goal": "重构 Hook 系统为三层结构：1) 全局钩子（所有 Agent 自动执行）；2) Agent 特定钩子（按当前执行 Agent 匹配）；3) 合同钩子（合同声明）。同步引入规则适用范围和事故记录中的 Agent 关联。",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\agents\\coordinator.md",
+    "D:\\projects\\alkaid\\AGENTS.md",
+    "D:\\projects\\alkaid\\.opencode\\constraints\\contract-mechanism.md"
+  ],
+  "constraints": ["R-0", "R-15", "P-03"],
+  "tech_stack_constraints": [],
+  "verification": [
+    "grep '三层' coordinator.md",
+    "grep 'AGENT_ROLE' coordinator.md",
+    "grep '适用范围' AGENTS.md",
+    "grep '范围' contract-mechanism.md"
+  ],
+  "coverage_checklist": {
+    "coord_hook_system": "assert: coordinator.md 将默认 Hook 章节重构为 Hook 系统（三层结构），含全局/Agent特定/合同三级",
+    "coord_agent_hook_map": "assert: coordinator.md 定义 Agent → 特定钩子的映射表",
+    "coord_flow_3layer": "assert: coordinator.md 步骤5.1 改为全局→Agent特定→合同三层顺序",
+    "agents_pseudo_3layer": "assert: AGENTS.md Phase 5/7 伪代码体现三层钩子执行顺序并传入 AGENT_ROLE",
+    "agents_rule_scope": "assert: AGENTS.md 规则 R-10/R-12/R-13 标注适用范围",
+    "contract_md_scope": "assert: contract-mechanism.md Hook 目录增加范围列"
+  },
+  "status": "completed"
+}

@@ -1,23 +1,23 @@
 {
   "version": "1.0",
-  "analyzed_at": "2026-05-03T10:56:29+08:00",
+  "analyzed_at": "2026-05-11T20:39:20+08:00",
   "project": {
     "name": "alkaid",
-    "path": "/home/qin/code/alkaid",
-    "is_git_repo": false
+    "path": "D:\\projects\\alkaid",
+    "is_git_repo": true
   },
   "detected": {
-    "tech_stack": ["ArkTS", "React", "Node.js"],
-    "layers": "layer2,layer3",
-    "build_system": "npm",
+    "tech_stack": ["React", "TypeScript", "Node.js", "Electron"],
+    "layers": "layer1,layer2,layer3",
+    "build_system": "bun",
     "detected_patterns": ["network", "react_hooks"]
   },
-  "suggested_constraints": ["contract-mechanism.md", "agent-system.md", "arktx.md", "typescript.md", "nodejs.md", "react.md", "arch-layering.md", "tool-schema.md", "memory-management.md"],
+  "suggested_constraints": ["contract-mechanism.md", "agent-system.md", "tech-stack/typescript.md", "tech-stack/nodejs.md", "tech-stack/react.md", "arch-layering.md"],
   "file_stats": {
     "cpp_files": 0,
     "ets_files": 0,
-    "ts_files": 10,
-    "tsx_files": 5,
+    "ts_files": 33,
+    "tsx_files": 28,
     "py_files": 0,
     "go_files": 0,
     "rs_files": 0,

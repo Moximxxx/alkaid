@@ -31,6 +31,7 @@
 ```markdown
 ## 审查报告
 - 合同 ID：[task_id]
+- Trace ID：[trace_id]
 - 审查文件：[文件列表]
 
 ### 严重问题 (必须修复)

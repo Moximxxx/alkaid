@@ -1,0 +1,34 @@
+{
+  "task_id": "FIX-009",
+  "timestamp": 1778531728,
+  "goal": "批次A：基础修复 — 修复过期配置、添加统一验证命令、重写架构验证脚本。1)修复harness.config.json的项目路径、is_git_repo、tech_stack、build_system；2)在package.json中添加bun run verify（串联typecheck→lint→test）和bun run audit（安全审计）脚本；3)重写.opencode/scripts/verify_arch.sh为适用于本项目Electron+React+TypeScript三层架构的验证脚本（移除ArkTS/OHOS/NAPI相关内容，添加Arch-layering、contract有效期、coverage_checklist完整性检查）",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\harness.config.json",
+    "D:\\projects\\alkaid\\package.json",
+    "D:\\projects\\alkaid\\.opencode\\scripts\\verify_arch.sh"
+  ],
+  "constraints": [
+    "R-0", "R-6", "R-7", "R-8",
+    "arch-layering",
+    "contract-mechanism"
+  ],
+  "tech_stack_constraints": [
+    "typescript.md",
+    "react.md",
+    "nodejs.md"
+  ],
+  "verification": [
+    "bun run typecheck",
+    "bun run verify",
+    "bash .opencode/scripts/verify_arch.sh"
+  ],
+  "coverage_checklist": {
+    "harness_config_fixed": "assert: harness.config.json的project.path指向Windows正确路径(D:\\projects\\alkaid)、is_git_repo=true、tech_stack移除ArkTS/Layer2/Layer3不准确项、build_system改为bun",
+    "verify_command": "assert: package.json中新增verify脚本，bun run verify依次执行typecheck→lint→test且全部通过",
+    "audit_command": "assert: package.json中新增audit脚本，bun run audit可执行（不要求0漏洞，但必须能运行）",
+    "verify_arch_rewritten": "assert: verify_arch.sh重写后不再包含ArkTS/OHOS/NAPI/texstudio/miktex相关内容，改为检查本项目三层架构约束（Layer3→Layer2→Layer1单向依赖）、合同有效期、coverage_checklist完整性",
+    "verify_arch_passes": "assert: bash .opencode/scripts/verify_arch.sh无错误退出（exit 0）",
+    "typecheck_passes": "assert: bun run typecheck通过"
+  },
+  "status": "completed"
+}

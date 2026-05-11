@@ -1,0 +1,30 @@
+{
+  "task_id": "FIX-010",
+  "timestamp": 1778531728,
+  "goal": "修复 FIX-009 审查中发现的问题：1) verify_arch.sh 中 grep -oP 改为 grep -oE（Windows兼容）；2) 移除空条件块和未使用变量；3) grep 加 -E 标志增强可移植性；4) 简化重定向冗余；5) package.json audit 脚本改为 bun audit；6) harness.config.json suggested_constraints 补全 tech-stack/ 路径前缀",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\scripts\\verify_arch.sh",
+    "D:\\projects\\alkaid\\package.json",
+    "D:\\projects\\alkaid\\.opencode\\harness.config.json"
+  ],
+  "constraints": [
+    "R-0", "R-6", "R-7", "R-8",
+    "contract-mechanism"
+  ],
+  "tech_stack_constraints": [],
+  "verification": [
+    "bash .opencode/scripts/verify_arch.sh",
+    "bun run typecheck"
+  ],
+  "coverage_checklist": {
+    "grep_P_to_E": "assert: verify_arch.sh 第140行 grep -oP 改为 grep -oE，Windows Git Bash 兼容",
+    "remove_empty_block": "assert: verify_arch.sh 第125-127行空条件块已移除",
+    "remove_unused_vars": "assert: verify_arch.sh 第174-176行未使用变量 WELCOME_PROVIDERS/SETTINGS_PROVIDERS/CONSTANTS_PROVIDERS 已移除",
+    "grep_add_E_flag": "assert: verify_arch.sh 第113行 grep 已加 -E 标志",
+    "simplify_redirect": "assert: verify_arch.sh 第49行 &>/dev/null 2>&1 简化为 &>/dev/null",
+    "audit_script_use_bun": "assert: package.json 中 audit 脚本从 npm audit 改为 bun audit",
+    "suggested_constraints_path": "assert: harness.config.json 中 suggested_constraints 的 typescript.md/nodejs.md/react.md 补全前缀为 tech-stack/typescript.md 等",
+    "verify_arch_passes": "assert: bash .opencode/scripts/verify_arch.sh 无错误退出"
+  },
+  "status": "completed"
+}

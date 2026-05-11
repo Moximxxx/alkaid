@@ -16,7 +16,7 @@
 ### 启动后台进程
 ```powershell
 # ✅ 正确：追踪具体 PID
-$process = Start-Process -NoNewWindow -PassThru -FilePath "bun" -ArgumentList "run dev"
+$process = Start-Process -WindowStyle Hidden -PassThru -FilePath "bun" -ArgumentList "run dev"
 $processId = $process.Id
 $processId | Out-File -FilePath ".opencode/tmp/vite.pid" -Encoding ascii
 
@@ -48,11 +48,11 @@ Phase 1: 准备环境
   ├─ 确认 Playwright 浏览器已安装
   └─ 创建截图输出目录 scripts/e2e/screenshots/
 
-Phase 2: 启动服务（异步 + 轮询）
-  ├─ Start-Job / Start-Process -PassThru 后台启动 Vite
-  ├─ 记录 PID 到 .opencode/tmp/vite.pid
-  ├─ 每 10 秒检查 http://localhost:5173
-  └─ 超时 120 秒 → 报告失败
+Phase 2: 启动服务（通过 service-agent）
+  ├─ 委派 service-agent 启动 Vite（Start-Process -WindowStyle Hidden 完全分离）
+  ├─ 委派 heartbeat 轮询检查（每 10 秒，超时 120 秒）
+  ├─ heartbeat 返回 READY → 继续
+  └─ heartbeat 返回 DEAD → 报告失败
 
 Phase 3: 执行 Playwright 测试
   ├─ npx playwright test scripts/e2e/smoke.test.ts
@@ -100,6 +100,7 @@ Phase 5: 安全清理
 
 ```markdown
 ### E2E 冒烟测试报告
+- **Trace ID**: [trace_id]
 - **测试结果**: [PASS/FAIL]
 - **运行时间**: [X秒]
 - **截图列表**:

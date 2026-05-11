@@ -1,0 +1,29 @@
+{
+  "task_id": "FIX-015",
+  "timestamp": 1778531728,
+  "goal": "工作流规则对齐与文档债务清理：1) smoke-tester.md Phase 2 对齐 R-12（通过 service-agent 启服务而非直接启动）；2) agent-system.md 称呼统一（实现者→task-executor）和验证方法更新（cpp/h/ets→ts/tsx）；3) contract-mechanism.md 示例格式更新（加 trace_id/retry_count/hooks）和生命周期状态对齐",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\agents\\smoke-tester.md",
+    "D:\\projects\\alkaid\\.opencode\\constraints\\agent-system.md",
+    "D:\\projects\\alkaid\\.opencode\\constraints\\contract-mechanism.md"
+  ],
+  "constraints": [
+    "R-0", "R-6", "R-7", "R-8",
+    "agent-system",
+    "contract-mechanism"
+  ],
+  "tech_stack_constraints": [],
+  "verification": [
+    "grep 确认无'实现者'术语残留",
+    "grep 确认 smoke-tester 无直接 -NoNewWindow 启服务"
+  ],
+  "coverage_checklist": {
+    "smoke_tester_r12": "assert: smoke-tester.md Phase 2 启动方式改为引用 service-agent，移除直接 Start-Process -NoNewWindow",
+    "agent_system_terminology": "assert: agent-system.md 工作区隔离表中'实现者'改为'task-executor'",
+    "agent_system_verify_method": "assert: agent-system.md 验证方法中 grep 模式由 .cpp|.h|.ets 改为 .ts|.tsx",
+    "contract_mechanism_example": "assert: contract-mechanism.md 示例合同格式包含 trace_id/retry_count/hooks 字段",
+    "contract_mechanism_lifecycle": "assert: contract-mechanism.md 生命周期描述从 in_progress 改为 pending/active/completed/failed",
+    "no_outdated_terms": "assert: grep 检查所有 .md 文件中无'实现者'术语残留"
+  },
+  "status": "completed"
+}

@@ -1,0 +1,27 @@
+{
+  "task_id": "FIX-014",
+  "timestamp": 1778531728,
+  "goal": "修复 Agent 配置遗漏：1) opencode.json 中 builder 的 bash 权限添加 bash *、steps 从 15 调整为 25；2) opencode.json 中 code-reviewer 添加 steps: 15；3) builder.md 可用构建命令表添加 bun run verify 和 bun run audit",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\opencode.json",
+    "D:\\projects\\alkaid\\.opencode\\agents\\builder.md"
+  ],
+  "constraints": [
+    "R-0", "R-6", "R-7", "R-8",
+    "agent-system"
+  ],
+  "tech_stack_constraints": [],
+  "verification": [
+    "opencode.json JSON 格式检查",
+    "builder.md markdown 格式完整性检查"
+],
+  "coverage_checklist": {
+    "builder_bash_permission": "assert: opencode.json builder 的 bash 权限列表中新增 bash *: allow",
+    "builder_steps_25": "assert: opencode.json builder 的 steps 值从 15 改为 25",
+    "code_reviewer_steps": "assert: opencode.json code-reviewer 配置中新增 steps: 15",
+    "builder_cmd_verify": "assert: builder.md 可用构建命令表新增 bun run verify 行",
+    "builder_cmd_audit": "assert: builder.md 可用构建命令表新增 bun run audit 行",
+    "opencode_json_valid": "assert: opencode.json 仍是合法 JSON"
+  },
+  "status": "completed"
+}

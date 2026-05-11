@@ -46,3 +46,13 @@ if (Test-Path $pidFile) {
 | Vite Dev Server | `bun run dev` | `.opencode/tmp/vite.pid` |
 | Electron App | `bun run electron:dev` | `.opencode/tmp/electron.pid` |
 | 自定义 | 任意 | `.opencode/tmp/{name}.pid` |
+
+## 交接报告
+
+```markdown
+### 交接报告
+- Trace ID：[trace_id]
+- 服务名：[service_name]
+- PID：[pid]
+- 状态：[started/stopped]
+```

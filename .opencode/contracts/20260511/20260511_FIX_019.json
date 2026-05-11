@@ -1,0 +1,20 @@
+{
+  "task_id": "FIX-019",
+  "timestamp": 1778537528,
+  "trace_id": "fix-019-20260512-agent-path",
+  "goal": "修复 opencode.json 中 10 个 Agent prompt 路径指向，从 ./agents/xxx.md 改为 ./.opencode/agents/xxx.md，防止 Agent 加载提示词时先到根目录下查找失败再回退",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\opencode.json"
+  ],
+  "constraints": ["R-0"],
+  "tech_stack_constraints": [],
+  "verification": [
+    "grep 'opencode/agents' opencode.json 确认 10 处全部更新"
+  ],
+  "coverage_checklist": {
+    "coordinator_path": "assert: coordinator prompt 路径为 ./.opencode/agents/coordinator.md",
+    "plan_path": "assert: plan prompt 路径为 ./.opencode/agents/plan.md",
+    "all_10_agents": "assert: 全部 10 个 Agent 的 prompt 路径均已更新为 ./.opencode/agents/ 下"
+  },
+  "status": "completed"
+}

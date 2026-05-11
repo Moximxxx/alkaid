@@ -1,0 +1,29 @@
+{
+  "task_id": "FIX-011",
+  "timestamp": 1778531728,
+  "goal": "创建 ESLint 配置文件以修复 bun run lint（及 bun run verify）的失败问题。原因：package.json 中有 lint 命令（eslint src --ext .ts,.tsx），但项目根目录缺少 .eslintrc.json 配置文件，导致 verify 在 lint 阶段短路失败。需创建适用于 React + TypeScript 项目的 ESLint v8 配置。",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.eslintrc.json"
+  ],
+  "constraints": [
+    "R-0", "R-6", "R-7", "R-8",
+    "tech-stack/typescript",
+    "tech-stack/react"
+  ],
+  "tech_stack_constraints": [
+    "typescript.md",
+    "react.md"
+  ],
+  "verification": [
+    "bun run lint",
+    "bun run typecheck",
+    "bun run verify"
+  ],
+  "coverage_checklist": {
+    "eslint_config_created": "assert: 在项目根目录创建 .eslintrc.json，配置支持 TypeScript 5 + React 18 + JSX",
+    "lint_passes": "assert: bun run lint 通过（允许有 warning 但不允许 error）",
+    "verify_passes": "assert: bun run verify 通过",
+    "typecheck_passes": "assert: bun run typecheck 通过"
+  },
+  "status": "completed"
+}

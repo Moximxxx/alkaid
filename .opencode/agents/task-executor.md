@@ -25,6 +25,7 @@
 ```markdown
 ### 交接报告
 - 合同 ID：[task_id]
+- Trace ID：[trace_id]
 - 完成状态：[成功/失败/部分]
 - 已修改文件：[列表]
 - 自验结果：[PASS/FAIL]

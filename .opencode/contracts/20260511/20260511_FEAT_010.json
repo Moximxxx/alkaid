@@ -1,0 +1,36 @@
+{
+  "task_id": "FEAT-010",
+  "timestamp": 1778531728,
+  "goal": "批次B-2：在所有子 Agent 的交接报告/审查报告/诊断报告/复盘报告格式中追加 Trace ID 字段，实现 P-02 全链路追踪。涉及 plan、task-executor、builder、code-reviewer、crash-doctor、retro、service-agent、heartbeat、smoke-tester 共9个 Agent prompt 文件。",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\agents\\plan.md",
+    "D:\\projects\\alkaid\\.opencode\\agents\\task-executor.md",
+    "D:\\projects\\alkaid\\.opencode\\agents\\builder.md",
+    "D:\\projects\\alkaid\\.opencode\\agents\\code-reviewer.md",
+    "D:\\projects\\alkaid\\.opencode\\agents\\crash-doctor.md",
+    "D:\\projects\\alkaid\\.opencode\\agents\\retro.md",
+    "D:\\projects\\alkaid\\.opencode\\agents\\service-agent.md",
+    "D:\\projects\\alkaid\\.opencode\\agents\\heartbeat.md",
+    "D:\\projects\\alkaid\\.opencode\\agents\\smoke-tester.md"
+  ],
+  "constraints": [
+    "R-0", "R-6", "R-7", "R-8",
+    "agent-system"
+  ],
+  "tech_stack_constraints": [],
+  "verification": [
+    "人工评审：每个 Agent prompt 的交接报告格式均已包含 Trace ID"
+  ],
+  "coverage_checklist": {
+    "plan_trace_id": "assert: plan.md 输出格式中的报告模板增加 trace_id 字段",
+    "task_executor_trace_id": "assert: task-executor.md 交接报告格式增加 trace_id 字段",
+    "builder_trace_id": "assert: builder.md 交接报告格式增加 trace_id 字段",
+    "code_reviewer_trace_id": "assert: code-reviewer.md 审查报告格式增加 trace_id 字段",
+    "crash_doctor_trace_id": "assert: crash-doctor.md 诊断报告格式增加 trace_id 字段",
+    "retro_trace_id": "assert: retro.md 复盘报告格式增加 trace_id 字段",
+    "service_agent_trace_id": "assert: service-agent.md 交接报告格式增加 trace_id 字段",
+    "heartbeat_trace_id": "assert: heartbeat.md 报告格式增加 trace_id 字段",
+    "smoke_tester_trace_id": "assert: smoke-tester.md 交接报告格式增加 trace_id 字段"
+  },
+  "status": "completed"
+}

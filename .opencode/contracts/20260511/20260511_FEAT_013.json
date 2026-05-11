@@ -1,0 +1,31 @@
+{
+  "task_id": "FEAT-013",
+  "timestamp": 1778534328,
+  "trace_id": "feat-013-20260511-alkaid-guardrails",
+  "goal": "新建 4 个强约束 Guardrail hook 脚本，均在 .opencode/hooks/ 目录下，遵循统一 Hook 协议（RESULT: PASS/BLOCK/WARN），用于增强 Agent 工作流的前馈控制和反馈校验能力",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\hooks\\workspace-clean.sh",
+    "D:\\projects\\alkaid\\.opencode\\hooks\\diff-size-guard.sh",
+    "D:\\projects\\alkaid\\.opencode\\hooks\\arch-constraint-check.sh",
+    "D:\\projects\\alkaid\\.opencode\\hooks\\secret-leak-scan.sh"
+  ],
+  "constraints": ["R-0", "agent-system"],
+  "tech_stack_constraints": [],
+  "verification": [
+    "bash -n 检查各脚本语法",
+    "grep 'RESULT:' 各脚本确认协议合规",
+    "grep 'exit 0' 各脚本确认退出码"
+  ],
+  "coverage_checklist": {
+    "ws_clean_script": "assert: workspace-clean.sh 使用 git status --porcelain 检查未提交源码变更",
+    "ws_clean_protocol": "assert: workspace-clean.sh 输出 RESULT: PASS/BLOCK/WARN",
+    "diff_size_script": "assert: diff-size-guard.sh 检查 files_to_modify 文件数（≤20）和估算变更行数（≤2000）",
+    "diff_size_parameters": "assert: diff-size-guard.sh 接收合同 JSON 路径作为参数",
+    "arch_check_script": "assert: arch-constraint-check.sh 检查 renderer 目录中 fs/process/path/electron 分层违规",
+    "arch_check_parameter": "assert: arch-constraint-check.sh 接收修改文件列表作为参数",
+    "secret_scan_script": "assert: secret-leak-scan.sh 扫描硬编码密钥（api_key/sk-/AKIA/password）",
+    "secret_scan_parameter": "assert: secret-leak-scan.sh 接收修改文件列表作为参数",
+    "protocol_compliance": "assert: 所有 4 个脚本 stdout 第一行输出 RESULT: 格式"
+  },
+  "status": "completed"
+}

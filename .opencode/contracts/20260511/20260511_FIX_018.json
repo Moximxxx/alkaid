@@ -1,0 +1,39 @@
+{
+  "task_id": "FIX-018",
+  "timestamp": 1778531728,
+  "trace_id": "contract-fix-018-0000-0000-000000000018",
+  "goal": "对齐 coordinator.md、AGENTS.md、contract-mechanism.md 三文件为 Plan→合同→执行 新流程。关键变更：1) coordinator.md 委派流程和自动修复循环加入 Plan 阶段；2) AGENTS.md 伪代码重写（Phase 顺序修正为 Plan→Generate Contract→Execute→Review→Plan→Fix→Review）；3) contract-mechanism.md 生命周期加入 Plan 分析阶段说明",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\agents\\coordinator.md",
+    "D:\\projects\\alkaid\\AGENTS.md",
+    "D:\\projects\\alkaid\\.opencode\\constraints\\contract-mechanism.md"
+  ],
+  "constraints": [
+    "R-0",
+    "R-6",
+    "R-7",
+    "R-14",
+    "P-02",
+    "agent-system",
+    "contract-mechanism"
+  ],
+  "tech_stack_constraints": [],
+  "verification": [
+    "grep 'trace_id' coordinator.md",
+    "grep '委派 plan' coordinator.md",
+    "grep 'fix_plan' AGENTS.md",
+    "grep 'Phase 1' AGENTS.md",
+    "grep 'planning' contract-mechanism.md"
+  ],
+  "coverage_checklist": {
+    "coordinator_trace_id_first": "assert: coordinator.md 完整委派流程第1步包含'生成 UUID trace_id'",
+    "coordinator_plan_before_contract": "assert: coordinator.md 完整委派流程第2步是委派 plan，第3步是基于 plan 生成合同",
+    "coordinator_auto_fix_with_plan": "assert: coordinator.md 自动修复循环第2步是委派 plan 分析修复方案",
+    "coordinator_delegation_table_updated": "assert: coordinator.md 各阶段委派目标表包含'修复分析'行和更新后的 plan 输出字段",
+    "agents_md_phase_order": "assert: AGENTS.md 伪代码 Phase 1 是生成 trace_id，Phase 2 是委派 plan（接收原始需求）",
+    "agents_md_fix_loop_plan": "assert: AGENTS.md 伪代码自动修复循环中包含 coordinator.delegate(plan, fix_repair) 步骤",
+    "agents_md_r6_updated": "assert: AGENTS.md R-6 规则描述包含 Plan 修复分析循环",
+    "contract_md_planning_stage": "assert: contract-mechanism.md 生命周期说明包含 Plan 分析阶段"
+  },
+  "status": "completed"
+}

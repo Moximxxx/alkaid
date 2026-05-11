@@ -1,0 +1,30 @@
+{
+  "task_id": "FEAT-012",
+  "timestamp": 1778534328,
+  "trace_id": "feat-012-20260511-alkaid-hooks",
+  "goal": "强化 Hook 约束系统：1) contract-schema.json hook 枚举改为 pattern 以支持扩展；2) coordinator.md 新增 Hook 失败处理（BLOCK 阻断流程）和统一 Hook 协议（PASS/BLOCK/WARN）；3) AGENTS.md 伪代码 Phase 5/7 补充 hook 失败分支；4) contract-mechanism.md 新增 Hook 目录和协议文档",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\contracts\\contract-schema.json",
+    "D:\\projects\\alkaid\\.opencode\\agents\\coordinator.md",
+    "D:\\projects\\alkaid\\AGENTS.md",
+    "D:\\projects\\alkaid\\.opencode\\constraints\\contract-mechanism.md"
+  ],
+  "constraints": ["R-0", "R-6", "R-7", "P-02", "contract-mechanism"],
+  "tech_stack_constraints": [],
+  "verification": [
+    "validate-contract 检验新 Schema 兼容旧合同",
+    "grep 'BLOCK' coordinator.md",
+    "grep 'BLOCK' AGENTS.md",
+    "grep 'Hook 目录' contract-mechanism.md"
+  ],
+  "coverage_checklist": {
+    "schema_extensible": "assert: contract-schema.json hooks 从 enum 改为 pattern，允许任意 hook 名注册",
+    "schema_on_hook_fail": "assert: contract-schema.json 新增 on_hook_fail 可选字段",
+    "coordinator_hook_protocol": "assert: coordinator.md 新增统一 Hook 协议（RESULT: PASS/BLOCK/WARN + exit code）",
+    "coordinator_block_flow": "assert: coordinator.md 中 hook BLOCK 时流程中断并委派 crash-doctor",
+    "agents_phase5_block": "assert: AGENTS.md Phase 5 前置钩子执行后有 IF any hook returns BLOCK 分支",
+    "agents_phase7_block": "assert: AGENTS.md Phase 7 后置钩子执行后有 IF any hook returns BLOCK 分支",
+    "contract_md_hook_catalog": "assert: contract-mechanism.md 新增 Hook 目录章节，列出所有 pre_task 和 post_task 钩子及其行为"
+  },
+  "status": "completed"
+}

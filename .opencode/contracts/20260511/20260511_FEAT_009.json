@@ -1,0 +1,30 @@
+{
+  "task_id": "FEAT-009",
+  "timestamp": 1778531728,
+  "goal": "批次B-1：工作流自愈循环核心实现。1) contract-schema.json 新增 trace_id 和 retry_count 字段；2) coordinator.md 增加 code-reviewer 失败后的自动修复循环（≤3次重试）；3) AGENTS.md 更新工作流伪代码和新增 R-14 自动修复循环规则",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\contracts\\contract-schema.json",
+    "D:\\projects\\alkaid\\.opencode\\agents\\coordinator.md",
+    "D:\\projects\\alkaid\\AGENTS.md"
+  ],
+  "constraints": [
+    "R-0", "R-6", "R-7", "R-8",
+    "contract-mechanism",
+    "agent-system"
+  ],
+  "tech_stack_constraints": [],
+  "verification": [
+    "validate-contract: .opencode/contracts/contract-schema.json",
+    "人工评审：coordinator.md 重试逻辑不会造成死循环"
+  ],
+  "coverage_checklist": {
+    "contract_schema_trace_id": "assert: contract-schema.json 中新增 trace_id 可选字符串字段，pattern: ^[A-Za-z0-9-]+$",
+    "contract_schema_retry_count": "assert: contract-schema.json 中新增 retry_count 可选整数字段，minimum: 0, maximum: 3",
+    "coordinator_auto_retry": "assert: coordinator.md 委派流程第5步中，当 code-reviewer 返回 FAIL_WITH_ISSUES 且 retry_count < 3 时，自动创建 fix_contract（retry_count+1）重申派 task-executor 并重新审查；retry_count ≥ 3 时升级失败走 crash-doctor",
+    "coordinator_trace_id": "assert: coordinator.md 中规定在合同创建时自动生成 UUID trace_id 填充至合同",
+    "agents_md_retry_loop": "assert: AGENTS.md 伪代码 Function main 中 Phase 7 加入自动重试循环逻辑（≤3次）",
+    "agents_md_r14": "assert: AGENTS.md 新增 R-14 规则：自动修复循环，审查失败自动触发修复（≤3次），超过升级失败",
+    "schema_valid": "assert: contract-schema.json 仍是合法 JSON Schema"
+  },
+  "status": "completed"
+}

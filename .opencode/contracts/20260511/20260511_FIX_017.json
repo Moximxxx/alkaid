@@ -1,0 +1,28 @@
+{
+  "task_id": "FIX-017",
+  "timestamp": 1778531728,
+  "trace_id": "contract-fix-017-0000-0000-000000000017",
+  "goal": "增强 plan.md 输出格式，增加合同核心字段（files_to_modify, constraints, verification, coverage_checklist），并新增修复分析场景（fix_repair）支持。实现 Plan → 合同 → 执行的新流程前置条件。",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\agents\\plan.md"
+  ],
+  "constraints": [
+    "R-0",
+    "agent-system",
+    "contract-mechanism"
+  ],
+  "tech_stack_constraints": [],
+  "verification": [
+    "grep 'files_to_modify' plan.md",
+    "grep 'verification' plan.md",
+    "grep 'fix_repair' plan.md",
+    "grep '修复分析' plan.md"
+  ],
+  "coverage_checklist": {
+    "plan_output_enhanced": "assert: plan.md 输出格式包含 files_to_modify, constraints, verification, coverage_checklist 字段",
+    "plan_fix_repair_scenario": "assert: plan.md 新增修复分析场景章节，描述如何处理 fix_repair 任务类型",
+    "plan_contract_fields": "assert: Plan 职责描述包含输出合同所需字段的说明",
+    "no_old_format": "assert: 旧输出格式中的'建议约束引用'已更新为 constraints 结构化字段"
+  },
+  "status": "completed"
+}

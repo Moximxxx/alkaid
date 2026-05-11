@@ -1,0 +1,29 @@
+{
+  "task_id": "FIX-013",
+  "timestamp": 1778531728,
+  "goal": "修复工作流核心数据模型问题：1) contract-schema.json status 枚举增加 failed；2) AGENTS.md 伪代码 Phase 7 添加 fix_result 失败处理、R-6 补全 code-reviewer 环节；3) coordinator.md hooks.post_task 执行时机调整到 task-executor 返回后（审查前）、fix_result 失败走 crash-doctor",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\contracts\\contract-schema.json",
+    "D:\\projects\\alkaid\\AGENTS.md",
+    "D:\\projects\\alkaid\\.opencode\\agents\\coordinator.md"
+  ],
+  "constraints": [
+    "R-0", "R-6", "R-7", "R-8",
+    "contract-mechanism",
+    "agent-system"
+  ],
+  "tech_stack_constraints": [],
+  "verification": [
+    "validate-contract .opencode/contracts/contract-schema.json"
+  ],
+  "coverage_checklist": {
+    "schema_status_add_failed": "assert: contract-schema.json 第64行 status.enum 由 ['pending','active','completed'] 改为 ['pending','active','completed','failed']",
+    "schema_status_desc_updated": "assert: contract-schema.json status 字段 description 增加 failed 说明",
+    "agents_md_r6_fixed": "assert: AGENTS.md R-6 描述补全为 Coordinator → Plan → Task-Executor → Code-Reviewer → Builder → Retro",
+    "agents_md_fix_result_check": "assert: AGENTS.md 伪代码 Phase 7 中 fix_result 添加失败检查，修复失败走 crash-doctor 而非继续循环",
+    "coordinator_hooks_position": "assert: coordinator.md 中 hooks.post_task 从步骤5.1（审查后）移到步骤4和5之间（task-executor返回后、审查前），更名或调整编号",
+    "coordinator_fix_fail": "assert: coordinator.md 自动修复循环步骤中，fix_result 失败时走 crash-doctor 诊断",
+    "schema_still_valid": "assert: contract-schema.json 仍是合法 JSON Schema"
+  },
+  "status": "completed"
+}

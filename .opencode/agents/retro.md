@@ -23,6 +23,7 @@ Coordinator 把你委派时传入:
 
 **日期**: YYYY-MM-DD HH:MM
 **任务目标**: {goal}
+**Trace ID**: {trace_id}
 **执行者**: {task-executor / builder}
 **审查者**: {code-reviewer}
 **构建者**: {builder}

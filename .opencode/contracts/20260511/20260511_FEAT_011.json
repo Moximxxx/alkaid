@@ -1,0 +1,27 @@
+{
+  "task_id": "FEAT-011",
+  "timestamp": 1778531728,
+  "goal": "批次C：技能系统集成与Hooks激活。1) plan.md 输出格式增加 suggested_skills 字段；2) coordinator.md 增加根据 suggested_skills 加载 skill 的说明和 hook 执行点；3) contract-schema.json hooks 字段从 enum 改为可扩展字符串，激活 hooks 机制",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\agents\\plan.md",
+    "D:\\projects\\alkaid\\.opencode\\agents\\coordinator.md",
+    "D:\\projects\\alkaid\\.opencode\\contracts\\contract-schema.json"
+  ],
+  "constraints": [
+    "R-0", "R-6", "R-7", "R-8",
+    "contract-mechanism",
+    "agent-system"
+  ],
+  "tech_stack_constraints": [],
+  "verification": [
+    "validate-contract .opencode/contracts/contract-schema.json"
+  ],
+  "coverage_checklist": {
+    "plan_suggested_skills": "assert: plan.md 输出格式中新增 suggested_skills 字段（字符串数组），列出任务类型对应的推荐 skill 名称",
+    "coordinator_skill_loading": "assert: coordinator.md 委派流程中说明根据 plan.suggested_skills 在委派 task-executor 前通过 skill 工具加载对应文档作为上下文",
+    "coordinator_hooks": "assert: coordinator.md 委派流程中增加说明——在委派前执行合同 hooks.pre_task，在子Agent返回后执行 hooks.post_task",
+    "schema_hooks_extensible": "assert: contract-schema.json hooks 字段中 pre_task 和 post_task 的 items 改为 type:string 而非固定 enum，支持扩展",
+    "schema_valid": "assert: contract-schema.json 仍是合法 JSON Schema"
+  },
+  "status": "completed"
+}

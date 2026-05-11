@@ -1,0 +1,17 @@
+{
+  "task_id": "FIX-016",
+  "timestamp": 1778531728,
+  "goal": "修复 contract-mechanism.md R-04 状态引用过时问题：将 status 从 in_progress 改为 active/completed/failed，与新生命周期对齐",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\constraints\\contract-mechanism.md"
+  ],
+  "constraints": ["R-0", "R-6", "R-7", "R-8", "contract-mechanism"],
+  "tech_stack_constraints": [],
+  "verification": [
+    "grep 确认 R-04 已更新"
+],
+  "coverage_checklist": {
+    "r04_updated": "assert: contract-mechanism.md R-04 中 in_progress 改为 active，增加 failed 状态说明"
+  },
+  "status": "completed"
+}

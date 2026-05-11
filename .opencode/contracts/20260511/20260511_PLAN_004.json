@@ -1,0 +1,39 @@
+{
+  "task_id": "PLAN-004",
+  "timestamp": 1778531728,
+  "goal": "对摇光项目Agent工作流配置进行全面自优化规划。基于已完成的Harness Engineering对标分析，评估各优化项的影响范围、依赖关系和风险，输出分批次的可执行迭代计划。",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\AGENTS.md",
+    "D:\\projects\\alkaid\\.opencode\\opencode.json",
+    "D:\\projects\\alkaid\\.opencode\\constraints\\agent-system.md",
+    "D:\\projects\\alkaid\\.opencode\\constraints\\arch-layering.md",
+    "D:\\projects\\alkaid\\.opencode\\constraints\\contract-mechanism.md",
+    "D:\\projects\\alkaid\\.opencode\\agents\\coordinator.md",
+    "D:\\projects\\alkaid\\.opencode\\agents\\builder.md",
+    "D:\\projects\\alkaid\\.opencode\\agents\\code-reviewer.md",
+    "D:\\projects\\alkaid\\.opencode\\agents\\task-executor.md",
+    "D:\\projects\\alkaid\\.opencode\\agents\\plan.md",
+    "D:\\projects\\alkaid\\.opencode\\contracts\\contract-schema.json",
+    "D:\\projects\\alkaid\\.opencode\\harness.config.json",
+    "D:\\projects\\alkaid\\.opencode\\rules\\code_rules.md",
+    "D:\\projects\\alkaid\\package.json"
+  ],
+  "constraints": [
+    "R-0", "R-6", "R-7", "R-8",
+    "agent-system",
+    "contract-mechanism",
+    "arch-layering"
+  ],
+  "tech_stack_constraints": [],
+  "verification": [
+    "人工评审：分批计划必须覆盖所有P0/P1优化项，每批有明确的目标、涉及文件、工作量评估"
+  ],
+  "coverage_checklist": {
+    "existing_analysis_review": "assert: 基于已完成的Harness对标分析，确认优化项完整性和优先级",
+    "batch_plan_output": "assert: 输出分2-3批的可执行迭代计划，每批包含目标、涉及文件、工作量估算、风险点",
+    "dependency_analysis": "assert: 识别批次间的依赖关系，确保不存在循环依赖或阻塞依赖",
+    "risk_assessment": "assert: 对每批次识别潜在风险（如递归修改Agent配置的风险）",
+    "execution_order": "assert: 明确批次执行顺序和前置条件"
+  },
+  "status": "completed"
+}
