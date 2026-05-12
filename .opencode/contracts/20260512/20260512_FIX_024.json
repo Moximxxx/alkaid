@@ -1,0 +1,48 @@
+{
+  "task_id": "FIX-024",
+  "timestamp": 1778592100,
+  "trace_id": "013b7e28-8e30-4c3a-8bbc-2ad6233e4964",
+  "goal": "批次E1: 修复 Issue #3 中的 no-unused-vars、prefer-const、no-constant-condition、noInlineConfig + Issue #10 tsconfig 开启 noUnusedLocals/noUnusedParameters",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\renderer\\components\\VideoStream.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useVideoCallState.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useVideoChat.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\About.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\Home.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\VideoChat.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\Welcome.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\__tests__\\context-manager.test.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\__tests__\\interrupt-controller.test.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\vision-pipeline.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\ai.ts",
+    "D:\\projects\\alkaid\\tsconfig.json"
+  ],
+  "constraints": [
+    "arch-layering",
+    "typescript.md",
+    "react.md"
+  ],
+  "tech_stack_constraints": [
+    "typescript.md",
+    "react.md"
+  ],
+  "hooks": {
+    "pre_task": [],
+    "post_task": []
+  },
+  "verification": [
+    "bun run typecheck",
+    "bun run lint",
+    "bun run test"
+  ],
+  "coverage_checklist": {
+    "fix_unused_vars": "assert: 所有 @typescript-eslint/no-unused-vars 警告已消除（移除未使用的导入/变量，或使用下划线前缀）",
+    "fix_prefer_const": "assert: vision-pipeline.ts 中 adaptiveMultiplier 改为 const",
+    "fix_while_true": "assert: ai.ts 中 while(true) 改为 while (true) 有退出条件或标注为 intentional",
+    "fix_no_inline_config": "assert: useCamera.ts 中的 eslint-disable-next-line noInlineConfig 警告已处理",
+    "tsconfig_strict_mode": "assert: tsconfig.json 中 noUnusedLocals 和 noUnusedParameters 已设为 true",
+    "typecheck_pass": "assert: bun run typecheck 通过",
+    "test_pass": "assert: bun run test 全部通过"
+  },
+  "status": "completed"
+}

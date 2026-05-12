@@ -1,0 +1,38 @@
+{
+  "task_id": "FIX-021",
+  "timestamp": 1778591595,
+  "trace_id": "013b7e28-8e30-4c3a-8bbc-2ad6233e4964",
+  "goal": "批次B：修复 Issue #4 (VideoContainer aiStatus 未使用) + Issue #8 (aiName 在 video_call 被忽略) + Issue #9 (硬编码 proxy URL)",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\renderer\\components\\VideoCall\\VideoContainer.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\VideoChat.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\system-prompt-builder.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\ai.ts"
+  ],
+  "constraints": [
+    "arch-layering",
+    "typescript.md",
+    "react.md"
+  ],
+  "tech_stack_constraints": [
+    "typescript.md",
+    "react.md"
+  ],
+  "hooks": {
+    "pre_task": [],
+    "post_task": []
+  },
+  "verification": [
+    "bun run typecheck",
+    "bun run lint",
+    "bun run test"
+  ],
+  "coverage_checklist": {
+    "video_container_no_aiStatus": "assert: VideoContainer.tsx 不再声明 aiStatus prop",
+    "video_chat_no_aiStatus_prop": "assert: VideoChat.tsx 不再向 VideoContainer 传入 aiStatus",
+    "ai_name_injected": "assert: buildVideoCallPrompt 将 aiName 注入到提示词中（不直接返回常量）",
+    "proxy_url_configurable": "assert: ai.ts 使用 VITE_PROXY_URL 环境变量替代硬编码 localhost:3000",
+    "typecheck_pass": "assert: bun run typecheck 通过"
+  },
+  "status": "completed"
+}

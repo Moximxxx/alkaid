@@ -1,0 +1,33 @@
+{
+  "task_id": "FIX-022",
+  "timestamp": 1778591770,
+  "trace_id": "013b7e28-8e30-4c3a-8bbc-2ad6233e4964",
+  "goal": "批次C：修复 Issue #1 (useAI hook 的 loading 始终 false、error 始终 null)",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\renderer\\services\\ai.ts"
+  ],
+  "constraints": [
+    "arch-layering",
+    "typescript.md",
+    "react.md"
+  ],
+  "tech_stack_constraints": [
+    "typescript.md",
+    "react.md"
+  ],
+  "hooks": {
+    "pre_task": [],
+    "post_task": []
+  },
+  "verification": [
+    "bun run typecheck",
+    "bun run test"
+  ],
+  "coverage_checklist": {
+    "loading_state_works": "assert: useAI 返回的 loading 在 sendMessage 期间为 true，完成/失败后为 false",
+    "error_state_works": "assert: useAI 返回的 error 在请求失败时设置错误消息，重试时清空",
+    "typecheck_pass": "assert: bun run typecheck 通过",
+    "test_pass": "assert: bun run test 通过 (140/140)"
+  },
+  "status": "completed"
+}

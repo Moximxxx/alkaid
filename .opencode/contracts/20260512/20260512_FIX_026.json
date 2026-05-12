@@ -1,0 +1,33 @@
+{
+  "task_id": "FIX-026",
+  "timestamp": 1778592500,
+  "trace_id": "013b7e28-8e30-4c3a-8bbc-2ad6233e4964",
+  "goal": "批次E2-fixup: 修复剩余 9 个 ESLint warnings（logger.ts + test files + VideoChat）",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\shared\\logger.ts",
+    "D:\\projects\\alkaid\\src\\main\\services\\__tests__\\ai.test.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\VideoChat.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\__tests__\\vision-pipeline.test.ts"
+  ],
+  "constraints": [
+    "arch-layering",
+    "typescript.md"
+  ],
+  "hooks": {
+    "pre_task": [],
+    "post_task": []
+  },
+  "verification": [
+    "bun run typecheck",
+    "bun run lint",
+    "bun run test"
+  ],
+  "coverage_checklist": {
+    "logger_console_allowed": "assert: logger.ts 中使用 eslint-disable 允许 console 调用",
+    "ai_test_any_fixed": "assert: ai.test.ts 第97行 no-explicit-any 已修复",
+    "videochat_console_fixed": "assert: VideoChat.tsx 第162行 console.log 已替换或添加 eslint-disable",
+    "vision_test_any_fixed": "assert: vision-pipeline.test.ts 中 as any 已替换为具体类型或 eslint-disable",
+    "lint_zero_warnings": "assert: bun run lint 返回 0 errors 0 warnings"
+  },
+  "status": "completed"
+}

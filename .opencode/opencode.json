@@ -26,7 +26,7 @@
       "mode": "primary",
       "model": "deepseek/deepseek-v4-pro",
       "temperature": 0.2,
-      "prompt": "{file:./.opencode/agents/coordinator.md}",
+      "prompt": "{file:./agents/coordinator.md}",
       "permission": {
         "edit": "allow",
         "bash": "allow",
@@ -41,7 +41,7 @@
       "model": "deepseek/deepseek-v4-flash",
       "temperature": 0.1,
       "steps": 10,
-      "prompt": "{file:./.opencode/agents/plan.md}",
+      "prompt": "{file:./agents/plan.md}",
       "permission": {
         "edit": "deny",
         "bash": "deny"
@@ -53,7 +53,7 @@
       "model": "deepseek/deepseek-v4-flash",
       "temperature": 0.3,
       "steps": 50,
-      "prompt": "{file:./.opencode/agents/task-executor.md}",
+      "prompt": "{file:./agents/task-executor.md}",
       "permission": {
         "edit": "allow",
         "bash": "allow"
@@ -65,7 +65,7 @@
       "model": "deepseek/deepseek-v4-flash",
       "temperature": 0.1,
       "steps": 25,
-      "prompt": "{file:./.opencode/agents/builder.md}",
+      "prompt": "{file:./agents/builder.md}",
       "permission": {
         "edit": "deny",
         "bash": {
@@ -88,7 +88,7 @@
       "mode": "subagent",
       "model": "deepseek/deepseek-v4-pro",
       "temperature": 0.2,
-      "prompt": "{file:./.opencode/agents/crash-doctor.md}",
+      "prompt": "{file:./agents/crash-doctor.md}",
       "permission": {
         "edit": "deny",
         "bash": {
@@ -105,7 +105,7 @@
       "model": "deepseek/deepseek-v4-flash",
       "temperature": 0.1,
       "steps": 15,
-      "prompt": "{file:./.opencode/agents/code-reviewer.md}",
+      "prompt": "{file:./agents/code-reviewer.md}",
       "permission": {
         "edit": "deny",
         "bash": "deny"
@@ -117,7 +117,7 @@
       "model": "deepseek/deepseek-v4-flash",
       "temperature": 0.1,
       "steps": 10,
-      "prompt": "{file:./.opencode/agents/service-agent.md}",
+      "prompt": "{file:./agents/service-agent.md}",
       "permission": {
         "edit": "deny",
         "bash": {
@@ -139,7 +139,7 @@
       "model": "deepseek/deepseek-v4-flash",
       "temperature": 0.1,
       "steps": 10,
-      "prompt": "{file:./.opencode/agents/heartbeat.md}",
+      "prompt": "{file:./agents/heartbeat.md}",
       "permission": {
         "edit": "deny",
         "bash": {
@@ -157,7 +157,7 @@
       "model": "deepseek/deepseek-v4-flash",
       "temperature": 0.2,
       "steps": 30,
-      "prompt": "{file:./.opencode/agents/smoke-tester.md}",
+      "prompt": "{file:./agents/smoke-tester.md}",
       "permission": {
         "edit": "deny",
         "bash": {
@@ -185,7 +185,7 @@
       "mode": "subagent",
       "model": "deepseek/deepseek-v4-pro",
       "temperature": 0.3,
-      "prompt": "{file:./.opencode/agents/retro.md}",
+      "prompt": "{file:./agents/retro.md}",
       "permission": {
         "edit": "allow",
         "bash": "allow",

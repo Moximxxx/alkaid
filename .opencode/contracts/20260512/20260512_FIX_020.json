@@ -1,0 +1,35 @@
+{
+  "task_id": "FIX-020",
+  "timestamp": 1778591145,
+  "trace_id": "013b7e28-8e30-4c3a-8bbc-2ad6233e4964",
+  "goal": "批次A：修复 Issue #6 (test-results 加入 gitignore) + Issue #7 (创建 README_EN.md) + Issue #5 (README.md 编码与内容修正)",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.gitignore",
+    "D:\\projects\\alkaid\\README.md",
+    "D:\\projects\\alkaid\\README_EN.md"
+  ],
+  "constraints": [
+    "arch-layering",
+    "typescript.md"
+  ],
+  "tech_stack_constraints": [
+    "typescript.md"
+  ],
+  "hooks": {
+    "pre_task": [],
+    "post_task": []
+  },
+  "verification": [
+    "bun run typecheck",
+    "bun run lint",
+    "bun run test"
+  ],
+  "coverage_checklist": {
+    "gitignore_test_results": "assert: .gitignore 包含 test-results/",
+    "readme_en_exists": "assert: README_EN.md 文件存在且为英文版 README",
+    "readme_encoding": "assert: README.md 为 UTF-8 with BOM，中文编码问题修复",
+    "readme_content_fix": "assert: README.md 中 Electrobun 已修正为 Electron",
+    "readme_english_link": "assert: README.md 中 English 链接指向 README_EN.md"
+  },
+  "status": "completed"
+}

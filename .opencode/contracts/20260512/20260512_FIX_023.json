@@ -1,0 +1,38 @@
+{
+  "task_id": "FIX-023",
+  "timestamp": 1778591930,
+  "trace_id": "013b7e28-8e30-4c3a-8bbc-2ad6233e4964",
+  "goal": "批次D：修复 Issue #2 (P-01 模型列表三重定义，从 constants.ts 统一导出)",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\shared\\constants.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\Welcome.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\Settings.tsx"
+  ],
+  "constraints": [
+    "arch-layering",
+    "typescript.md",
+    "react.md"
+  ],
+  "tech_stack_constraints": [
+    "typescript.md",
+    "react.md"
+  ],
+  "hooks": {
+    "pre_task": [],
+    "post_task": []
+  },
+  "verification": [
+    "bun run typecheck",
+    "bun run lint",
+    "bun run test"
+  ],
+  "coverage_checklist": {
+    "constants_has_text_providers": "assert: constants.ts 导出 TEXT_PROVIDERS（与 Welcome/Settings 格式一致）",
+    "constants_has_text_models": "assert: constants.ts 导出 TEXT_MODELS（与 Welcome/Settings 格式一致）",
+    "welcome_imports_from_constants": "assert: Welcome.tsx 从 @shared/constants 导入 VISION_MODELS/TEXT_PROVIDERS/TEXT_MODELS",
+    "settings_imports_from_constants": "assert: Settings.tsx 从 @shared/constants 导入 VISION_MODELS/TEXT_PROVIDERS/TEXT_MODELS",
+    "no_duplicate_definitions": "assert: Welcome.tsx 和 Settings.tsx 不再本地定义 VISION_MODELS/TEXT_PROVIDERS/TEXT_MODELS",
+    "typecheck_pass": "assert: bun run typecheck 通过"
+  },
+  "status": "completed"
+}

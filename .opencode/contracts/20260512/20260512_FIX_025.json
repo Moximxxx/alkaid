@@ -1,0 +1,49 @@
+{
+  "task_id": "FIX-025",
+  "timestamp": 1778592250,
+  "trace_id": "013b7e28-8e30-4c3a-8bbc-2ad6233e4964",
+  "goal": "批次E2: 修复 Issue #3 剩余的 no-console(~24处) 和 no-explicit-any(~21处) + 修复 _userLanguage 警告",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.eslintrc.json",
+    "D:\\projects\\alkaid\\src\\shared\\logger.ts",
+    "D:\\projects\\alkaid\\src\\main\\config.ts",
+    "D:\\projects\\alkaid\\src\\main\\index.ts",
+    "D:\\projects\\alkaid\\src\\main\\services\\ai.ts",
+    "D:\\projects\\alkaid\\src\\main\\services\\vision.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\ai.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useCamera.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useVAD.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useVideoChat.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useSpeechRecognition.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\system-prompt-builder.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\vision-pipeline.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\__tests__\\vision-pipeline.test.ts"
+  ],
+  "constraints": [
+    "arch-layering",
+    "typescript.md",
+    "react.md"
+  ],
+  "tech_stack_constraints": [
+    "typescript.md",
+    "react.md"
+  ],
+  "hooks": {
+    "pre_task": [],
+    "post_task": []
+  },
+  "verification": [
+    "bun run typecheck",
+    "bun run lint",
+    "bun run test"
+  ],
+  "coverage_checklist": {
+    "logger_created": "assert: src/shared/logger.ts 存在，提供 debug/info/warn/error 方法",
+    "eslint_underscore_args": "assert: .eslintrc.json 中 @typescript-eslint/no-unused-vars 配置 argsIgnorePattern: ^_",
+    "console_replaced": "assert: 主要源文件中 console.log 已替换为 logger 调用",
+    "any_replaced": "assert: 主要源文件中 no-explicit-any 已减少（使用 unknown 或具体类型替代）",
+    "typecheck_pass": "assert: bun run typecheck 通过",
+    "test_pass": "assert: bun run test 全部通过(140/140)"
+  },
+  "status": "completed"
+}
