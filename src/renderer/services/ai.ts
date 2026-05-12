@@ -2,6 +2,8 @@
 
 import type { ChatMessage, PromptScenario } from '@shared/types'
 import { SYSTEM_PROMPT, SYSTEM_PROMPTS } from '@shared/constants'
+import { useState } from 'react'
+import { logger } from '@shared/logger'
 
 export interface UseAIReturn {
   messages: ChatMessage[]
@@ -24,6 +26,8 @@ const PROVIDER_CONFIGS: Record<string, { apiKeyEnv: string }> = {
   claude: { apiKeyEnv: 'VITE_CLAUDE_API_KEY' },
   google: { apiKeyEnv: 'VITE_GOOGLE_API_KEY' },
 }
+
+const PROXY_URL = import.meta.env.VITE_PROXY_URL || 'http://localhost:3000'
 
 /**
  * 合并两个 AbortSignal：任一 signal 触发 abort 时，返回的 signal 也会触发
@@ -51,12 +55,16 @@ interface UseAIOptions {
 
 export const useAI = (options: UseAIOptions): UseAIReturn => {
   const { provider, apiKey: externalApiKey, model, onFirstToken, onComplete, scenario } = options
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const messages: ChatMessage[] = []
   let messageUpdateCallback: ((msgs: ChatMessage[]) => void) | null = null
   const abortController = new AbortController()
 
   const sendMessage = async (content: string, image?: string, streamingId?: string, externalSignal?: AbortSignal): Promise<void> => {
-    console.log('[AI] sendMessage called', { provider, model, streamingId, scenario })
+    setLoading(true)
+    setError(null)
+    logger.debug('sendMessage called', { provider, model, streamingId, scenario })
     const config = PROVIDER_CONFIGS[provider]
     if (!config) {
       throw new Error(`不支持的 provider: ${provider}`)
@@ -83,8 +91,8 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
       : abortController.signal
 
     try {
-      console.log('[AI] Fetching via proxy...')
-      const response = await fetch('http://localhost:3000/api/ai/chat', {
+      logger.debug('Fetching via proxy...')
+      const response = await fetch(`${PROXY_URL}/api/ai/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -111,11 +119,7 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
       let firstChunk = true
       let buffer = ''
 
-      while (true) {
-        if (combinedSignal.aborted) {
-          console.log('[AI] Stream aborted by signal')
-          break
-        }
+      while (!combinedSignal.aborted) {
         const { done, value } = await reader.read()
         if (done) break
 
@@ -126,18 +130,18 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const data = line.slice(6)
-            console.log('[AI] Raw line:', line)
+            logger.debug('Raw line:', line)
             if (data === '[DONE]') continue
 
             try {
               const parsed = JSON.parse(data)
-              console.log('[AI] Parsed:', JSON.stringify(parsed).substring(0, 200))
+              logger.debug('Parsed:', JSON.stringify(parsed).substring(0, 200))
               const content = parsed.choices?.[0]?.delta?.content
                            || parsed.choices?.[0]?.text
                            || parsed.choices?.[0]?.message?.content
                            || parsed.candidates?.[0]?.content?.parts?.[0]?.text
                            || ''
-              console.log('[AI] Extracted content:', content.substring(0, 50))
+              logger.debug('Extracted content:', content.substring(0, 50))
 
               if (firstChunk && content) {
                 firstChunk = false
@@ -149,18 +153,22 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
                 messageUpdateCallback?.([...messages])
               }
             } catch (e) {
-              console.log('[AI] JSON parse error:', e)
+              logger.debug('JSON parse error:', e)
             }
           }
         }
       }
 
-      console.log('[AI] Stream completed')
+      logger.info('Stream completed')
       onComplete?.()
     } catch (error: unknown) {
-      console.error('[AI] Error:', error)
-      console.error('[AI] Error stack:', error instanceof Error ? error.stack : 'N/A')
+      const errMsg = error instanceof Error ? error.message : 'AI 请求失败'
+      logger.error('Error:', error)
+      logger.error('Error stack:', error instanceof Error ? error.stack : 'N/A')
+      setError(errMsg)
       throw error
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -174,8 +182,8 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
 
   return {
     messages,
-    loading: false,
-    error: null,
+    loading,
+    error,
     sendMessage,
     clearMessages,
     setMessageUpdateCallback,
@@ -183,7 +191,13 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
   }
 }
 
-function buildAPIMessages(content: string, image?: string, provider?: string, scenario?: PromptScenario) {
+// API 消息项类型
+interface APIMessageItem {
+  role: string
+  content: string | Array<Record<string, unknown>>
+}
+
+function buildAPIMessages(content: string, image?: string, provider?: string, scenario?: PromptScenario): APIMessageItem[] {
   // 根据场景选择系统提示词
   let systemPrompt = SYSTEM_PROMPT
   if (scenario === 'video_call') {
@@ -192,7 +206,7 @@ function buildAPIMessages(content: string, image?: string, provider?: string, sc
     systemPrompt = SYSTEM_PROMPTS.text_chat
   }
 
-  const msgs: any[] = [
+  const msgs: APIMessageItem[] = [
     { role: 'system', content: systemPrompt },
   ]
 

@@ -8,14 +8,15 @@ import { LocalPiP } from "@/components/VideoCall/LocalPiP"
 import { CallControls } from "@/components/VideoCall/CallControls"
 import { AIStatusBar } from "@/components/VideoCall/AIStatusBar"
 import { ChatDrawer } from "@/components/VideoCall/ChatDrawer"
+import { logger } from '@shared/logger'
 import type { AIStatus } from '@shared/types'
 
 export function VideoChatPage() {
   const { settings } = useSettings()
   const [input, setInput] = useState("")
   const [image, setImage] = useState<string | null>(null)
-  const [autoAnalyze, setAutoAnalyze] = useState(false)
-  const [ttsEnabled, setTTSEnabled] = useState(false)
+  const [autoAnalyze] = useState(false)
+  const [ttsEnabled] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   // 中断横幅状态（1.5秒自动消失）
@@ -52,31 +53,20 @@ export function VideoChatPage() {
   // 集成新管线
   const {
     stream: cameraStream,
-    isCameraReady,
     messages,
     loading,
     sendMessage,
     isListening,
-    transcript,
-    interimTranscript,
-    startListening,
-    stopListening,
     isTTSSpeaking,
-    isTTSSupported,
-    isVADSpeaking,
     isVADSupported,
     startVAD,
     stopVAD,
     isInterrupted,
-    interruptAI,
     resetInterrupt,
     startVisionPipeline,
     stopVisionPipeline,
     startCamera,
     stopCamera,
-    captureFrame,
-    startAutoCapture,
-    stopAutoCapture,
   } = useVideoChat({
     settings,
     onAIStatusChange: handleAIStatusChange,
@@ -163,13 +153,6 @@ export function VideoChatPage() {
     }
   }, [isInterrupted])
 
-  const handleCapture = useCallback(() => {
-    const frame = captureFrame(videoRef.current || undefined)
-    if (frame) {
-      setImage(frame)
-    }
-  }, [captureFrame])
-
   const handleSend = async () => {
     if (!input.trim()) return
     try {
@@ -177,7 +160,7 @@ export function VideoChatPage() {
       setInput("")
       setImage(null)
     } catch (error) {
-      console.error("发送失败:", error)
+      logger.error("发送失败:", error)
     }
   }
 
@@ -220,7 +203,6 @@ export function VideoChatPage() {
     }, 1500)
   }, [stopCamera, stopVisionPipeline, stopVAD, resetInterrupt, endCall, dispatch])
 
-  const showCallScreen = callState === 'idle' || callState === 'ended'
   const showVideo = callState !== 'idle'
 
   return (
@@ -237,7 +219,6 @@ export function VideoChatPage() {
         <VideoContainer
           stream={cameraStream}
           isActive={callState === 'connected'}
-          aiStatus={aiStatus}
         >
           {/* AI 状态栏 */}
           <AIStatusBar

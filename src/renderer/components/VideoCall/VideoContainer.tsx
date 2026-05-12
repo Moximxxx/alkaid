@@ -1,17 +1,14 @@
 import React, { useRef, useEffect } from 'react'
-import type { AIStatus } from '@shared/types'
 
 export interface VideoContainerProps {
   stream: MediaStream | null
   isActive: boolean
-  aiStatus: AIStatus
   children?: React.ReactNode
 }
 
 export function VideoContainer({
   stream,
   isActive,
-  aiStatus,
   children,
 }: VideoContainerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
