@@ -1,0 +1,28 @@
+{
+  "task_id": "FEAT-052",
+  "timestamp": 1778629500,
+  "trace_id": "a1b2c3d4-e5f6-7890-0123-456789abcdef",
+  "goal": "①标题栏设备选择器(麦克风+摄像头下拉按钮,通话中立即生效) ②视频通话全屏(隐藏工具栏+返回按钮+退出即挂断)",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\renderer\\components\\layout\\Toolbar.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useSettings.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useCamera.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useVideoChat.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\App.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\VideoChat.tsx"
+  ],
+  "constraints": ["arch-layering.md", "tech-stack/typescript.md", "tech-stack/react.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run test"],
+  "coverage_checklist": {
+    "toolbar_buttons": "assert: 标题栏有摄像头和麦克风两个下拉按钮",
+    "device_list": "assert: 下拉列出所有可用设备，当前选中高亮",
+    "camera_switch_immediate": "assert: 通话中切换摄像头立即生效",
+    "mic_switch_immediate": "assert: 通话中切换麦克风立即生效",
+    "fullscreen_hide_toolbar": "assert: /video-chat 页面隐藏 Toolbar 和 Sidebar",
+    "back_button": "assert: VideoChat 左上角有返回按钮",
+    "exit_end_call": "assert: 任何方式退出视频通话页都自动结束通话",
+    "typecheck_test_pass": "assert: typecheck 和 test 通过"
+  },
+  "status": "pending"
+}

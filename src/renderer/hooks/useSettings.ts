@@ -13,6 +13,8 @@ export interface Settings {
   cameraResolution?: string  // "1280x720"
   cameraFps?: number
   cameraMirror?: boolean
+  // 麦克风设备 ID
+  audioDeviceId?: string
   // TTS 设置
   ttsEnabled?: boolean
   ttsRate?: number
@@ -30,6 +32,7 @@ const DEFAULT_SETTINGS: Settings = {
   cameraResolution: "1280x720",
   cameraFps: 30,
   cameraMirror: false,
+  audioDeviceId: '',
   ttsEnabled: true,
   ttsRate: 1,
   ttsPitch: 1,

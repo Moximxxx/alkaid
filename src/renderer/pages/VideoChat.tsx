@@ -1,4 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { useSettings } from "@/hooks/useSettings"
 import { useVideoChat } from "@/hooks/useVideoChat"
 import { useVideoCallState } from "@/hooks/useVideoCallState"
@@ -13,6 +15,7 @@ import type { AIStatus } from '@shared/types'
 
 export function VideoChatPage() {
   const { settings } = useSettings()
+  const navigate = useNavigate()
   const [input, setInput] = useState("")
   const [image, setImage] = useState<string | null>(null)
   const [autoAnalyze] = useState(false)
@@ -121,6 +124,12 @@ export function VideoChatPage() {
       dispatch({ type: 'SET_AI_STATUS', payload: 'idle' })
       setIsObserving(false)
     }
+
+    return () => {
+      if (interruptedTimerRef.current) {
+        clearTimeout(interruptedTimerRef.current)
+      }
+    }
   }, [isTTSSpeaking, isListening, loading, isInterrupted, messages, dispatch])
 
   // 启动 VAD 监控（通话连接后）
@@ -203,10 +212,33 @@ export function VideoChatPage() {
     }, 1500)
   }, [stopCamera, stopVisionPipeline, stopVAD, resetInterrupt, endCall, dispatch])
 
+  const endCallRef = useRef(handleEndCall)
+  endCallRef.current = handleEndCall
+
+  // 返回按钮：先结束通话再返回首页
+  const handleBack = useCallback(() => {
+    handleEndCall()
+    navigate('/')
+  }, [handleEndCall, navigate])
+
+  // 组件卸载时自动结束通话
+  useEffect(() => {
+    return () => { endCallRef.current() }
+  }, [])
+
   const showVideo = callState !== 'idle'
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-black">
+      {/* 左上角返回按钮 */}
+      <button
+        onClick={handleBack}
+        className="absolute top-4 left-4 z-50 flex items-center gap-1 px-3 py-1.5 bg-black/50 hover:bg-black/70 text-white rounded-full text-sm transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        <span>返回</span>
+      </button>
+
       {/* 来电画面 */}
       <CallAlertScreen
         isVisible={callState === 'idle'}

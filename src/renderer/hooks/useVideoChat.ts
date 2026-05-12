@@ -86,6 +86,7 @@ export function useVideoChat(options: UseVideoChatOptions): UseVideoChatReturn {
     captureFrame,
     startAutoCapture,
     stopAutoCapture,
+    switchDevice,
   } = useCamera({ autoStart: false })
 
   // ====== AI 对话 ======
@@ -364,6 +365,59 @@ export function useVideoChat(options: UseVideoChatOptions): UseVideoChatReturn {
       }
     }
   }, [captureFrame, sendAIMessage, aiAbortController, onAIStatusChange])
+
+  // ====== 媒体流引用（用于音频轨道替换） ======
+  const mediaStreamRef = useRef<MediaStream | null>(null)
+  const micSwitchRef = useRef<AbortController | null>(null)
+
+  // 同步 mediaStreamRef 与摄像头流
+  useEffect(() => {
+    if (stream) {
+      mediaStreamRef.current = stream
+    }
+  }, [stream])
+
+  // ====== 监听摄像头设备变更 ======
+  useEffect(() => {
+    if (settings.cameraDeviceId && switchDevice) {
+      switchDevice(settings.cameraDeviceId)
+    }
+  }, [settings.cameraDeviceId, switchDevice])
+
+  // ====== 监听麦克风设备变更 ======
+  useEffect(() => {
+    if (settings.audioDeviceId && mediaStreamRef.current) {
+      // 取消前一次未完成的切换
+      if (micSwitchRef.current) {
+        micSwitchRef.current.abort()
+      }
+      const controller = new AbortController()
+      micSwitchRef.current = controller
+
+      navigator.mediaDevices.getUserMedia({
+        audio: { deviceId: { exact: settings.audioDeviceId } }
+      }).then(newStream => {
+        if (controller.signal.aborted) {
+          // 请求已被取消，清理新流
+          newStream.getTracks().forEach(t => t.stop())
+          return
+        }
+        const stream = mediaStreamRef.current
+        if (!stream) return
+        const oldTracks = stream.getAudioTracks()
+        oldTracks.forEach(t => t.stop())
+        newStream.getAudioTracks().forEach(t => stream.addTrack(t))
+      }).catch(err => {
+        if (!controller.signal.aborted) {
+          logger.error('切换麦克风失败:', err)
+        }
+      })
+
+      return () => {
+        controller.abort()
+      }
+    }
+  }, [settings.audioDeviceId])
 
   // ====== 清理 ======
   useEffect(() => {

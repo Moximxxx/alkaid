@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom"
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom"
 import { Toolbar } from "@/components/layout/Toolbar"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { WelcomePage } from "@/pages/Welcome"
@@ -23,6 +23,8 @@ function AppContent() {
   const { theme, toggleTheme } = useTheme()
   const { isConfigured, settings } = useSettings()
   const navigate = useNavigate()
+  const location = useLocation()
+  const isVideoChat = location.pathname === '/video-chat'
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const prevSetupCompleted = useRef(settings.setupCompleted)
   const { conversations, remove } = useChatHistory()
@@ -40,19 +42,23 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Toolbar
-        theme={theme}
-        onThemeToggle={toggleTheme}
-        onMenuToggle={() => setSidebarOpen(true)}
-      />
-      <Sidebar
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        conversations={conversations.map(c => ({ id: c.id, title: c.title }))}
-        onDeleteConversation={remove}
-      />
+      {!isVideoChat && (
+        <Toolbar
+          theme={theme}
+          onThemeToggle={toggleTheme}
+          onMenuToggle={() => setSidebarOpen(true)}
+        />
+      )}
+      {!isVideoChat && (
+        <Sidebar
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          conversations={conversations.map(c => ({ id: c.id, title: c.title }))}
+          onDeleteConversation={remove}
+        />
+      )}
 
-      <main className="flex-1 flex flex-col">
+      <main className={isVideoChat ? 'flex-1' : 'flex-1 flex flex-col'}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/settings" element={<SettingsPage />} />

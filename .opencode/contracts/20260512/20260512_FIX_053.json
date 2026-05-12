@@ -1,0 +1,21 @@
+{
+  "task_id": "FIX-053",
+  "timestamp": 1778630000,
+  "trace_id": "a1b2c3d4-e5f6-7890-0123-456789abcdef",
+  "goal": "修复 FEAT-052 CR 4个问题: ①mic切换effect竞态+内存泄漏 ②中断timer无cleanup ③handleEndCall依赖异常 ④fetchDevices重复",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useVideoChat.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\VideoChat.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useCamera.ts"
+  ],
+  "constraints": ["tech-stack/typescript.md", "tech-stack/react.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run test"],
+  "coverage_checklist": {
+    "mic_cleanup": "assert: mic切换有 AbortController 清理 + 可选链替代非空断言",
+    "timer_cleanup": "assert: 中断横幅 timer 在 effect cleanup 中清除",
+    "endcall_ref": "assert: handleEndCall cleanup 用 ref 持有避免依赖变化触发",
+    "dedup_fetch": "assert: useCamera 消除重复 fetchDevices"
+  },
+  "status": "pending"
+}

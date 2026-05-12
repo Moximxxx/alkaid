@@ -1,4 +1,5 @@
 ﻿import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { VideoChatPage } from '../VideoChat'
 import { describe, it, expect, vi } from 'vitest'
 
@@ -99,22 +100,38 @@ vi.mock('@/components/VideoCall/ChatDrawer', () => ({
 
 describe('VideoChatPage', () => {
   it('renders without crashing', () => {
-    const { container } = render(<VideoChatPage />)
+    const { container } = render(
+      <MemoryRouter>
+        <VideoChatPage />
+      </MemoryRouter>
+    )
     expect(container).toBeDefined()
   })
 
   it('renders CallAlertScreen when idle', () => {
-    render(<VideoChatPage />)
+    render(
+      <MemoryRouter>
+        <VideoChatPage />
+      </MemoryRouter>
+    )
     expect(screen.getByTestId('call-alert')).toBeTruthy()
   })
 
   it('does not render video container when idle', () => {
-    render(<VideoChatPage />)
+    render(
+      <MemoryRouter>
+        <VideoChatPage />
+      </MemoryRouter>
+    )
     expect(screen.queryByTestId('video-container')).toBeNull()
   })
 
   it('renders ChatDrawer', () => {
-    render(<VideoChatPage />)
+    render(
+      <MemoryRouter>
+        <VideoChatPage />
+      </MemoryRouter>
+    )
     expect(screen.getByTestId('chat-drawer')).toBeTruthy()
   })
 })

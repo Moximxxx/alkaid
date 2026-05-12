@@ -3,6 +3,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { logger } from '@shared/logger'
 
+// 独立的设备枚举函数，可被外部调用
+export async function fetchDevices(): Promise<MediaDeviceInfo[]> {
+  try {
+    const allDevices = await navigator.mediaDevices.enumerateDevices()
+    return allDevices.filter(d => d.kind === 'videoinput')
+  } catch (err) {
+    logger.error('获取设备列表失败:', err)
+    return []
+  }
+}
+
 interface UseCameraOptions {
   autoStart?: boolean
   deviceId?: string
@@ -32,16 +43,6 @@ export const useCamera = (options: UseCameraOptions = {}): UseCameraReturn => {
   const captureTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const captureCallbackRef = useRef<((frame: string) => void) | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
-
-  // 获取设备列表
-  const fetchDevices = useCallback(async () => {
-    try {
-      const allDevices = await navigator.mediaDevices.enumerateDevices()
-      setDevices(allDevices.filter(d => d.kind === 'videoinput'))
-    } catch (err) {
-      logger.error('获取设备列表失败:', err)
-    }
-  }, [])
 
   // 启动摄像头
   const start = useCallback(async () => {
@@ -160,7 +161,7 @@ export const useCamera = (options: UseCameraOptions = {}): UseCameraReturn => {
 
   // 初始化
   useEffect(() => {
-    fetchDevices()
+    fetchDevices().then(setDevices)
     if (autoStart) {
       start()
     }
