@@ -126,3 +126,51 @@ export interface PipelineState {
 }
 
 export type PipelineStatus = 'running' | 'paused' | 'stopped'
+
+// 聊天历史会话
+export interface Conversation {
+  id: string
+  title: string
+  messages: ChatMessage[]
+  createdAt: number
+  updatedAt: number
+}
+
+// === 设置页类型 ===
+
+export interface CameraSettings {
+  deviceId?: string
+  resolution: { width: number; height: number }
+  fps: number
+  mirror: boolean
+}
+
+export interface TTSSettings {
+  enabled: boolean
+  rate: number
+  pitch: number
+  voiceURI: string
+}
+
+export interface ShortcutConfig {
+  toggleWindow: string
+  sendMessage: string
+}
+
+export const DEFAULT_CAMERA_SETTINGS: CameraSettings = {
+  resolution: { width: 1280, height: 720 },
+  fps: 30,
+  mirror: false,
+}
+
+export const DEFAULT_TTS_SETTINGS: TTSSettings = {
+  enabled: true,
+  rate: 1,
+  pitch: 1,
+  voiceURI: '',
+}
+
+export const DEFAULT_SHORTCUTS: ShortcutConfig = {
+  toggleWindow: 'Ctrl+Shift+A',
+  sendMessage: 'Ctrl+Enter',
+}

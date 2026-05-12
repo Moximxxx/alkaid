@@ -1,0 +1,23 @@
+{
+  "task_id": "FIX-033",
+  "timestamp": 1778618432,
+  "trace_id": "65b31268-e38d-46c7-abd1-81a6e0ff71a2",
+  "goal": "#26 设置页完善: 摄像头参数调节 + TTS 配置 + 快捷键提示",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useSettings.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\Settings.tsx",
+    "D:\\projects\\alkaid\\src\\shared\\types.ts"
+  ],
+  "constraints": ["arch-layering", "typescript.md", "react.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run test"],
+  "coverage_checklist": {
+    "camera_tab_implemented": "assert: 设置页摄像头标签实现设备选择 + 分辨率/FPS 配置",
+    "tts_tab_implemented": "assert: 设置页新增 TTS 标签（开关/语速/音高/语音选择）",
+    "shortcuts_tab_added": "assert: 设置页新增快捷键提示标签",
+    "settings_expanded": "assert: useSettings 接口扩展 cameraDeviceId/ttsEnabled/ttsRate 等字段",
+    "typecheck_pass": "assert: bun run typecheck 通过",
+    "test_pass": "assert: bun run test 通过"
+  },
+  "status": "completed"
+}

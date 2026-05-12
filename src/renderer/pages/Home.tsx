@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect, KeyboardEvent } from "react"
 import { Link } from "react-router-dom"
-import { Send, Video, User, Loader2, Bot } from "lucide-react"
+import { Volume2, VolumeX, Send, Video, User, Loader2, Bot, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useSettings } from "@/hooks/useSettings"
 import { useAI } from "../services/ai"
+import { useTTS } from "@/hooks/useTTS"
+import { useChatHistory } from "@/hooks/useChatHistory"
 
 interface Message {
   id: string
@@ -15,6 +17,8 @@ interface Message {
 
 export function HomePage() {
   const { settings } = useSettings()
+  const { speak, stop, isSpeaking, isSupported } = useTTS()
+  const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null)
   const [, setStreamingId] = useState<string | null>(null)
   const { loading, sendMessage, setMessageUpdateCallback } = useAI({
     provider: settings.textProvider,
@@ -23,6 +27,9 @@ export function HomePage() {
     onFirstToken: () => setStreamingId(null),
     onComplete: () => setStreamingId(null),
   })
+
+  const { conversations, save, createNew } = useChatHistory()
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -55,6 +62,35 @@ export function HomePage() {
       }
     })
   }, [setMessageUpdateCallback])
+
+  useEffect(() => {
+    if (!isSpeaking && speakingMessageId) {
+      setSpeakingMessageId(null)
+    }
+  }, [isSpeaking])
+
+  // 自动保存对话历史
+  useEffect(() => {
+    if (messages.length > 1 || messages[0]?.role === 'user') {
+      const conv = createNew(messages.map(m => ({
+        id: m.id,
+        role: m.role,
+        content: m.content,
+      })))
+      save({ ...conv, id: currentConversationId || conv.id })
+      if (!currentConversationId) setCurrentConversationId(conv.id)
+    }
+  }, [messages])
+
+  // 新建对话
+  const handleNewConversation = () => {
+    setMessages([{
+      id: "1",
+      role: "assistant",
+      content: "你好！我是摇光，你的AI助手。有什么我可以帮助你的吗？",
+    }])
+    setCurrentConversationId(null)
+  }
 
   const handleSend = async () => {
     if (!input.trim()) return
@@ -92,6 +128,17 @@ export function HomePage() {
     }
   }
 
+  const handleTTS = (message: Message) => {
+    if (speakingMessageId === message.id) {
+      stop()
+      setSpeakingMessageId(null)
+    } else {
+      if (speakingMessageId) stop()
+      speak(message.content)
+      setSpeakingMessageId(message.id)
+    }
+  }
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
@@ -99,8 +146,35 @@ export function HomePage() {
     }
   }
 
+  const handleSelectConversation = (id: string) => {
+    setCurrentConversationId(id)
+  }
+
   return (
     <div className="flex flex-col" style={{ height: "calc(100vh - 64px)" }}>
+      {/* 对话历史顶部操作栏 */}
+      <div className="flex-shrink-0 border-b px-4 py-2 flex items-center gap-2">
+        <Button variant="ghost" size="sm" onClick={handleNewConversation} title="新对话">
+          <Clock className="h-4 w-4 mr-1" />
+          新对话
+        </Button>
+        <div className="flex-1" />
+        {conversations.length > 0 && conversations.slice(0, 5).map(conv => (
+          <button
+            key={conv.id}
+            onClick={() => handleSelectConversation(conv.id)}
+            className={`text-xs px-2 py-1 rounded truncate max-w-[120px] ${
+              currentConversationId === conv.id
+                ? "bg-primary text-primary-foreground"
+                : "hover:bg-accent"
+            }`}
+            title={conv.title}
+          >
+            {conv.title}
+          </button>
+        ))}
+      </div>
+
       {/* Chat Area - 占满剩余空间 */}
       <div className="flex-1 px-4 py-6 min-h-0">
         <div className="h-full overflow-y-auto space-y-6">
@@ -131,7 +205,22 @@ export function HomePage() {
                     <span className="text-sm text-muted-foreground">思考中...</span>
                   </div>
                 ) : (
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <>
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    {message.role === "assistant" && message.content && isSupported && (
+                      <button
+                        onClick={() => handleTTS(message)}
+                        className="mt-1 p-1 rounded hover:bg-background/50 transition-colors"
+                        title={speakingMessageId === message.id ? "停止朗读" : "朗读"}
+                      >
+                        {speakingMessageId === message.id ? (
+                          <VolumeX className="h-3.5 w-3.5 text-muted-foreground" />
+                        ) : (
+                          <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
+                        )}
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
               {message.role === "user" && (

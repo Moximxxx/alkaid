@@ -1,0 +1,28 @@
+{
+  "task_id": "FIX-032",
+  "timestamp": 1778617998,
+  "trace_id": "65b31268-e38d-46c7-abd1-81a6e0ff71a2",
+  "goal": "#24 全局快捷键 (Ctrl+Shift+A) + #25 聊天历史 localStorage 持久化 + 侧边栏列表",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\electron\\main.cjs",
+    "D:\\projects\\alkaid\\electron\\preload.cjs",
+    "D:\\projects\\alkaid\\src\\shared\\types.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useChatHistory.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\Home.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\components\\layout\\Sidebar.tsx",
+    "D:\\projects\\alkaid\\vitest.config.ts"
+  ],
+  "constraints": ["arch-layering", "typescript.md", "react.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run test"],
+  "coverage_checklist": {
+    "shortcut_registered": "assert: main.cjs 在 app.whenReady() 后注册 Ctrl+Shift+A 唤起窗口",
+    "preload_shortcut_api": "assert: preload.cjs 暴露 electronAPI",
+    "chat_history_hook": "assert: useChatHistory.ts 提供 conversations/save/load/delete 操作",
+    "home_auto_save": "assert: Home.tsx 在 messages 变化后自动保存到 localStorage",
+    "sidebar_history_list": "assert: Sidebar.tsx 导出 Conversation 列表类型到全局",
+    "typecheck_pass": "assert: bun run typecheck 通过",
+    "test_pass": "assert: bun run test 通过"
+  },
+  "status": "completed"
+}

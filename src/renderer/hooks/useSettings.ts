@@ -8,6 +8,16 @@ export interface Settings {
   textApiKey: string
   textModel: string
   setupCompleted?: boolean
+  // 摄像头设置
+  cameraDeviceId?: string
+  cameraResolution?: string  // "1280x720"
+  cameraFps?: number
+  cameraMirror?: boolean
+  // TTS 设置
+  ttsEnabled?: boolean
+  ttsRate?: number
+  ttsPitch?: number
+  ttsVoiceURI?: string
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -17,6 +27,13 @@ const DEFAULT_SETTINGS: Settings = {
   textProvider: "openai",
   textApiKey: "",
   textModel: "gpt-4.1",
+  cameraResolution: "1280x720",
+  cameraFps: 30,
+  cameraMirror: false,
+  ttsEnabled: true,
+  ttsRate: 1,
+  ttsPitch: 1,
+  ttsVoiceURI: '',
 }
 
 export function useSettings() {

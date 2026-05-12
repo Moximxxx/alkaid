@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
 const path = require('path');
 const http = require('http');
 
@@ -118,6 +118,18 @@ app.whenReady().then(async () => {
 
   createWindow();
 
+  // 注册全局快捷键 CommandOrControl+Shift+A
+  const shortcutRegistered = globalShortcut.register('CommandOrControl+Shift+A', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.show()
+      mainWindow.focus()
+    }
+  })
+  if (!shortcutRegistered) {
+    console.error('[Electron] Failed to register global shortcut')
+  }
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -133,6 +145,7 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
   console.log('[Electron] App quitting...');
+  globalShortcut.unregisterAll()
   if (proxyServer) proxyServer.close()
 });
 

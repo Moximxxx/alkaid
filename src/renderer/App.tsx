@@ -9,6 +9,7 @@ import { VideoChatPage } from "@/pages/VideoChat"
 import { AboutPage } from "@/pages/About"
 import { useTheme } from "@/hooks/useTheme"
 import { useSettings } from "@/hooks/useSettings"
+import { useChatHistory } from "@/hooks/useChatHistory"
 
 export function App() {
   return (
@@ -24,6 +25,7 @@ function AppContent() {
   const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const prevSetupCompleted = useRef(settings.setupCompleted)
+  const { conversations, remove } = useChatHistory()
 
   useEffect(() => {
     if (!prevSetupCompleted.current && settings.setupCompleted) {
@@ -43,7 +45,12 @@ function AppContent() {
         onThemeToggle={toggleTheme}
         onMenuToggle={() => setSidebarOpen(true)}
       />
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        conversations={conversations.map(c => ({ id: c.id, title: c.title }))}
+        onDeleteConversation={remove}
+      />
 
       <main className="flex-1 flex flex-col">
         <Routes>

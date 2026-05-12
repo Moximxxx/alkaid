@@ -1,0 +1,20 @@
+{
+  "task_id": "FIX-031",
+  "timestamp": 1778617835,
+  "trace_id": "65b31268-e38d-46c7-abd1-81a6e0ff71a2",
+  "goal": "#28 文本聊天 TTS: 在 Home.tsx 中 AI 回复消息气泡旁添加朗读/停止按钮",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\Home.tsx"
+  ],
+  "constraints": ["react.md", "typescript.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run test"],
+  "coverage_checklist": {
+    "tts_import": "assert: Home.tsx 导入 useTTS 和 Volume2 图标",
+    "tts_speak": "assert: assistant 消息气泡旁有朗读按钮，点击调用 speak(content)",
+    "tts_state": "assert: 使用 speakingMessageId 追踪正在朗读的消息，按钮状态可区分",
+    "typecheck_pass": "assert: bun run typecheck 通过",
+    "test_pass": "assert: bun run test 通过"
+  },
+  "status": "completed"
+}
