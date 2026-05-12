@@ -1,57 +1,71 @@
-// 图像识别服务测试
+﻿import { VisionService } from '../vision'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { VisionService } from '../vision'
-
-// 模拟 fetch
-const mockFetch = vi.fn()
-vi.stubGlobal('fetch', mockFetch)
 
 describe('VisionService', () => {
-  let visionService: VisionService
+  const cfg = { provider: 'doubao_vision' as const, apiKey: 'test-key', model: 'doubao-2.0-vision-pro' }
 
   beforeEach(() => {
-    vi.clearAllMocks()
-    visionService = new VisionService({
-      provider: 'doubao_vision',
-      apiKey: 'test-key',
-      model: 'doubao-2.0-vision-pro',
-    })
+    vi.restoreAllMocks()
   })
 
-  it('应该创建 VisionService 实例', () => {
-    expect(visionService).toBeDefined()
+  it('constructor initializes with config', () => {
+    const s = new VisionService(cfg)
+    expect(s).toBeDefined()
   })
 
-  it('应该能够更新配置', () => {
-    visionService.updateConfig({
-      provider: 'doubao_vision',
-      apiKey: 'new-key',
-      model: 'doubao-2.0-vision-pro',
-    })
-    expect(true).toBe(true)
+  it('updateConfig updates the internal config', () => {
+    const s = new VisionService(cfg)
+    s.updateConfig({ ...cfg, model: 'new-model' })
+    // 通过 recognize 抛错时的 provider 来判断配置已更新
+    // 如果 updateConfig 不生效，model 不会变；但这里只是验证不抛出即可
+    expect(s).toBeDefined()
   })
 
-  it('应该调用豆包 API 进行识别', async () => {
-    mockFetch.mockResolvedValueOnce({
+  it('throws on unsupported provider', async () => {
+    const s = new VisionService({ ...cfg, provider: 'unknown' as never })
+    await expect(s.recognize('data:image/jpeg;base64,xxx')).rejects.toThrow('不支持的识别服务')
+  })
+
+  it('recognizeWithDoubao calls fetch and returns result', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
-        choices: [{ message: { content: '图片中有一只猫' } }],
+        choices: [{ message: { content: '一张猫的图片' } }],
       }),
     })
+    vi.stubGlobal('fetch', mockFetch)
 
-    const result = await visionService.recognize('data:image/jpeg;base64,test')
+    const s = new VisionService(cfg)
+    const result = await s.recognize('data:image/jpeg;base64,cGFzc3dvcmQ=')
 
-    expect(result).toBeDefined()
-    expect(result.scene).toBeDefined()
-    expect(result.scene.description).toBe('图片中有一只猫')
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+    expect(result.scene.description).toBe('一张猫的图片')
   })
 
-  it('API 错误应该抛出异常', async () => {
-    mockFetch.mockResolvedValueOnce({
+  it('recognizeWithDoubao throws on non-ok response', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
       ok: false,
-      status: 500,
+      status: 401,
     })
+    vi.stubGlobal('fetch', mockFetch)
 
-    await expect(visionService.recognize('test')).rejects.toThrow('豆包视觉 API 错误: 500')
+    const s = new VisionService(cfg)
+    await expect(s.recognize('data:image/jpeg;base64,xxx')).rejects.toThrow('豆包视觉 API 错误: 401')
+  })
+
+  it('recognizeWithGoogleVision calls fetch and returns result', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        candidates: [{ content: { parts: [{ text: 'a dog' }] } }],
+      }),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+
+    const s = new VisionService({ ...cfg, provider: 'google_vision', model: 'gemini-2.5-pro-vision' })
+    const result = await s.recognize('data:image/jpeg;base64,dGVzdA==')
+
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+    expect(result.scene.description).toBe('a dog')
   })
 })

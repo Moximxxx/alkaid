@@ -1,0 +1,24 @@
+{
+  "task_id": "FIX-035",
+  "timestamp": 1778628000,
+  "trace_id": "6921f6eb-6f55-42c8-8d57-16f6f9f750d5",
+  "goal": "#18 补充测试: crypto / logger / useTTS / useTheme 全覆盖",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\shared\\__tests__\\crypto.test.ts",
+    "D:\\projects\\alkaid\\src\\shared\\__tests__\\logger.test.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\__tests__\\useTTS.test.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\__tests__\\useTheme.test.ts"
+  ],
+  "constraints": ["typescript.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run test -- --coverage"],
+  "coverage_checklist": {
+    "crypto_tests": "assert: crypto.test.ts 覆盖 encrypt/decrypt/isEncrypted",
+    "logger_tests": "assert: logger.test.ts 覆盖 debug/info/warn/error",
+    "useTTS_tests": "assert: useTTS.test.ts mock SpeechSynthesis 测试 speak/stop",
+    "useTheme_tests": "assert: useTheme.test.ts 覆盖 light/dark/toggle",
+    "typecheck_pass": "assert: boy run typecheck 通过",
+    "all_tests_pass": "assert: 所有测试通过（含新增）"
+  },
+  "status": "completed"
+}

@@ -1,0 +1,23 @@
+{
+  "task_id": "FIX-036",
+  "timestamp": 1778620266,
+  "trace_id": "6921f6eb-6f55-42c8-8d57-16f6f9f750d5",
+  "goal": "#18 Iter1: 补充 utils + useSpeechRecognition + useChatHistory + useVideoCallState 测试",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\renderer\\lib\\__tests__\\utils.test.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\__tests__\\useSpeechRecognition.test.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\__tests__\\useChatHistory.test.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\__tests__\\useVideoCallState.test.ts"
+  ],
+  "constraints": ["typescript.md", "react.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run test"],
+  "coverage_checklist": {
+    "utils_tests": "assert: utils.test.ts 覆盖 cn() 类名合并",
+    "speech_tests": "assert: useSpeechRecognition mock SpeechRecognition 测试",
+    "chat_history_tests": "assert: useChatHistory 测试 save/load/remove/createNew",
+    "video_call_state_tests": "assert: useVideoCallState 测试 reducer + timer",
+    "all_pass": "assert: 所有测试通过"
+  },
+  "status": "completed"
+}

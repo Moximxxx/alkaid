@@ -1,0 +1,23 @@
+{
+  "task_id": "FIX-038",
+  "timestamp": 1778621000,
+  "trace_id": "6921f6eb-6f55-42c8-8d57-16f6f9f750d5",
+  "goal": "#18 Iter3: Sidebar / Toolbar / AIStatusBar / VideoContainer 组件渲染测试",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\renderer\\components\\layout\\__tests__\\Sidebar.test.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\components\\layout\\__tests__\\Toolbar.test.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\components\\VideoCall\\__tests__\\AIStatusBar.test.tsx",
+    "D:\\projects\\alkaid\\src\\renderer\\components\\VideoCall\\__tests__\\VideoContainer.test.tsx"
+  ],
+  "constraints": ["react.md", "typescript.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run test"],
+  "coverage_checklist": {
+    "sidebar_renders": "assert: Sidebar.test.tsx 测试渲染和导航",
+    "toolbar_renders": "assert: Toolbar.test.tsx 测试渲染",
+    "aistatusbar_renders": "assert: AIStatusBar.test.tsx 测试状态显示",
+    "videocontainer_renders": "assert: VideoContainer.test.tsx 测试渲染",
+    "all_pass": "assert: 所有测试通过"
+  },
+  "status": "completed"
+}

@@ -1,0 +1,19 @@
+{
+  "task_id": "FIX-037",
+  "timestamp": 1778620800,
+  "trace_id": "6921f6eb-6f55-42c8-8d57-16f6f9f750d5",
+  "goal": "#18 Iter2: AIService (main) + useVideoChat 基础测试",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\main\\services\\__tests__\\ai.test.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\__tests__\\useVideoChat.test.ts"
+  ],
+  "constraints": ["typescript.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run test"],
+  "coverage_checklist": {
+    "ai_service_tests": "assert: AIService 测试覆盖构造/消息/清空/ID生成",
+    "video_chat_tests": "assert: useVideoChat 测试 hook 基础状态",
+    "all_pass": "assert: 所有测试通过"
+  },
+  "status": "completed"
+}
