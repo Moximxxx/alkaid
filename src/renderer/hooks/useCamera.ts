@@ -1,6 +1,7 @@
 // 摄像头Hook - 渲染进程直接使用浏览器 API
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { logger } from '@shared/logger'
 
 interface UseCameraOptions {
   autoStart?: boolean
@@ -38,7 +39,7 @@ export const useCamera = (options: UseCameraOptions = {}): UseCameraReturn => {
       const allDevices = await navigator.mediaDevices.enumerateDevices()
       setDevices(allDevices.filter(d => d.kind === 'videoinput'))
     } catch (err) {
-      console.error('获取设备列表失败:', err)
+      logger.error('获取设备列表失败:', err)
     }
   }, [])
 
@@ -66,8 +67,8 @@ export const useCamera = (options: UseCameraOptions = {}): UseCameraReturn => {
       streamRef.current = newStream
       setIsReady(true)
       return true
-    } catch (err: any) {
-      setError(err.message || '摄像头启动失败')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '摄像头启动失败')
       return false
     }
   }, [deviceId])
@@ -102,8 +103,8 @@ export const useCamera = (options: UseCameraOptions = {}): UseCameraReturn => {
       streamRef.current = newStream
       setIsReady(true)
       return true
-    } catch (err: any) {
-      setError(err.message || '切换摄像头失败')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '切换摄像头失败')
       return false
     }
   }, [])
@@ -169,7 +170,6 @@ export const useCamera = (options: UseCameraOptions = {}): UseCameraReturn => {
         streamRef.current.getTracks().forEach(t => t.stop())
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return {

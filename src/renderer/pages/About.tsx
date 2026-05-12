@@ -1,6 +1,5 @@
-import React from "react"
 import { Target, Github, Heart } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export function AboutPage() {
   return (

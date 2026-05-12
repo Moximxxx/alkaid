@@ -10,11 +10,11 @@ import { useTTS } from './useTTS'
 import { useVAD } from './useVAD'
 import { createVisionPipeline } from '../services/vision-pipeline'
 import { InterruptController } from '../services/interrupt-controller'
-import { ContextManager } from '../services/context-manager'
 import { mergeContext } from '../services/context-merge'
-import type { ChatMessage, PipelineStatus, PromptScenario } from '@shared/types'
-import { PIPELINE_DEFAULTS, SYSTEM_PROMPT, SYSTEM_PROMPTS } from '@shared/constants'
+import type { ChatMessage, PipelineStatus } from '@shared/types'
+import { PIPELINE_DEFAULTS } from '@shared/constants'
 import type { Settings } from './useSettings'
+import { logger } from '@shared/logger'
 
 export interface UseVideoChatOptions {
   settings: Settings
@@ -192,14 +192,6 @@ export function useVideoChat(options: UseVideoChatOptions): UseVideoChatReturn {
   // ====== AI 状态追踪 ref（用于主动观察判断） ======
   const aiStatusRef = useRef<'listening' | 'thinking' | 'speaking' | 'idle'>('idle')
 
-  // ====== 上下文管理器 ======
-  const contextManagerRef = useRef<ContextManager>(
-    new ContextManager({
-      maxTokens: PIPELINE_DEFAULTS.maxContextTokens,
-      systemPrompt: SYSTEM_PROMPTS.video_call,
-    }),
-  )
-
   // ====== 视觉管线 ======
   const [pipelineStatus, setPipelineStatus] = useState<PipelineStatus>('stopped')
 
@@ -241,9 +233,9 @@ export function useVideoChat(options: UseVideoChatOptions): UseVideoChatReturn {
           } catch (err: unknown) {
             if (err instanceof Error && err.name === 'AbortError') {
               // 中断是正常行为
-              console.log('[VideoChat] Active observation aborted')
+              logger.debug('Active observation aborted')
             } else {
-              console.error('[VideoChat] Active observation error:', err)
+              logger.error('Active observation error:', err)
             }
           }
           return
@@ -273,9 +265,9 @@ export function useVideoChat(options: UseVideoChatOptions): UseVideoChatReturn {
           } catch (err: unknown) {
             if (err instanceof Error && err.name === 'AbortError') {
               // 中断是正常行为
-              console.log('[VideoChat] Vision analysis aborted')
+              logger.debug('Vision analysis aborted')
             } else {
-              console.error('[VideoChat] Vision analysis error:', err)
+              logger.error('Vision analysis error:', err)
             }
           }
         }
@@ -343,7 +335,7 @@ export function useVideoChat(options: UseVideoChatOptions): UseVideoChatReturn {
       )
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') {
-        console.log('[VideoChat] SendMessage aborted')
+        logger.debug('SendMessage aborted')
       } else {
         throw err
       }
@@ -366,9 +358,9 @@ export function useVideoChat(options: UseVideoChatOptions): UseVideoChatReturn {
       )
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') {
-        console.log('[VideoChat] CaptureAndAnalyze aborted')
+        logger.debug('CaptureAndAnalyze aborted')
       } else {
-        console.error('[VideoChat] CaptureAndAnalyze error:', err)
+        logger.error('CaptureAndAnalyze error:', err)
       }
     }
   }, [captureFrame, sendAIMessage, aiAbortController, onAIStatusChange])

@@ -15,7 +15,7 @@ export const VideoStream: React.FC<VideoStreamProps> = ({
   captureInterval = 5000,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const { stream, start, stop, captureFrame, isReady } = useCamera({ autoStart: true })
+  const { stream, captureFrame, isReady } = useCamera({ autoStart: true })
 
   // 将 stream 绑定到 video 元素
   useEffect(() => {

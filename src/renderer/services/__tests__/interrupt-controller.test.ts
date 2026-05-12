@@ -1,5 +1,5 @@
 // 中断控制器测试
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { InterruptController } from '../interrupt-controller'
 
 describe('InterruptController', () => {

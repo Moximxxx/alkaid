@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { PIPELINE_DEFAULTS } from '@shared/constants'
+import { logger } from '@shared/logger'
 
 export interface UseVADOptions {
   stream: MediaStream | null
@@ -49,7 +50,7 @@ export function useVAD(options: UseVADOptions): UseVADReturn {
   // 检查 AudioContext 可用性
   useEffect(() => {
     const supported = typeof AudioContext !== 'undefined'
-      || typeof (window as any).webkitAudioContext !== 'undefined'
+      || typeof (window as unknown as Record<string, unknown>).webkitAudioContext !== 'undefined'
     setIsSupported(supported)
   }, [])
 
@@ -104,7 +105,7 @@ export function useVAD(options: UseVADOptions): UseVADReturn {
     if (!stream || isMonitoringRef.current) return
 
     try {
-      const AudioCtx = AudioContext || (window as any).webkitAudioContext
+      const AudioCtx = AudioContext || (window as unknown as Record<string, unknown>).webkitAudioContext as typeof AudioContext
       if (!AudioCtx) return
 
       const audioContext = new AudioCtx()
@@ -121,7 +122,7 @@ export function useVAD(options: UseVADOptions): UseVADReturn {
 
       analyzeAudio()
     } catch (err) {
-      console.error('[VAD] 启动监控失败:', err)
+      logger.error('[VAD] 启动监控失败:', err)
     }
   }, [stream, analyzeAudio])
 

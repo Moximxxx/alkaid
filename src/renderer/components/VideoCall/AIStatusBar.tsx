@@ -1,4 +1,3 @@
-import React from 'react'
 import type { AIStatus } from '@shared/types'
 import { VIDEO_CALL_DEFAULTS } from '@shared/constants'
 

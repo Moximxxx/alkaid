@@ -2,6 +2,7 @@
 // 管理帧捕获定时器、自适应频率、帧去重、暂停/恢复
 
 import { PIPELINE_DEFAULTS } from '@shared/constants'
+import { logger } from '@shared/logger'
 
 export interface VisionPipelineOptions {
   captureInterval?: number
@@ -79,7 +80,7 @@ export function createVisionPipeline(options: VisionPipelineOptions): VisionPipe
   let pipelineRunning = false
   let lastFrameData: string | null = null
   // 自适应倍率：AI 说话时设为 2
-  let adaptiveMultiplier = 1
+  const adaptiveMultiplier = 1
 
   const maxWidth = PIPELINE_DEFAULTS.frameMaxWidth
   const maxHeight = PIPELINE_DEFAULTS.frameMaxHeight
@@ -109,7 +110,7 @@ export function createVisionPipeline(options: VisionPipelineOptions): VisionPipe
     const interval = currentIntervalMs * adaptiveMultiplier
     timerId = window.setInterval(() => {
       captureAndProcess().catch((err) => {
-        console.error('[VisionPipeline] captureAndProcess error:', err)
+        logger.error('[VisionPipeline] captureAndProcess error:', err)
       })
     }, interval)
   }

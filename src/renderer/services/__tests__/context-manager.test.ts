@@ -106,11 +106,8 @@ describe('ContextManager', () => {
         )
       }
 
-      const ctx = smallManager.getContext()
       // 由于 frame 有 500 token 的图片估算，第一条消息可能被裁剪
       // 但优先丢弃的是带 image 的帧
-      const hasImageFrames = ctx.some((m) => m.image)
-      // 至少文本消息应该保留（它是第一条，但因为我们优先丢弃帧，所以文本消息最后可能也被丢）
       // 关键验证：total 不超过 maxTokens
       const totalTokens = smallManager.getTotalTokens()
       expect(totalTokens).toBeLessThanOrEqual(500)

@@ -143,8 +143,8 @@ export class AIService {
   }
 
   // 构建OpenAI消息格式
-  private buildOpenAIMessages(content: string, image?: string): Array<{role: string; content: any}> {
-    const messages: Array<{role: string; content: any}> = [
+  private buildOpenAIMessages(content: string, image?: string): Array<{ role: string; content: string | Array<{ type: string; text?: string; image_url?: { url: string } }> }> {
+    const messages: Array<{ role: string; content: string | Array<{ type: string; text?: string; image_url?: { url: string } }> }> = [
       {
         role: 'system',
         content: '你是一个能够理解和分析图像的AI助手。请用中文回复。',
@@ -192,8 +192,8 @@ export class AIService {
   }
 
   // 构建Claude消息格式
-  private buildClaudeMessages(content: string, image?: string): Array<{role: string; content: any}> {
-    const messages: Array<{role: string; content: any}> = []
+  private buildClaudeMessages(content: string, image?: string): Array<{ role: string; content: string | Record<string, unknown>[] }> {
+    const messages: Array<{ role: string; content: string | Record<string, unknown>[] }> = []
 
     // 添加历史消息
     for (const msg of this.messages.slice(-10)) {
@@ -251,7 +251,7 @@ export class AIService {
     const systemMessage = '你是一个能够理解和分析图像的AI助手。请用中文回复。'
 
     // 构建 contents 数组
-    const contents: Array<{role: string; parts: any[]}> = []
+    const contents: Array<{ role: string; parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> }> = []
 
     // 添加历史消息
     for (const msg of this.messages.slice(-10)) {

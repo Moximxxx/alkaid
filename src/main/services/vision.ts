@@ -102,14 +102,17 @@ export class VisionService {
   }
 
   // 解析 Google Vision 结果
-  private parseGoogleVisionResult(data: any): RecognitionResult {
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+  private parseGoogleVisionResult(data: Record<string, unknown>): RecognitionResult {
+    const candidates = data.candidates as Array<Record<string, unknown>> | undefined
+    const content = candidates?.[0]?.content as Record<string, unknown> | undefined
+    const parts = content?.parts as Array<Record<string, unknown>> | undefined
+    const text = parts?.[0]?.text as string | undefined
     return {
       objects: [],
       faces: [],
       scene: {
         tags: [],
-        description: content,
+        description: text || '',
         confidence: 1,
       },
       timestamp: Date.now(),
@@ -117,8 +120,10 @@ export class VisionService {
   }
 
   // 解析豆包结果
-  private parseDoubaoResult(data: any): RecognitionResult {
-    const content = data.choices[0].message.content
+  private parseDoubaoResult(data: Record<string, unknown>): RecognitionResult {
+    const choices = data.choices as Array<Record<string, unknown>> | undefined
+    const message = choices?.[0]?.message as Record<string, unknown> | undefined
+    const content = (message?.content as string) || ''
     return {
       objects: [],
       faces: [],

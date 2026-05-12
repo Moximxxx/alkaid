@@ -3,6 +3,7 @@
 import { VisionService } from './services/vision'
 import { AIService } from './services/ai'
 import { configManager } from './config'
+import { logger } from '@shared/logger'
 
 // 初始化服务
 const visionService = new VisionService(configManager.getVisionConfig())
@@ -15,4 +16,4 @@ export {
   configManager,
 }
 
-console.log('摇光 - 主进程已启动')
+logger.info('摇光 - 主进程已启动')

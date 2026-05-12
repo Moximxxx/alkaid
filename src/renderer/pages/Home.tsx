@@ -1,9 +1,8 @@
-import React, { useState, useRef, useEffect, KeyboardEvent } from "react"
+import { useState, useRef, useEffect, KeyboardEvent } from "react"
 import { Link } from "react-router-dom"
-import { Send, Settings, Video, User, Loader2, Bot } from "lucide-react"
+import { Send, Video, User, Loader2, Bot } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useSettings } from "@/hooks/useSettings"
 import { useAI } from "../services/ai"
 
@@ -16,8 +15,8 @@ interface Message {
 
 export function HomePage() {
   const { settings } = useSettings()
-  const [streamingId, setStreamingId] = useState<string | null>(null)
-  const { messages: aiMessages, loading, sendMessage, setMessageUpdateCallback } = useAI({
+  const [, setStreamingId] = useState<string | null>(null)
+  const { loading, sendMessage, setMessageUpdateCallback } = useAI({
     provider: settings.textProvider,
     apiKey: settings.textApiKey,
     model: settings.textModel,

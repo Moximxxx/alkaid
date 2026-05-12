@@ -1,5 +1,47 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 
+// 浏览器 SpeechRecognition 构造器类型
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognitionInstance
+}
+
+// 浏览器 SpeechRecognition 实例类型
+interface SpeechRecognitionInstance {
+  lang: string
+  continuous: boolean
+  interimResults: boolean
+  maxAlternatives: number
+  start: () => void
+  stop: () => void
+  onresult: ((event: SpeechRecognitionResultEvent) => void) | null
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null
+  onend: (() => void) | null
+}
+
+interface SpeechRecognitionResultEvent {
+  resultIndex: number
+  results: SpeechRecognitionResultList
+}
+
+interface SpeechRecognitionErrorEvent {
+  error: string
+}
+
+interface SpeechRecognitionResultList {
+  length: number
+  [index: number]: SpeechRecognitionResult
+}
+
+interface SpeechRecognitionResult {
+  isFinal: boolean
+  [index: number]: SpeechRecognitionAlternative
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string
+  confidence: number
+}
+
 export interface UseSpeechRecognitionReturn {
   isListening: boolean
   transcript: string
@@ -17,10 +59,11 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
   const [interimTranscript, setInterimTranscript] = useState('')
   const [isSupported, setIsSupported] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const recognitionRef = useRef<any>(null)
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
 
   useEffect(() => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    const SpeechRecognition = (window as unknown as Record<string, unknown>).SpeechRecognition as SpeechRecognitionConstructor | undefined
+      || (window as unknown as Record<string, unknown>).webkitSpeechRecognition as SpeechRecognitionConstructor | undefined
     if (SpeechRecognition) {
       setIsSupported(true)
       const recognition = new SpeechRecognition()
@@ -29,7 +72,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
       recognition.interimResults = true
       recognition.maxAlternatives = 1
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionResultEvent) => {
         let final = ''
         let interim = ''
         for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -46,7 +89,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
         setInterimTranscript(interim)
       }
 
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         setError(`语音识别错误: ${event.error}`)
         setIsListening(false)
       }
@@ -66,7 +109,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
         recognition.start()
         setIsListening(true)
         setError(null)
-      } catch (e) {
+      } catch {
         setError('启动语音识别失败')
       }
     }

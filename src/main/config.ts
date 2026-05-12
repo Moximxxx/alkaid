@@ -6,6 +6,7 @@ import fs from 'fs'
 import path from 'path'
 import type { AppConfig } from '@shared/types'
 import { DEFAULT_APP_CONFIG } from '@shared/constants'
+import { logger } from '@shared/logger'
 
 // 配置存储路径：优先使用 APPDATA 环境变量（Windows），回退到当前工作目录
 const CONFIG_DIR = path.join(process.env.APPDATA || process.cwd(), 'alkaid')
@@ -27,7 +28,7 @@ export class ConfigManager {
         fs.mkdirSync(CONFIG_DIR, { recursive: true })
       }
     } catch (error) {
-      console.error('创建配置目录失败:', error)
+      logger.error('创建配置目录失败:', error)
     }
   }
 
@@ -39,7 +40,7 @@ export class ConfigManager {
         return { ...DEFAULT_APP_CONFIG, ...JSON.parse(raw) }
       }
     } catch (error) {
-      console.error('加载配置失败:', error)
+      logger.error('加载配置失败:', error)
     }
     return { ...DEFAULT_APP_CONFIG }
   }
@@ -50,7 +51,7 @@ export class ConfigManager {
       this.ensureConfigDir()
       fs.writeFileSync(CONFIG_PATH, JSON.stringify(this.config, null, 2), 'utf-8')
     } catch (error) {
-      console.error('保存配置失败:', error)
+      logger.error('保存配置失败:', error)
     }
   }
 

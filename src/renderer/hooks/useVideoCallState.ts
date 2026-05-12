@@ -1,5 +1,5 @@
 import { useReducer, useCallback, useEffect, useRef } from 'react'
-import type { CallState, AIStatus, ControlState, VideoCallState, VideoCallAction } from '@shared/types'
+import type { ControlState, VideoCallState, VideoCallAction } from '@shared/types'
 
 const initialControls: ControlState = {
   micEnabled: true,
