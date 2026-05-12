@@ -27,6 +27,7 @@ export function SettingsPage() {
   const [localSettings, setLocalSettings] = useState<Settings>(settings)
   const [activeTab, setActiveTab] = useState("ai")
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [shortcutWarning, setShortcutWarning] = useState<string | null>(null)
 
   // 摄像头设备列表
   const [cameraDevices, setCameraDevices] = useState<MediaDeviceInfo[]>([])
@@ -72,6 +73,15 @@ export function SettingsPage() {
   useEffect(() => {
     setLocalSettings(settings)
   }, [settings])
+
+  useEffect(() => {
+    if ((window as any).electronAPI?.onShortcutWarning) {
+      (window as any).electronAPI.onShortcutWarning((msg: string) => {
+        setShortcutWarning(msg)
+        setTimeout(() => setShortcutWarning(null), 5000)
+      })
+    }
+  }, [])
 
   const handleTextProviderChange = (provider: Settings["textProvider"]) => {
     setLocalSettings((prev) => ({
@@ -416,6 +426,11 @@ export function SettingsPage() {
 
         {/* ============ Shortcuts ============ */}
         <TabsContent value="shortcuts">
+          {shortcutWarning && (
+            <div className="mx-4 mt-2 p-2 bg-yellow-100 text-yellow-800 text-sm rounded">
+              ⚠ {shortcutWarning}
+            </div>
+          )}
           <Card>
             <CardHeader>
               <CardTitle>快捷键</CardTitle>

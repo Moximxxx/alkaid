@@ -1,0 +1,23 @@
+{
+  "task_id": "FIX-050",
+  "timestamp": 1778628000,
+  "trace_id": "d1e2f3a4-b5c6-7890-def0-1234567890ab",
+  "goal": "统一修复日志捕获的3个错误: ①Logger Error序列化→{} ②API Key加密跨会话失效401 ③全局快捷键注册失败降级",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\shared\\logger.ts",
+    "D:\\projects\\alkaid\\src\\shared\\crypto.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useSettings.ts",
+    "D:\\projects\\alkaid\\electron\\main.cjs"
+  ],
+  "constraints": ["arch-layering.md", "tech-stack/typescript.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run lint", "bun run test", "bun run build"],
+  "coverage_checklist": {
+    "error_serialize": "assert: transport 中 Error 实例不再序列化为 {}，保留 message+stack",
+    "api_key_plaintext": "assert: useSettings 移除加密逻辑，API Key 直接存 localStorage",
+    "shortcut_fallback": "assert: 全局快捷键失败时注册窗口级 keydown 监听+IPC通知 renderer",
+    "typecheck_pass": "assert: bun run typecheck 通过",
+    "tests_pass": "assert: bun run test 通过"
+  },
+  "status": "pending"
+}

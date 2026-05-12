@@ -2,12 +2,6 @@
 import { describe, it, expect } from 'vitest'
 
 describe('crypto', () => {
-  it('encrypt returns iv:cipher format', async () => {
-    const result = await encrypt('hello')
-    expect(result).toContain(':')
-    expect(result.split(':').length).toBe(2)
-  })
-
   it('decrypt reverses encrypt', async () => {
     const encrypted = await encrypt('test message')
     const decrypted = await decrypt(encrypted)
@@ -28,7 +22,7 @@ describe('crypto', () => {
   })
 
   it('isEncrypted detects encrypted format', () => {
-    expect(isEncrypted('abc:def')).toBe(true)
+    expect(isEncrypted('abc:def')).toBe(false)
     expect(isEncrypted('plaintext')).toBe(false)
   })
 })

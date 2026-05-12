@@ -44,7 +44,16 @@ const isDev = checkDev()
 function transport(level: LogLevel, args: unknown[]): void {
   try {
     if (typeof window !== 'undefined' && window.electronAPI?.logToFile) {
-      const message = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      const message = args.map(a => {
+        if (a instanceof Error) {
+          // 截断为前3行，避免单条日志过大
+          return JSON.stringify({ name: a.name, message: a.message, stack: a.stack?.split('\n').slice(0, 3).join(' | ') });
+        }
+        if (typeof a === 'object' && a !== null) {
+          try { return JSON.stringify(a); } catch { return String(a); }
+        }
+        return String(a);
+      }).join(' ');
       window.electronAPI.logToFile(level, message, 'renderer');
     }
   } catch { /* 静默失败，不影响主功能 */ }

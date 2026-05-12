@@ -1,0 +1,22 @@
+{
+  "task_id": "FIX-051",
+  "timestamp": 1778628500,
+  "trace_id": "d1e2f3a4-b5c6-7890-def0-1234567890ab",
+  "goal": "修复 CR 发现的3个问题: ①补充合同外文件到关联范围 ②renderer消费shortcut-warning通知 ③清理INC占位符",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\electron\\preload.cjs",
+    "D:\\projects\\alkaid\\src\\shared\\__tests__\\crypto.test.ts",
+    "D:\\projects\\alkaid\\src\\shared\\crypto.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\Settings.tsx",
+    "D:\\projects\\alkaid\\src\\shared\\logger.ts"
+  ],
+  "constraints": ["arch-layering.md", "contract-mechanism.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run test"],
+  "coverage_checklist": {
+    "contract_files_match": "assert: 修改文件与合同 files_to_modify 一致",
+    "shortcut_consumed": "assert: Settings 页面监听 onShortcutWarning 并显示提示",
+    "inc_placeholder_fixed": "assert: crypto.ts 无 INC-... 占位符"
+  },
+  "status": "pending"
+}

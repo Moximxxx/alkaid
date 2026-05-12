@@ -132,7 +132,24 @@ app.whenReady().then(async () => {
     }
   })
   if (!shortcutRegistered) {
-    log.error('Failed to register global shortcut')
+    log.error('Failed to register global shortcut');
+    // 降级为窗口级快捷键
+    const win = BrowserWindow.getAllWindows()[0];
+    if (win) {
+      win.webContents.on('before-input-event', (event, input) => {
+        if (input.control && input.shift && input.key.toLowerCase() === 'a' && !input.type.startsWith('keyUp')) {
+          event.preventDefault();
+          if (mainWindow) {
+            if (mainWindow.isMinimized()) mainWindow.restore();
+            mainWindow.show();
+            mainWindow.focus();
+          }
+        }
+      });
+      log.info('Fallback: registered window-level Ctrl+Shift+A');
+      // 通知 renderer 显示提示
+      win.webContents.send('shortcut-warning', '全局快捷键被占用，已降级为窗口内快捷键');
+    }
   }
 
   app.on('activate', () => {

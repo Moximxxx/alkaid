@@ -42,15 +42,7 @@ export function useSettings() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
-        // 初始加载不解密（解密是异步的），挂载后由 decrypt effect 处理
-        const decrypted: Partial<Settings> = {}
-        if (parsed.visionApiKey && typeof parsed.visionApiKey === 'string') {
-          decrypted.visionApiKey = parsed.visionApiKey
-        }
-        if (parsed.textApiKey && typeof parsed.textApiKey === 'string') {
-          decrypted.textApiKey = parsed.textApiKey
-        }
-        return { ...DEFAULT_SETTINGS, ...parsed, ...decrypted }
+        return { ...DEFAULT_SETTINGS, ...parsed }
       } catch {
         return DEFAULT_SETTINGS
       }
@@ -58,49 +50,10 @@ export function useSettings() {
     return DEFAULT_SETTINGS
   })
 
-  // 保存时加密 API Key
+  // 存储时直接明文保存（不再加密）
   useEffect(() => {
-    async function saveEncrypted() {
-      const { encrypt } = await import('@shared/crypto')
-      const dataToSave = { ...settings }
-      if (dataToSave.visionApiKey) {
-        dataToSave.visionApiKey = await encrypt(dataToSave.visionApiKey)
-      }
-      if (dataToSave.textApiKey) {
-        dataToSave.textApiKey = await encrypt(dataToSave.textApiKey)
-      }
-      localStorage.setItem("settings", JSON.stringify(dataToSave))
-    }
-    saveEncrypted()
+    localStorage.setItem("settings", JSON.stringify(settings))
   }, [settings])
-
-  // 挂载后解密已存储的加密数据
-  useEffect(() => {
-    async function decryptStored() {
-      const saved = localStorage.getItem("settings")
-      if (!saved) return
-      const { decrypt } = await import('@shared/crypto')
-      const { isEncrypted } = await import('@shared/crypto')
-      try {
-        const parsed = JSON.parse(saved)
-        let needUpdate = false
-        if (parsed.visionApiKey && typeof parsed.visionApiKey === 'string' && isEncrypted(parsed.visionApiKey)) {
-          parsed.visionApiKey = await decrypt(parsed.visionApiKey)
-          needUpdate = true
-        }
-        if (parsed.textApiKey && typeof parsed.textApiKey === 'string' && isEncrypted(parsed.textApiKey)) {
-          parsed.textApiKey = await decrypt(parsed.textApiKey)
-          needUpdate = true
-        }
-        if (needUpdate) {
-          setSettings(prev => ({ ...prev, ...parsed }))
-        }
-      } catch {
-        // ignore parse errors
-      }
-    }
-    decryptStored()
-  }, [])
 
   const updateSettings = useCallback((updates: Partial<Settings>) => {
     setSettings((prev) => ({ ...prev, ...updates }))

@@ -8,4 +8,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   maximize: () => ipcRenderer.invoke('window:maximize'),
   close: () => ipcRenderer.invoke('window:close'),
   logToFile: (level, message, source) => ipcRenderer.invoke('log:write', { level, message, source }),
+  onShortcutWarning: (callback) => ipcRenderer.on('shortcut-warning', (_event, message) => callback(message)),
 });
