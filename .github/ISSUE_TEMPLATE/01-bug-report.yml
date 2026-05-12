@@ -1,0 +1,107 @@
+name: 🐛 Bug 报告
+description: 提交 Bug 帮助改进摇光
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 感谢提交 Bug 报告 🐛
+        请填写以下信息帮助我们定位问题。
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 📝 问题描述
+      description: 清晰简洁地描述这个 Bug
+      placeholder: 当我...时，出现了...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 🔄 复现步骤
+      description: 如何复现这个 Bug？
+      placeholder: |
+        1. 打开...
+        2. 点击...
+        3. 出现错误...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: ✅ 期望行为
+      description: 你期望发生什么？
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: ❌ 实际行为
+      description: 实际发生了什么？
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 📋 日志 / 截图
+      description: 如有相关日志或截图，请附上
+      placeholder: 拖拽或粘贴截图 / 粘贴日志内容
+    validations:
+      required: false
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: ⚠️ 严重程度
+      description: 该 Bug 的影响范围
+      options:
+        - "🔴 严重 — 功能完全不可用"
+        - "🟡 中等 — 功能部分受影响"
+        - "🟢 轻微 — 不影响使用"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: constraints
+    attributes:
+      label: 📌 相关约束规则
+      description: 该 Bug 涉及哪些项目约束？（可多选）
+      multiple: true
+      options:
+        - "P-01 模型列表一致性"
+        - "P-02 全链路 Trace ID"
+        - "R-01 三层架构反向依赖"
+        - "R-02/R-03 跨层通信 / 循环依赖"
+        - "R-08 合同 files_to_modify 范围"
+        - "R-10 工作区洁净检查"
+        - "R-11 禁止无差别杀进程"
+        - "R-12/R-13 后台服务管理 + 心跳"
+        - "R-14 自动修复循环"
+        - "其他 / 不确定"
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: 📌 版本信息
+      description: 提交 SHA 或版本号
+      placeholder: git log --oneline -1
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ 提交前确认
+      options:
+        - label: 我已搜索现有 Issues，未发现重复
+          required: true
+        - label: 我已确认该 Bug 在最新代码中仍可复现
+          required: false

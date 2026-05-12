@@ -1,0 +1,80 @@
+name: 🔧 技术改进 / 代码质量
+description: 重构、优化、消除技术债务
+title: "[Chore] "
+labels: ["tech-debt"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 技术改进 🛠️
+        请描述需要改进的技术点。
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 📝 改进描述
+      description: 当前的问题是什么？
+      placeholder: 当前代码中存在...
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: 📊 影响评估
+      description: 不处理会有什么后果？
+      placeholder: 可能导致...
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: 💡 改进建议
+      description: 你建议如何改进？
+      placeholder: 建议方式...
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: ⭐ 优先级
+      options:
+        - "🔴 高 — 影响开发效率或正确性"
+        - "🟡 中 — 渐进式改进"
+        - "🟢 低 — 优雅性提升"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: 📌 类型
+      options:
+        - "代码质量 / ESLint"
+        - "架构 / 分层"
+        - "类型安全 / TypeScript"
+        - "测试覆盖"
+        - "文档 / README"
+        - "构建 / CI"
+        - "基础设施 / Agent 系统"
+    validations:
+      required: true
+
+  - type: input
+    id: related_incident
+    attributes:
+      label: 🔗 相关事故（如有）
+      description: 关联的 INC 编号
+      placeholder: INC-2026-XXXX-XXX
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ 提交前确认
+      options:
+        - label: 我已搜索现有 Issues，未发现重复
+          required: true
