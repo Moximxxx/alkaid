@@ -1,0 +1,16 @@
+{
+  "task_id": "FIX-046",
+  "timestamp": 1778625100,
+  "trace_id": "b8e3a2d1-c7f6-4a5b-9e0c-1d2e3f4a5b6c",
+  "goal": "#31 Chore: 升级 @vitejs/plugin-react 4.0.0 → 4.4.1 消除 esbuild 弃用警告",
+  "files_to_modify": ["D:\\projects\\alkaid\\package.json"],
+  "constraints": ["tech-stack/nodejs.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun install", "bun run build"],
+  "coverage_checklist": {
+    "dep_upgraded": "assert: package.json 中 @vitejs/plugin-react 版本为 ^4.4.1",
+    "warning_eliminated": "assert: bun run build 无 esbuild deprecated 警告",
+    "build_ok": "assert: build 成功生成 dist"
+  },
+  "status": "pending"
+}

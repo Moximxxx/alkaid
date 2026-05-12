@@ -1,0 +1,15 @@
+{
+  "task_id": "FIX-045",
+  "timestamp": 1778625000,
+  "trace_id": "b8e3a2d1-c7f6-4a5b-9e0c-1d2e3f4a5b6c",
+  "goal": "#29 Fix: Vite alias @/ 路径解析错误导致生产构建失败 — 将 vite.config.ts 中 @ 别名从 src 改为 src/renderer",
+  "files_to_modify": ["D:\\projects\\alkaid\\vite.config.ts"],
+  "constraints": ["arch-layering.md", "tech-stack/typescript.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run build"],
+  "coverage_checklist": {
+    "alias_fix": "assert: vite.config.ts alias @ 指向 path.resolve(__dirname, 'src/renderer')",
+    "build_success": "assert: bun run build 无 'Could not load' 错误"
+  },
+  "status": "pending"
+}
