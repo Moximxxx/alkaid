@@ -1,0 +1,15 @@
+{
+  "task_id": "FIX-049",
+  "timestamp": 1778627500,
+  "trace_id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
+  "goal": "第二次修复: 消除 main.cjs 5 处冗余 console+log 双写(重试2)",
+  "files_to_modify": ["D:\\projects\\alkaid\\electron\\main.cjs"],
+  "constraints": ["arch-layering.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run build"],
+  "coverage_checklist": {
+    "no_dual_write": "assert: L34/L40/L119/L139/L157 处不再同时 console + log",
+    "log_intact": "assert: 所有 log?.info / log.error 调用保留不变"
+  },
+  "status": "pending"
+}

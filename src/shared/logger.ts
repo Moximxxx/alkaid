@@ -7,6 +7,15 @@ const LOG_PREFIX = '[Alkaid]'
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 
+// 声明 electronAPI 类型，用于 IPC 日志转发
+declare global {
+  interface Window {
+    electronAPI?: {
+      logToFile?: (level: LogLevel, message: string, source: string) => void;
+    }
+  }
+}
+
 const LEVEL_ICON: Record<LogLevel, string> = {
   debug: '🔍',
   info: 'ℹ️',
@@ -29,19 +38,35 @@ function checkDev(): boolean {
 
 const isDev = checkDev()
 
+/**
+ * 通过 IPC 将日志传输到 Electron 主进程进行文件落盘
+ */
+function transport(level: LogLevel, args: unknown[]): void {
+  try {
+    if (typeof window !== 'undefined' && window.electronAPI?.logToFile) {
+      const message = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      window.electronAPI.logToFile(level, message, 'renderer');
+    }
+  } catch { /* 静默失败，不影响主功能 */ }
+}
+
 export const logger = {
-  debug: (...args: unknown[]) => {
+  debug: (...args: unknown[]): void => {
     if (isDev) {
       console.debug(formatMessage('debug'), ...args)
     }
+    transport('debug', args)
   },
-  info: (...args: unknown[]) => {
+  info: (...args: unknown[]): void => {
     console.info(formatMessage('info'), ...args)
+    transport('info', args)
   },
-  warn: (...args: unknown[]) => {
+  warn: (...args: unknown[]): void => {
     console.warn(formatMessage('warn'), ...args)
+    transport('warn', args)
   },
-  error: (...args: unknown[]) => {
+  error: (...args: unknown[]): void => {
     console.error(formatMessage('error'), ...args)
+    transport('error', args)
   },
 }

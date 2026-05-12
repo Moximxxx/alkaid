@@ -1,0 +1,12 @@
+{
+  "task_id": "SVC-001",
+  "timestamp": 1778625800,
+  "trace_id": "c9d4e5f6-0a1b-2c3d-4e5f-6a7b8c9d0e1f",
+  "goal": "启动 Alkaid 开发应用 — Vite dev server + Electron",
+  "files_to_modify": ["D:\\projects\\alkaid\\package.json"],
+  "constraints": ["agent-system.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["heartbeat 验证 Vite 端口 5173 就绪"],
+  "coverage_checklist": { "vite_ready": "assert: Vite dev server 端口 5173 可达", "electron_started": "assert: Electron 窗口已启动" },
+  "status": "pending"
+}

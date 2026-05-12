@@ -1,0 +1,26 @@
+{
+  "task_id": "FIX-048",
+  "timestamp": 1778627000,
+  "trace_id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
+  "goal": "修复 FEAT-047 代码审查 8 个问题(重试1): ERROR×2 fs.mkdirSync/appendFileSync 加 try-catch + WARN×3 IPC白名单/清理日志/冗余双写 + INFO×3 返回类型/eslint/LogLevel",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\electron\\lib\\logger.cjs",
+    "D:\\projects\\alkaid\\electron\\main.cjs",
+    "D:\\projects\\alkaid\\src\\shared\\logger.ts"
+  ],
+  "constraints": ["arch-layering.md", "tech-stack/typescript.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run lint", "bun run test"],
+  "coverage_checklist": {
+    "mkdir_trycatch": "assert: fs.mkdirSync 失败时 console.error 输出不崩溃",
+    "append_trycatch": "assert: fs.appendFileSync 失败时 console.error 输出不崩溃",
+    "cleanup_log": "assert: cleanup 失败时 catch 输出错误信息",
+    "ipc_whitelist": "assert: log:write IPC 校验 level 白名单",
+    "console_dedup": "assert: Logger 初始化后不冗余双写",
+    "return_void": "assert: logger 4 方法显式 :void",
+    "eslint_removed": "assert: 删除多余 eslint-disable",
+    "level_type": "assert: transport + logToFile level 为 LogLevel",
+    "all_pass": "assert: typecheck + lint + test 全过"
+  },
+  "status": "pending"
+}

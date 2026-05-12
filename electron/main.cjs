@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
 const path = require('path');
 const http = require('http');
+const { createLogger } = require('./lib/logger.cjs');
 
 const PROVIDER_CONFIGS = {
   doubao: { baseUrl: 'https://ark.cn-beijing.volces.com/api/v3' },
@@ -20,6 +21,7 @@ let proxyServer = null;
 let isProxyServerRunning = false;
 let isReady = false;
 let isWaitingForServer = false;
+let log = null;
 
 function waitForViteServer(maxWaitTime = 30000) {
   if (isWaitingForServer || isReady) {
@@ -29,12 +31,12 @@ function waitForViteServer(maxWaitTime = 30000) {
   const startTime = Date.now();
 
   return new Promise((resolve, reject) => {
-    console.log('[Electron] Waiting for Vite server...');
+    log?.info('Waiting for Vite server...');
 
     function checkServer() {
       const req = http.get('http://localhost:5173', (res) => {
         if (res.statusCode === 200) {
-          console.log('[Electron] Vite server is ready!');
+          log?.info('Vite server is ready!');
           resolve();
         } else {
           retry();
@@ -92,7 +94,7 @@ function createWindow() {
     mainWindow.webContents.send('ready')
   })
 
-  console.log('[Electron] Window created');
+  log?.info('Window created');
 }
 
 app.whenReady().then(async () => {
@@ -101,7 +103,10 @@ app.whenReady().then(async () => {
   }
   isReady = true;
 
-  console.log('[Electron] App ready, waiting for Vite server...');
+  log = createLogger(app.getPath('userData'));
+  log.info('App starting...');
+
+  log?.info('App ready, waiting for Vite server...');
 
   const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
@@ -109,8 +114,8 @@ app.whenReady().then(async () => {
     try {
       await waitForViteServer();
     } catch (err) {
-      console.error('[Electron] Failed to wait for Vite server:', err.message);
-      console.error('[Electron] Please make sure Vite dev server is running on http://localhost:5173');
+      log.error(`Failed to wait for Vite server: ${err.message}`);
+      log.error('Please make sure Vite dev server is running on http://localhost:5173');
       app.quit();
       return;
     }
@@ -127,7 +132,7 @@ app.whenReady().then(async () => {
     }
   })
   if (!shortcutRegistered) {
-    console.error('[Electron] Failed to register global shortcut')
+    log.error('Failed to register global shortcut')
   }
 
   app.on('activate', () => {
@@ -144,7 +149,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
-  console.log('[Electron] App quitting...');
+  log?.info('App quitting...');
   globalShortcut.unregisterAll()
   if (proxyServer) proxyServer.close()
 });
@@ -156,6 +161,15 @@ ipcMain.handle('window:maximize', () => {
   else mainWindow?.maximize()
 })
 ipcMain.handle('window:close', () => mainWindow?.close())
+
+const VALID_LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
+
+// IPC handler for renderer-side log forwarding
+ipcMain.handle('log:write', (event, { level, message, source }) => {
+  if (log && VALID_LOG_LEVELS.includes(level)) {
+    log[level](message, source || 'renderer');
+  }
+});
 
 function startProxyServer() {
   if (isProxyServerRunning) return
@@ -207,7 +221,7 @@ function startProxyServer() {
           } else {
             apiUrl = `${providerConfig.baseUrl}/chat/completions`
           }
-          console.log('[Proxy] Forwarding to:', apiUrl)
+          log?.info(`Forwarding to: ${apiUrl}`, 'proxy')
 
           // Build headers
           const headers = { 'Content-Type': 'application/json' }
@@ -278,10 +292,10 @@ function startProxyServer() {
             res.setHeader('Content-Type', 'text/event-stream')
             res.setHeader('Cache-Control', 'no-cache')
             res.setHeader('Connection', 'keep-alive')
-            console.log('[Proxy] Upstream status:', upstream.status)
-            console.log('[Proxy] Upstream body type:', typeof upstream.body)
+            log?.info(`Upstream status: ${upstream.status}`, 'proxy')
+            log?.info(`Upstream body type: ${typeof upstream.body}`, 'proxy')
             for await (const chunk of upstream.body) {
-              console.log('[Proxy] Forwarding chunk:', chunk.toString().substring(0, 100))
+              log?.debug(`Forwarding chunk: ${chunk.toString().substring(0, 100)}`, 'proxy')
               res.write(chunk)
             }
             res.end()
@@ -291,7 +305,7 @@ function startProxyServer() {
             res.end(JSON.stringify(data))
           }
         } catch (err) {
-          console.error('[Proxy] Error:', err.message)
+          log?.error(`Proxy error: ${err.message}`, 'proxy')
           res.writeHead(500, { 'Content-Type': 'application/json' })
           res.end(JSON.stringify({ error: err.message }))
         }
@@ -303,7 +317,7 @@ function startProxyServer() {
   })
 
   proxyServer.listen(3000, () => {
-    console.log('[Proxy] Server listening on http://localhost:3000')
+    log?.info('Proxy server listening on http://localhost:3000', 'proxy')
   })
 }
 

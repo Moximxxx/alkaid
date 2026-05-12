@@ -1,0 +1,27 @@
+{
+  "task_id": "FEAT-047",
+  "timestamp": 1778626500,
+  "trace_id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
+  "goal": "日志落盘：main 进程文件写入 + renderer 进程通过 IPC 转发，按日轮转保留 15 天",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\electron\\lib\\logger.cjs",
+    "D:\\projects\\alkaid\\electron\\main.cjs",
+    "D:\\projects\\alkaid\\electron\\preload.cjs",
+    "D:\\projects\\alkaid\\src\\shared\\logger.ts"
+  ],
+  "constraints": ["arch-layering.md", "tech-stack/typescript.md", "tech-stack/nodejs.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run build"],
+  "coverage_checklist": {
+    "file_logger_exists": "assert: electron/lib/logger.cjs 创建成功，支持 info/warn/error/debug",
+    "date_rotation": "assert: 日志文件名格式 app-YYYY-MM-DD.log，按日切分",
+    "cleanup_15days": "assert: 自动清理超过 15 天的旧日志文件",
+    "main_console_replaced": "assert: electron/main.cjs 中所有 console.log/error 替换为文件日志",
+    "ipc_handler": "assert: main.cjs 注册 log:write IPC handler",
+    "preload_expose": "assert: preload.cjs 暴露 electronAPI.logToFile",
+    "shared_logger_transport": "assert: src/shared/logger.ts 在浏览器环境检测 electronAPI 并转发 IPC",
+    "log_format": "assert: 日志格式 [ISO时间] [LEVEL] [来源] 消息",
+    "build_ok": "assert: bun run build 成功"
+  },
+  "status": "pending"
+}
