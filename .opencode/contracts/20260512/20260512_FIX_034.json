@@ -1,0 +1,23 @@
+{
+  "task_id": "FIX-034",
+  "timestamp": 1778626560,
+  "trace_id": "6921f6eb-6f55-42c8-8d57-16f6f9f750d5",
+  "goal": "#18 测试覆盖率提升: 补充 useSettings / system-prompt-builder / useCamera 单元测试",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\__tests__\\useSettings.test.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\services\\__tests__\\system-prompt-builder.test.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\__tests__\\useCamera.test.ts"
+  ],
+  "constraints": ["typescript.md", "react.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run test -- --coverage"],
+  "coverage_checklist": {
+    "useSettings_tests": "assert: useSettings.test.ts 覆盖 CRUD + reset + isConfigured + 加密存储",
+    "prompt_builder_tests": "assert: system-prompt-builder.test.ts 覆盖 text_chat + video_call + aiName 注入",
+    "useCamera_tests": "assert: useCamera.test.ts 覆盖 device 枚举 + start/stop + switchDevice",
+    "typecheck_pass": "assert: bun run typecheck 通过",
+    "test_pass": "assert: bun run test 全部通过",
+    "coverage_up": "assert: 覆盖率从 76% 提升至 80%+"
+  },
+  "status": "completed"
+}
