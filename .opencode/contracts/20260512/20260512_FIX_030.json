@@ -1,0 +1,34 @@
+{
+  "task_id": "FIX-030",
+  "timestamp": 1778616967,
+  "trace_id": "bb7d646e-4827-4fc7-a649-c13cf7330887",
+  "goal": "B5: 修复 #19 (HTTP 代理加固) + #20 (preload.cjs 补充) + #21 (Provider 配置统一)",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\electron\\main.cjs",
+    "D:\\projects\\alkaid\\electron\\preload.cjs",
+    "D:\\projects\\alkaid\\src\\shared\\constants.ts"
+  ],
+  "constraints": [
+    "arch-layering",
+    "typescript.md"
+  ],
+  "hooks": {
+    "pre_task": [],
+    "post_task": []
+  },
+  "verification": [
+    "bun run typecheck",
+    "bun run test"
+  ],
+  "coverage_checklist": {
+    "proxy_timeout": "assert: main.cjs HTTP 代理添加请求超时(30s)",
+    "proxy_body_limit": "assert: main.cjs 添加请求体大小限制(10MB)",
+    "proxy_cors_lock": "assert: main.cjs CORS 限制为具体来源",
+    "preload_ready_fixed": "assert: main.cjs 发送 ready 事件或 preload 移除死代码",
+    "preload_ipc_basic": "assert: preload.cjs 添加基本窗口控制 API",
+    "provider_config_centralized": "assert: Provider 端点配置统一到 constants.ts",
+    "typecheck_pass": "assert: bun run typecheck 通过",
+    "test_pass": "assert: bun run test 通过"
+  },
+  "status": "completed"
+}

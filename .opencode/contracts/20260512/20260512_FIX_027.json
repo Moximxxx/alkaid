@@ -1,0 +1,30 @@
+{
+  "task_id": "FIX-027",
+  "timestamp": 1778612817,
+  "trace_id": "bb7d646e-4827-4fc7-a649-c13cf7330887",
+  "goal": "B1 安全修复: Issue #22 API Key localStorage 加密存储 + 传输安全基础加固",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\shared\\crypto.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\useSettings.ts"
+  ],
+  "constraints": [
+    "arch-layering",
+    "typescript.md"
+  ],
+  "hooks": {
+    "pre_task": [],
+    "post_task": []
+  },
+  "verification": [
+    "bun run typecheck",
+    "bun run test"
+  ],
+  "coverage_checklist": {
+    "crypto_util_exists": "assert: src/shared/crypto.ts 提供 encrypt/decrypt 方法",
+    "settings_encrypted": "assert: useSettings.ts 使用 crypto 加密 API Key 后存入 localStorage",
+    "backward_compatible": "assert: 读取旧明文数据时自动迁移到加密格式",
+    "typecheck_pass": "assert: bun run typecheck 通过",
+    "test_pass": "assert: bun run test 通过"
+  },
+  "status": "completed"
+}

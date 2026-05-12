@@ -103,6 +103,20 @@ export const AI_PROVIDERS = [
   { value: "google_vision", label: "Google Vision", type: "vision" },
 ]
 
+// Provider API 端点
+export const PROVIDER_ENDPOINTS: Record<string, string> = {
+  doubao: 'https://ark.cn-beijing.volces.com/api/v3',
+  openai: 'https://api.openai.com/v1',
+  glm: 'https://open.bigmodel.cn/api/paas/v4',
+  minimax: 'https://api.minimax.chat/v1',
+  xiaomi: 'https://api.mimo.minimax.io/v1',
+  kimi: 'https://api.moonshot.cn/v1',
+  deepseek: 'https://api.deepseek.com/v1',
+  claude: 'https://api.anthropic.com/v1',
+  google: 'https://generativelanguage.googleapis.com/v1beta',
+  google_vision: 'https://generativelanguage.googleapis.com/v1beta',
+}
+
 // 视觉模型列表
 export const VISION_MODELS = [
   { value: "doubao-2.0-vision-pro", label: "豆包 2.0 视觉专业版" },

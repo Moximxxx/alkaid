@@ -1,7 +1,42 @@
 // VAD Hook 测试
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useVAD } from '../useVAD'
+
+beforeAll(() => {
+  class MockAudioContext {
+    createAnalyser() {
+      return {
+        connect: vi.fn(),
+        disconnect: vi.fn(),
+        frequencyBinCount: 1024,
+        fftSize: 256,
+        getByteFrequencyData: vi.fn(),
+        getByteTimeDomainData(array: Uint8Array) {
+          // 填充 128（归一化 0），使 RMS = 0 < 阈值 0.3
+          array.fill(128)
+        },
+      }
+    }
+    createMediaStreamSource() {
+      return { connect: vi.fn(), disconnect: vi.fn() }
+    }
+    decodeAudioData() {
+      return Promise.resolve({ length: 1, numberOfChannels: 1, sampleRate: 44100 })
+    }
+    close() {
+      return Promise.resolve()
+    }
+    get sampleRate() {
+      return 44100
+    }
+    get state() {
+      return 'running'
+    }
+  }
+  Object.defineProperty(window, 'AudioContext', { value: MockAudioContext, writable: true })
+  Object.defineProperty(window, 'webkitAudioContext', { value: MockAudioContext, writable: true })
+})
 
 describe('useVAD', () => {
   beforeEach(() => {
@@ -16,12 +51,12 @@ describe('useVAD', () => {
       expect(result.current.isSpeaking).toBe(false)
     })
 
-    it('isSupported 为 false（jsdom 无 AudioContext）', () => {
+    it('isSupported 为 true（已 mock AudioContext）', () => {
       const { result } = renderHook(() =>
         useVAD({ stream: null }),
       )
-      // jsdom 环境没有 AudioContext
-      expect(result.current.isSupported).toBe(false)
+      // 已 mock AudioContext，因此支持
+      expect(result.current.isSupported).toBe(true)
     })
   })
 

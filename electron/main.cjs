@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const http = require('http');
 
@@ -16,6 +16,7 @@ const PROVIDER_CONFIGS = {
 }
 
 let mainWindow = null;
+let proxyServer = null;
 let isProxyServerRunning = false;
 let isReady = false;
 let isWaitingForServer = false;
@@ -87,6 +88,10 @@ function createWindow() {
     mainWindow = null;
   });
 
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.send('ready')
+  })
+
   console.log('[Electron] Window created');
 }
 
@@ -128,26 +133,45 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
   console.log('[Electron] App quitting...');
+  if (proxyServer) proxyServer.close()
 });
+
+// IPC handlers for window controls
+ipcMain.handle('window:minimize', () => mainWindow?.minimize())
+ipcMain.handle('window:maximize', () => {
+  if (mainWindow?.isMaximized()) mainWindow.unmaximize()
+  else mainWindow?.maximize()
+})
+ipcMain.handle('window:close', () => mainWindow?.close())
 
 function startProxyServer() {
   if (isProxyServerRunning) return
   isProxyServerRunning = true
 
-  const server = http.createServer(async (req, res) => {
+  proxyServer = http.createServer(async (req, res) => {
     if (req.method === 'OPTIONS' && req.url === '/api/ai/chat') {
-      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
       res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, anthropic-version, x-goog-api-key')
       res.end()
       return
     }
     if (req.method === 'POST' && req.url === '/api/ai/chat') {
-      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
       res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, anthropic-version, x-goog-api-key')
       let body = ''
-      req.on('data', chunk => { body += chunk })
+      let bodySize = 0
+      req.on('data', chunk => {
+        bodySize += chunk.length
+        if (bodySize > 10 * 1024 * 1024) {
+          res.writeHead(413, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ error: 'Request too large' }))
+          req.destroy()
+          return
+        }
+        body += chunk
+      })
       req.on('end', async () => {
         try {
           const { provider, model, messages, apiKey, stream } = JSON.parse(body)
@@ -227,11 +251,15 @@ function startProxyServer() {
             requestBody = { model, messages, stream }
           }
 
+          const controller = new AbortController()
+          const timeout = setTimeout(() => controller.abort(), 60000)
           const upstream = await fetch(apiUrl, {
             method: 'POST',
             headers,
             body: JSON.stringify(requestBody),
+            signal: controller.signal,
           })
+          clearTimeout(timeout)
 
           if (stream) {
             res.setHeader('Content-Type', 'text/event-stream')
@@ -261,7 +289,7 @@ function startProxyServer() {
     }
   })
 
-  server.listen(3000, () => {
+  proxyServer.listen(3000, () => {
     console.log('[Proxy] Server listening on http://localhost:3000')
   })
 }

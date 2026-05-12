@@ -67,6 +67,17 @@ function isFrameDuplicate(frameA: string | null, frameB: string, threshold: numb
   return changeRate < threshold
 }
 
+// 自适应倍率（模块级）：AI 说话时自动加倍
+let adaptiveMultiplier = 1
+
+export function setVisionAdaptiveMultiplier(value: number) {
+  adaptiveMultiplier = Math.max(1, value)
+}
+
+export function getVisionAdaptiveMultiplier(): number {
+  return adaptiveMultiplier
+}
+
 export function createVisionPipeline(options: VisionPipelineOptions): VisionPipelineControls {
   const {
     captureInterval = PIPELINE_DEFAULTS.visionCaptureInterval,
@@ -79,8 +90,6 @@ export function createVisionPipeline(options: VisionPipelineOptions): VisionPipe
   let pipelinePaused = false
   let pipelineRunning = false
   let lastFrameData: string | null = null
-  // 自适应倍率：AI 说话时设为 2
-  const adaptiveMultiplier = 1
 
   const maxWidth = PIPELINE_DEFAULTS.frameMaxWidth
   const maxHeight = PIPELINE_DEFAULTS.frameMaxHeight

@@ -1,5 +1,6 @@
 import { Target, Github, Heart } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { APP_NAME, APP_VERSION } from '@shared/constants'
 
 export function AboutPage() {
   return (
@@ -16,8 +17,8 @@ export function AboutPage() {
             <Target className="w-8 h-8 text-primary" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">摇光</h2>
-            <p className="text-muted-foreground">版本 0.2.0</p>
+            <h2 className="text-2xl font-bold">{APP_NAME}</h2>
+            <p className="text-muted-foreground">版本 {APP_VERSION}</p>
           </div>
         </div>
 

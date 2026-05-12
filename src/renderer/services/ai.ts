@@ -57,7 +57,7 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
   const { provider, apiKey: externalApiKey, model, onFirstToken, onComplete, scenario } = options
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const messages: ChatMessage[] = []
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   let messageUpdateCallback: ((msgs: ChatMessage[]) => void) | null = null
   const abortController = new AbortController()
 
@@ -81,7 +81,7 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
       content: '',
       timestamp: Date.now(),
     }
-    messages.push(assistantMsg)
+    setMessages(prev => [...prev, assistantMsg])
 
     const apiMessages = buildAPIMessages(content, image, provider, scenario)
 
@@ -149,8 +149,15 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
               }
 
               if (content) {
-                assistantMsg.content += content
-                messageUpdateCallback?.([...messages])
+                setMessages(prev => {
+                  const next = prev.map(m =>
+                    m.id === assistantMsg.id
+                      ? { ...m, content: m.content + content }
+                      : m
+                  )
+                  messageUpdateCallback?.(next)
+                  return next
+                })
               }
             } catch (e) {
               logger.debug('JSON parse error:', e)
@@ -177,7 +184,7 @@ export const useAI = (options: UseAIOptions): UseAIReturn => {
   }
 
   const clearMessages = () => {
-    messages.length = 0
+    setMessages([])
   }
 
   return {

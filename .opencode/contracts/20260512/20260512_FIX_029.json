@@ -1,0 +1,31 @@
+{
+  "task_id": "FIX-029",
+  "timestamp": 1778616747,
+  "trace_id": "bb7d646e-4827-4fc7-a649-c13cf7330887",
+  "goal": "B3: 修复 #14 — useAI 消息列表改为 React useState，组件可感知消息变化",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\renderer\\services\\ai.ts"
+  ],
+  "constraints": [
+    "arch-layering",
+    "typescript.md",
+    "react.md"
+  ],
+  "hooks": {
+    "pre_task": [],
+    "post_task": []
+  },
+  "verification": [
+    "bun run typecheck",
+    "bun run test"
+  ],
+  "coverage_checklist": {
+    "messages_use_state": "assert: useAI 使用 useState<ChatMessage[]> 管理 messages",
+    "loading_error_preserved": "assert: loading 和 error 的 useState 逻辑保持不变",
+    "streaming_update_works": "assert: 流式内容更新通过 setMessages 函数式更新实现",
+    "callback_compat": "assert: setMessageUpdateCallback 向后兼容，仍通知调用方",
+    "typecheck_pass": "assert: bun run typecheck 通过",
+    "test_pass": "assert: bun run test 通过"
+  },
+  "status": "completed"
+}
