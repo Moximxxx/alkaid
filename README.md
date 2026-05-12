@@ -1,10 +1,10 @@
-# 摇光 - 摄像头AI对话助手
+﻿# 摇光 - 摄像头AI对话助手
 
 [English](./README_EN.md) | 中文
 
 ## 简介
 
-摇光是一个基于 Electrobun 的 Windows 桌面应用，集成了摄像头实时视频流、图像识别和 AI 对话功能。支持多种 AI 模型，包括 OpenAI、Claude 和豆包，可实现实时场景识别和智能对话。
+摇光是一个基于 Electron 的 Windows 桌面应用，集成了摄像头实时视频流、图像识别和 AI 对话功能。支持多种 AI 模型，包括 OpenAI、Claude 和豆包，可实现实时场景识别和智能对话。
 
 ## 功能特性
 
@@ -18,7 +18,7 @@
 
 ## 技术栈
 
-- **框架**: Electrobun
+- **框架**: Electron
 - **语言**: TypeScript
 - **UI**: React + TailwindCSS
 - **构建**: Vite
@@ -38,7 +38,7 @@ alkaid/
 │   │   │   └── __tests__/           # 服务测试
 │   │   ├── config.ts                # 配置管理
 │   │   ├── index.ts                 # Web入口
-│   │   └── electrobun.ts            # Electrobun桌面入口
+│   │   └── electron.ts            # Electron桌面入口
 │   ├── renderer/                     # 渲染进程
 │   │   ├── components/
 │   │   │   ├── VideoStream.tsx      # 视频流组件
@@ -93,7 +93,7 @@ bun install
 # Web 模式
 npm run dev
 
-# Electrobun 桌面模式
+# Electron 桌面模式
 npm run dev:electron
 ```
 
@@ -174,7 +174,7 @@ npm run build
 | 命令 | 说明 |
 |------|------|
 | `npm run dev` | 启动 Web 开发服务器 |
-| `npm run dev:electron` | 启动 Electrobun 桌面应用 |
+| `npm run dev:electron` | 启动 Electron 桌面应用 |
 | `npm test` | 运行单元测试 |
 | `npm run test:watch` | 监听模式运行测试 |
 | `npm run test:coverage` | 生成测试覆盖率报告 |
