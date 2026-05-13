@@ -97,23 +97,23 @@ function createWindow() {
   log?.info('Window created');
 }
 
-// 设置 Content-Security-Policy
-session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-  callback({
-    responseHeaders: {
-      ...details.responseHeaders,
-      'Content-Security-Policy': [
-        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws://localhost:* https://*; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:"
-      ]
-    }
-  })
-})
-
 app.whenReady().then(async () => {
   if (isReady) {
     return;
   }
   isReady = true;
+
+  // 设置 Content-Security-Policy（必须在 app ready 之后）
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [
+          "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws://localhost:* https://*; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:"
+        ]
+      }
+    })
+  })
 
   log = createLogger(app.getPath('userData'));
   log.info('App starting...');
