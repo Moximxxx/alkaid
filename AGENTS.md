@@ -272,10 +272,27 @@ FUNCTION main(user_task):
 ### R-8: 合同必须
 Task-Executor 仅能修改合同 `files_to_modify` 指定的文件，合同有效期 30 分钟。
 
-### R-6: 完整工作流闭环
-每个任务必须走完：Coordinator → Plan（分析）→ 基于 plan 生成合同 → Task-Executor
-→ Code-Reviewer →（若 FAIL → Plan[修复分析] → Task-Executor → Code-Reviewer 循环，≤3次）
-→ Builder → Retro。
+### R-6: 完整工作流闭环（强制 — 不可跳过）
+
+每个任务**必须**按顺序走完完整工作流：
+Coordinator → Plan → Contract → Validate → Hooks → Task-Executor
+→ Code-Reviewer →（自动修复循环 ≤3次）→ Builder → Retro → Git。
+
+**违反后果**：
+- 跳过 Plan 阶段直接生成合同 → **违规**，合同无效
+- 跳过 Code-Review 阶段 → **违规**，任务不得标记为 completed
+- 跳过 Retro 阶段 → **违规**，禁止 Git 提交
+- 连续 2 次违规 → Coordinator 必须委派 crash-doctor 诊断流程缺陷
+
+**物理门禁**：
+- `coordinator-guard.sh`：编辑文件前检查是否在 active 合同范围内（被 R-8 引用）
+- `workflow-integrity-check.sh`：合同完整性验证（trace_id/constraints 等非空）
+
+**验证命令**：
+```bash
+bash .opencode/hooks/coordinator-guard.sh <file_path>
+bash .opencode/hooks/workflow-integrity-check.sh
+```
 
 ### R-9: 网络搜索时间戳
 网络搜索前必须先执行 `date` 获取当前时间，将时间加入搜索关键词。

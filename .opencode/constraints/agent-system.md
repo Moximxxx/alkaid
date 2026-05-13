@@ -14,6 +14,27 @@
 | Retro | 复盘、约束更新、事故记录 | 否 | 任务完成/验证失败 |
 | Smoke-Tester | E2E 冒烟测试（服务需提前就绪） | 否 | 服务就绪后执行测试 |
 
+## 完整工作流链约束
+
+### 强制交接物
+
+每个阶段必须有明确的交接物传递给下一阶段：
+
+| 阶段 | → 下一阶段 | 交接物 |
+|------|:--------:|------|
+| Coordinator 接收任务 | → Plan | 用户任务原始描述 + trace_id |
+| Plan 分析 | → Coordinator | 结构报告（files_to_modify/constraints/verification/coverage_checklist/suggested_skills/risks） |
+| Coordinator 生成合同 | → Task-Executor | 任务合同 JSON（validate-contract 通过） + 加载的 skills |
+| Task-Executor 执行 | → Code-Reviewer | 交接报告（已修改文件列表 + 自验结果） |
+| Code-Reviewer | → Coordinator | 审查报告（pass/issues 分级） |
+| Coordinator | → Retro | 全链路数据（合同+plan+执行+审查+构建结果） |
+
+### 禁止行为
+- ❌ Coordinator 在没有 Plan 输出的情况下自行填写合同字段
+- ❌ 跳过 validate-contract 直接委派 task-executor
+- ❌ 跳过 code-reviewer 直接进入构建/复盘
+- ❌ 跳过 retro 直接 Git 提交
+
 ## 强制调用规则
 
 ### 所有任务必须先调用 Coordinator

@@ -1,0 +1,18 @@
+{
+  "task_id": "FIX-056",
+  "timestamp": 1778648000,
+  "trace_id": "e5f6a7b8-c9d0-1234-5678-90abcdef1234",
+  "goal": "修复二次CR: ①integrity-check加ls -t fallback ②coordinator.md 5.2编号修复",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\hooks\\workflow-integrity-check.sh",
+    "D:\\projects\\alkaid\\.opencode\\agents\\coordinator.md"
+  ],
+  "constraints": ["agent-system.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run test"],
+  "coverage_checklist": {
+    "ls_fallback": "assert: integrity-check 有 fallback 机制",
+    "numbering_ok": "assert: coordinator.md 无重复 5.2"
+  },
+  "status": "pending"
+}

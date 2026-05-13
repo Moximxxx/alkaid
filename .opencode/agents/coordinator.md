@@ -12,10 +12,16 @@
      suggested_skills, risks
 3. 基于 Plan 输出生成任务合同 JSON
    （files_to_modify / constraints / verification / coverage_checklist 均来自 Plan）
+    3.1 验证 Plan 输出完整性：
+        - 检查 files_to_modify 不为空
+        - 检查 constraints 不为空
+        - 检查 verification 不为空
+        - 检查 coverage_checklist 不为空
+        - 以上任一项缺失 → 驳回 plan，要求重新分析
 4. 调用 validate-contract 工具验证合同
 5. PASS → 加载 plan.suggested_skills 对应 skill（如有）
     5.1 设置 AGENT_ROLE=[当前委派的 Agent 名称]
-   5.1 按三层顺序执行 pre_task hooks:
+   5.2 按三层顺序执行 pre_task hooks:
        └─ 第一层: 全局钩子（workspace-clean → diff-size-guard）
        └─ 第二层: Agent 特定钩子（按 AGENT_ROLE 匹配，查表）
        └─ 第三层: 合同钩子（如合同声明 hooks.pre_task）
@@ -28,7 +34,7 @@
             3. GOTO 复盘阶段
           ERROR (exit 3+)         → 等同 BLOCK
        └─ 如 on_hook_fail 有覆盖配置，按覆盖行为处理
-   5.2 根据 plan.recommended_subagent 委派执行者:
+    5.3 根据 plan.recommended_subagent 委派执行者:
        - 代码修改任务 → task-executor
        - 纯构建任务   → builder
 6. 代码修改后 → 按三层顺序执行 post_task hooks:
@@ -39,20 +45,27 @@
       PASS → 继续
       WARN → 记录告警，继续
       BLOCK → 中断流程，合同→failed，委派 crash-doctor，GOTO 复盘
-   6.1 委派 code-reviewer 审查代码合规性
+7. 委派 code-reviewer 审查代码合规性:
    └─ 审查 FAIL 且 retry_count < 3 → 委派 plan 分析修复方案
-        → 基于修复计划生成 fix_contract → 委派 task-executor → 重新审查（GOTO 步骤6）
+        → 基于修复计划生成 fix_contract → 委派 task-executor → 重新审查（GOTO 步骤7）
    └─ 审查 FAIL 且 retry_count ≥ 3 → 升级失败 → 委派 crash-doctor 诊断
-7. 需要构建   → 委派 builder 构建验证
-8. 任何失败   → 委派 crash-doctor 诊断根因
-9. 任务完成   → 委派 retro 复盘落盘
-10. 复盘通过（结论不含 NEW_CONSTRAINT / UPDATE_CONSTRAINT 以外严重问题）
-    → 10.1 加载 git-commit skill（规范化提交信息）
-    → 10.2 委派 task-executor 执行最终操作：
+   7.1 验证 Code-Review 已执行：
+       - 确认审查报告存在
+       - 若 pass=false → 进入自动修复循环（retry ≤3次）
+       - 若审查未执行 → 禁止进入后续阶段
+8. 需要构建   → 委派 builder 构建验证
+9. 任何失败   → 委派 crash-doctor 诊断根因
+10. 任务完成   → 委派 retro 复盘落盘
+    10.1 验证 Retro 前提：
+        - 确认所有前置阶段产物完整
+        - 确认合同 workflow_phases 已更新
+11. 复盘通过（结论不含 NEW_CONSTRAINT / UPDATE_CONSTRAINT 以外严重问题）
+    → 11.1 加载 git-commit skill（规范化提交信息）
+    → 11.2 委派 task-executor 执行最终操作：
         - git add 合同 files_to_modify 中已修改的文件
         - git commit -m "遵循 Conventional Commits 格式"
         - git push
-    → 10.3 如 git 操作失败 → WARN 记录但任务本身已完成
+    → 11.3 如 git 操作失败 → WARN 记录但任务本身已完成
 ```
 
 ## Hook 系统（三层结构）

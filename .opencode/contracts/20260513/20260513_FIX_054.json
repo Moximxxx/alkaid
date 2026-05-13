@@ -1,0 +1,28 @@
+{
+  "task_id": "FIX-054",
+  "timestamp": 1778647013,
+  "trace_id": "e5f6a7b8-c9d0-1234-5678-90abcdef1234",
+  "goal": "加强工作流强制约束: ①coordinator-guard.sh物理门禁 ②workflow-integrity-check.sh ③增强R-6+多文档 ④schema加workflow_phases",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\hooks\\coordinator-guard.sh",
+    "D:\\projects\\alkaid\\.opencode\\hooks\\workflow-integrity-check.sh",
+    "D:\\projects\\alkaid\\.opencode\\constraints\\contract-mechanism.md",
+    "D:\\projects\\alkaid\\.opencode\\constraints\\agent-system.md",
+    "D:\\projects\\alkaid\\AGENTS.md",
+    "D:\\projects\\alkaid\\.opencode\\agents\\coordinator.md",
+    "D:\\projects\\alkaid\\.opencode\\contracts\\contract-schema.json"
+  ],
+  "constraints": ["agent-system.md", "contract-mechanism.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run test"],
+  "coverage_checklist": {
+    "guard_exists": "assert: coordinator-guard.sh 存在可执行",
+    "integrity_exists": "assert: workflow-integrity-check.sh 存在可执行",
+    "r6_enhanced": "assert: AGENTS.md R-6 有违反后果+验证机制",
+    "schema_phases": "assert: schema 有 workflow_phases 字段",
+    "agent_chain": "assert: agent-system.md 有工作流链约束",
+    "coord_checks": "assert: coordinator.md 有阶段验证检查点",
+    "typecheck_test": "assert: typecheck+test 通过"
+  },
+  "status": "pending"
+}

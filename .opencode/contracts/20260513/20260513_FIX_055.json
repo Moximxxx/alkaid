@@ -1,0 +1,23 @@
+{
+  "task_id": "FIX-055",
+  "timestamp": 1778647500,
+  "trace_id": "e5f6a7b8-c9d0-1234-5678-90abcdef1234",
+  "goal": "修复FIX-054 CR的5个问题: ①integrity-check改用ls -t ②guard去冗余反斜杠 ③路径格式一致性说明 ④coordinator.md编号修复 ⑤步骤拆分",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\.opencode\\hooks\\workflow-integrity-check.sh",
+    "D:\\projects\\alkaid\\.opencode\\hooks\\coordinator-guard.sh",
+    "D:\\projects\\alkaid\\.opencode\\contracts\\contract-schema.json",
+    "D:\\projects\\alkaid\\.opencode\\agents\\coordinator.md"
+  ],
+  "constraints": ["agent-system.md", "contract-mechanism.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run test"],
+  "coverage_checklist": {
+    "find_fixed": "assert: integrity-check 用 ls -t 替代 -newer",
+    "backslash_removed": "assert: guard.sh 移除 \\\\* 匹配",
+    "path_note": "assert: schema description 注明相对路径推荐",
+    "numbering_fixed": "assert: coordinator.md 5.1/5.2 正确编号",
+    "steps_split": "assert: post_task hooks 和 code review 拆为独立步骤"
+  },
+  "status": "pending"
+}
