@@ -62,6 +62,7 @@ export function VideoChatPage() {
     isListening,
     isTTSSpeaking,
     isVADSupported,
+    isVADUnavailable,
     startVAD,
     stopVAD,
     isInterrupted,
@@ -269,6 +270,13 @@ export function VideoChatPage() {
           {showInterruptedBanner && (
             <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 bg-yellow-500/90 text-black text-xs font-medium px-3 py-1 rounded-full">
               已打断
+            </div>
+          )}
+
+          {/* 麦克风不可用提示 */}
+          {isVADUnavailable && (
+            <div className="absolute top-28 left-1/2 -translate-x-1/2 z-40 bg-yellow-500/90 text-black text-xs font-medium px-3 py-1 rounded-full">
+              麦克风不可用，语音检测已禁用
             </div>
           )}
 

@@ -15,6 +15,7 @@ export interface UseVADOptions {
 export interface UseVADReturn {
   isSpeaking: boolean
   isSupported: boolean
+  vadUnavailable: boolean
   startMonitoring: () => void
   stopMonitoring: () => void
 }
@@ -38,6 +39,7 @@ export function useVAD(options: UseVADOptions): UseVADReturn {
 
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [isSupported, setIsSupported] = useState(false)
+  const [vadUnavailable, setVadUnavailable] = useState(false)
 
   const audioContextRef = useRef<AudioContext | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
@@ -104,6 +106,16 @@ export function useVAD(options: UseVADOptions): UseVADReturn {
   const startMonitoring = useCallback(() => {
     if (!stream || isMonitoringRef.current) return
 
+    // 重置 VAD 不可用标记
+    setVadUnavailable(false)
+
+    // 检查 MediaStream 是否有音轨
+    if (stream.getAudioTracks().length === 0) {
+      logger.warn('[VAD] MediaStream 没有音轨，语音检测已禁用')
+      setVadUnavailable(true)
+      return
+    }
+
     try {
       const AudioCtx = AudioContext || (window as unknown as Record<string, unknown>).webkitAudioContext as typeof AudioContext
       if (!AudioCtx) return
@@ -129,6 +141,7 @@ export function useVAD(options: UseVADOptions): UseVADReturn {
   // 停止监控
   const stopMonitoring = useCallback(() => {
     isMonitoringRef.current = false
+    setVadUnavailable(false)
 
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current)
@@ -165,6 +178,7 @@ export function useVAD(options: UseVADOptions): UseVADReturn {
   return {
     isSpeaking,
     isSupported,
+    vadUnavailable,
     startMonitoring,
     stopMonitoring,
   }

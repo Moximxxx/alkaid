@@ -110,7 +110,7 @@ describe('useVAD', () => {
 
   describe('带 stream 参数', () => {
     it('传入 mock stream 不报错', () => {
-      const mockStream = {} as MediaStream
+      const mockStream = { getAudioTracks: () => [] } as unknown as MediaStream
       const { result } = renderHook(() =>
         useVAD({ stream: mockStream }),
       )
@@ -122,7 +122,7 @@ describe('useVAD', () => {
     })
 
     it('传入 stream + 回调不报错', () => {
-      const mockStream = {} as MediaStream
+      const mockStream = { getAudioTracks: () => [] } as unknown as MediaStream
       const onSpeechStart = vi.fn()
       const onSpeechEnd = vi.fn()
       const { result } = renderHook(() =>

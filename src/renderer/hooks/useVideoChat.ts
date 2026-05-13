@@ -57,6 +57,7 @@ export interface UseVideoChatReturn {
   // VAD 语音活动检测
   isVADSpeaking: boolean
   isVADSupported: boolean
+  isVADUnavailable: boolean
   startVAD: () => void
   stopVAD: () => void
 
@@ -153,6 +154,7 @@ export function useVideoChat(options: UseVideoChatOptions): UseVideoChatReturn {
   const {
     isSpeaking: isVADSpeaking,
     isSupported: isVADSupported,
+    vadUnavailable: isVADUnavailable,
     startMonitoring: startVAD,
     stopMonitoring: stopVAD,
   } = useVAD({ stream })
@@ -462,6 +464,7 @@ export function useVideoChat(options: UseVideoChatOptions): UseVideoChatReturn {
     // VAD
     isVADSpeaking,
     isVADSupported,
+    isVADUnavailable,
     startVAD,
     stopVAD,
 
