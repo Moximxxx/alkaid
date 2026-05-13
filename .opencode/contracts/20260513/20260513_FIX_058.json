@@ -1,0 +1,17 @@
+{
+  "task_id": "FIX-058",
+  "timestamp": 1778700000,
+  "trace_id": "a5b6c7d8-e9f0-1234-5678-90abcdef0001",
+  "goal": "修复 Electron CSP 安全警告 — 添加 Content-Security-Policy 响应头",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\electron\\main.cjs"
+  ],
+  "constraints": ["agent-system.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run build"],
+  "coverage_checklist": {
+    "csp_header_set": "assert: main.cjs 中 session.defaultSession 设置了 CSP",
+    "build_ok": "assert: bun run build 通过"
+  },
+  "status": "pending"
+}
