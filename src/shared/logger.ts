@@ -12,6 +12,7 @@ declare global {
   interface Window {
     electronAPI?: {
       logToFile?: (level: LogLevel, message: string, source: string) => void;
+      onShortcutWarning?: (callback: (message: string) => void) => void;
     }
   }
 }

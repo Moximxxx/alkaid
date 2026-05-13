@@ -46,7 +46,8 @@
     {
       "files": ["*.test.ts", "__tests__/**"],
       "rules": {
-        "@typescript-eslint/no-explicit-any": "off"
+        "@typescript-eslint/no-explicit-any": "off",
+        "no-console": "off"
       }
     }
   ],

@@ -29,14 +29,14 @@ export function Toolbar({ theme, onThemeToggle, onMenuToggle, className }: Toolb
     setMicDevices(devices.filter(d => d.kind === 'audioinput'))
   }
 
-  // 点击外部关闭下拉
+  // 点击外部关闭下拉（改用 click 事件）
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (camRef.current && !camRef.current.contains(e.target as Node)) setShowCameraList(false)
       if (micRef.current && !micRef.current.contains(e.target as Node)) setShowMicList(false)
     }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    document.addEventListener('click', handler)
+    return () => document.removeEventListener('click', handler)
   }, [])
 
   const navItems = [

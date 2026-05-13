@@ -1,0 +1,24 @@
+{
+  "task_id": "FIX-057",
+  "timestamp": 1778650000,
+  "trace_id": "a5b6c7d8-e9f0-1234-5678-90abcdef0001",
+  "goal": "批量修复 4 个 issue: #33下拉互斥 #34去除any #40 ESLint警告 #39 VAD集成测试",
+  "files_to_modify": [
+    "D:\\projects\\alkaid\\src\\renderer\\components\\layout\\Toolbar.tsx",
+    "D:\\projects\\alkaid\\src\\shared\\logger.ts",
+    "D:\\projects\\alkaid\\src\\renderer\\pages\\Settings.tsx",
+    "D:\\projects\\alkaid\\.eslintrc.json",
+    "D:\\projects\\alkaid\\src\\renderer\\hooks\\__tests__\\useVideoChat.test.ts"
+  ],
+  "constraints": ["tech-stack/typescript.md", "tech-stack/react.md"],
+  "hooks": { "pre_task": [], "post_task": [] },
+  "verification": ["bun run typecheck", "bun run lint", "bun run test"],
+  "coverage_checklist": {
+    "dropdown_exclusive": "assert: 同时只能显示一个下拉菜单",
+    "no_any_in_settings": "assert: Settings.tsx 无 (window as any)",
+    "window_type_declared": "assert: Window 接口有 onShortcutWarning 声明",
+    "eslint_clean": "assert: bun run lint 0 errors",
+    "vad_interrupt_test": "assert: 新增 VAD→Interrupt 集成测试"
+  },
+  "status": "pending"
+}

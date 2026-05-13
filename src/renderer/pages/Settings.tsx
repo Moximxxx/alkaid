@@ -75,8 +75,8 @@ export function SettingsPage() {
   }, [settings])
 
   useEffect(() => {
-    if ((window as any).electronAPI?.onShortcutWarning) {
-      (window as any).electronAPI.onShortcutWarning((msg: string) => {
+    if (window.electronAPI?.onShortcutWarning) {
+      window.electronAPI.onShortcutWarning((msg: string) => {
         setShortcutWarning(msg)
         setTimeout(() => setShortcutWarning(null), 5000)
       })
