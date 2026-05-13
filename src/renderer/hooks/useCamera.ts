@@ -17,6 +17,7 @@ export async function fetchDevices(): Promise<MediaDeviceInfo[]> {
 interface UseCameraOptions {
   autoStart?: boolean
   deviceId?: string
+  audio?: boolean
 }
 
 interface UseCameraReturn {
@@ -34,7 +35,7 @@ interface UseCameraReturn {
 }
 
 export const useCamera = (options: UseCameraOptions = {}): UseCameraReturn => {
-  const { autoStart = false, deviceId } = options
+  const { autoStart = false, deviceId, audio = false } = options
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
   const [isReady, setIsReady] = useState(false)
@@ -60,7 +61,7 @@ export const useCamera = (options: UseCameraOptions = {}): UseCameraReturn => {
           frameRate: { ideal: 30 },
           ...(deviceId ? { deviceId: { exact: deviceId } } : {}),
         },
-        audio: false,
+        audio: audio ? { echoCancellation: true, noiseSuppression: true } : false,
       }
 
       const newStream = await navigator.mediaDevices.getUserMedia(constraints)
@@ -97,7 +98,7 @@ export const useCamera = (options: UseCameraOptions = {}): UseCameraReturn => {
     try {
       const constraints: MediaStreamConstraints = {
         video: { deviceId: { exact: newDeviceId } },
-        audio: false,
+        audio: audio ? { echoCancellation: true, noiseSuppression: true } : false,
       }
       const newStream = await navigator.mediaDevices.getUserMedia(constraints)
       setStream(newStream)
@@ -108,7 +109,7 @@ export const useCamera = (options: UseCameraOptions = {}): UseCameraReturn => {
       setError(err instanceof Error ? err.message : '切换摄像头失败')
       return false
     }
-  }, [])
+  }, [audio])
 
   // 捕获帧
   const captureFrame = useCallback((videoElement?: HTMLVideoElement): string | null => {

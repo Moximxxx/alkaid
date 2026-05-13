@@ -88,7 +88,7 @@ export function useVideoChat(options: UseVideoChatOptions): UseVideoChatReturn {
     startAutoCapture,
     stopAutoCapture,
     switchDevice,
-  } = useCamera({ autoStart: false })
+  } = useCamera({ autoStart: false, audio: true })
 
   // ====== AI 对话 ======
   const provider = settings.visionProvider || settings.textProvider
